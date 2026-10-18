@@ -66,6 +66,19 @@ export function Calculator({
   );
   const [inputs, setInputs] = useState<FinanceInputs>(defaults);
   const [pvgis, setPvgis] = useState<{ state: 'idle' | 'loading' | 'done' | 'error'; value?: number }>({ state: 'idle' });
+  // When the roof size changes (e.g. the /calculator area field), refresh only the
+  // size-dependent assumptions and keep everything else the user edited.
+  const [syncedArea, setSyncedArea] = useState(usableAreaSqm);
+  if (usableAreaSqm !== syncedArea) {
+    setSyncedArea(usableAreaSqm);
+    setInputs((p) => ({
+      ...p,
+      capacityKw: defaults.capacityKw,
+      installCostIls: defaults.installCostIls,
+      opexIlsYear: defaults.opexIlsYear,
+      reserveIlsYear: defaults.reserveIlsYear,
+    }));
+  }
   const r = calculate(inputs);
   const mode: SplitMode = inputs.splitMode ?? 'share';
 

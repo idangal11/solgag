@@ -48,7 +48,8 @@ export function AreaCalculator() {
             : 'החלק מהגג שאפשר להציב עליו פאנלים בפועל — בדרך כלל פחות מהשטח הכולל, בגלל שוליים, מעברים, הצללה ומתקנים על הגג.'}
         </p>
       </div>
-      <Calculator key={area} usableAreaSqm={area} />
+      {/* No key: changing the area updates size-based assumptions and keeps the user's other edits. */}
+      <Calculator usableAreaSqm={area} />
     </>
   );
 }
