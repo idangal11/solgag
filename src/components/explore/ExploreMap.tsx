@@ -7,6 +7,7 @@ import L from 'leaflet';
 import { memo, useEffect, type RefObject } from 'react';
 import { MapContainer, Marker, Polygon, Tooltip, useMap, ZoomControl } from 'react-leaflet';
 import { BaseLayers, ISRAEL_BOUNDS, listingBounds, pinIcon } from '@/components/map/mapParts';
+import { SAMPLE_STATUS } from '@/components/ui';
 import { AVAILABILITY } from '@/lib/labels';
 import type { Listing } from '@/lib/types';
 import { prefersReducedMotion } from './useMediaQuery';
@@ -80,9 +81,10 @@ function Controller({ flyTo, visible, overlayRef }: Pick<Props, 'flyTo' | 'visib
 }
 
 const RoofLayer = memo(function RoofLayer({ listing: l, selected, onSelect }: { listing: Listing; selected: boolean; onSelect: (id: string) => void }) {
-  const status = AVAILABILITY[l.availability];
+  // Sample listings get a neutral color: they cannot receive inquiries, so they must not look "open".
+  const status = l.isFictional ? SAMPLE_STATUS : AVAILABILITY[l.availability];
   const handlers = { click: () => onSelect(l.id) };
-  const sample = l.isFictional ? 'מודעה לדוגמה — בדויה' : null;
+  const sample = l.isFictional ? 'מודעה לדוגמה — בדויה, לא פתוחה לפניות' : null;
   return (
     <>
       {l.polygon.length >= 3 && (
@@ -112,7 +114,7 @@ const RoofLayer = memo(function RoofLayer({ listing: l, selected, onSelect }: { 
       )}
       <Marker
         position={l.center}
-        icon={pinIcon(l.availability, selected)}
+        icon={pinIcon(l.isFictional ? 'sample' : l.availability, selected)}
         zIndexOffset={selected ? 1000 : 0}
         eventHandlers={handlers}
         title={[l.title, status.label, sample].filter(Boolean).join(' · ')}

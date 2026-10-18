@@ -3,7 +3,6 @@
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
-import { createClient } from '@/lib/supabase/client';
 
 type ToastTone = 'success' | 'info' | 'error';
 interface Toast {
@@ -41,6 +40,15 @@ export function AppProvider({
   const router = useRouter();
   const pathname = usePathname();
   const [favorites, setFavorites] = useState<Set<string>>(() => new Set(initialFavorites));
+  // Re-sync when the server sends a different favorites list (sign-in, sign-out,
+  // account switch, router.refresh after changes elsewhere). Adjusting state
+  // during render is React's recommended pattern for props-derived state.
+  const initialKey = [...initialFavorites].sort().join(',');
+  const [syncedKey, setSyncedKey] = useState(initialKey);
+  if (initialKey !== syncedKey) {
+    setSyncedKey(initialKey);
+    setFavorites(new Set(initialFavorites));
+  }
   const [toasts, setToasts] = useState<Toast[]>([]);
   const pending = useRef(new Set<string>());
 
@@ -74,6 +82,8 @@ export function AppProvider({
           return next;
         });
       flip(!wasFav); // optimistic
+      // Loaded on demand so the Supabase SDK is not part of every page's initial bundle.
+      const { createClient } = await import('@/lib/supabase/client');
       const supabase = createClient();
       const { error } = wasFav
         ? await supabase.from('favorites').delete().eq('user_id', user!.id).eq('listing_id', listingId)

@@ -81,7 +81,7 @@ export default async function ListingPage({ params }: Params) {
 
           <header className="detail-head">
             <div className="badges">
-              <StatusBadge status={listing.availability} />
+              <StatusBadge status={listing.availability} fictional={listing.isFictional} />
               <span className="agreement-chip">{AGREEMENT_LABEL[listing.agreement]}</span>
             </div>
             <h1>{listing.title}</h1>
@@ -123,7 +123,13 @@ export default async function ListingPage({ params }: Params) {
           <ListingTrust listing={listing} />
           <ListingLocation listing={listing} />
 
-          <Calculator key={listing.id} usableAreaSqm={listing.usableAreaSqm} ownerSharePct={listing.terms.sharePct} location={listing.center} />
+          <Calculator
+            key={listing.id}
+            usableAreaSqm={listing.usableAreaSqm}
+            ownerSharePct={listing.terms.sharePct}
+            rentPerSqmYear={listing.agreement === 'fixed_rent' ? listing.terms.rentPerSqmYear : null}
+            location={listing.center}
+          />
         </div>
 
         <ListingActions

@@ -118,6 +118,7 @@ describe('edit round trip', () => {
     isFictional: false,
     isMine: true,
     status: 'published',
+    adminHidden: false,
     createdAt: '',
     updatedAt: '',
   } satisfies Listing;

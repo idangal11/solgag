@@ -12,7 +12,7 @@ function routeName(pathname: string): string {
   return pathname.split('/')[1] || 'explore';
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, year }: { children: ReactNode; year: number }) {
   const pathname = usePathname() || '/';
   const { user } = useApp();
   const route = routeName(pathname);
@@ -55,8 +55,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               {(user.displayName.trim()[0] || '?').toUpperCase()}
             </Link>
           ) : (
-            <Link className="btn ghost sm" href={`/login?next=${encodeURIComponent(pathname)}`}>
-              <LogIn size={15} /> <span className="label">כניסה</span>
+            <Link className="btn ghost sm" href={`/login?next=${encodeURIComponent(pathname)}`} aria-label="כניסה או הרשמה">
+              <LogIn size={15} aria-hidden="true" /> <span className="label">כניסה</span>
             </Link>
           )}
         </div>
@@ -80,7 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <footer className="site-footer">
         <div className="inner">
-          <span>© {new Date().getFullYear()} סולגג · המחשבון והמידע להמחשה בלבד ואינם ייעוץ השקעות.</span>
+          <span>© {year} סולגג · המחשבון והמידע להמחשה בלבד ואינם ייעוץ השקעות.</span>
           <nav aria-label="קישורים משפטיים">
             <Link href="/terms">תנאי שימוש</Link>
             <Link href="/privacy">מדיניות פרטיות</Link>

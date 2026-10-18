@@ -1,0 +1,11 @@
+# Keep deploy uploads small: local tooling, reference app and test artefacts.
+.tools
+prototype
+e2e
+tests
+test-results
+playwright-report
+supabase/.temp
+supabase/.branches
+*.log
+.env*.local

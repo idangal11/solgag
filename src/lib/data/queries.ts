@@ -20,6 +20,7 @@ export async function getPublishedListings(): Promise<Listing[]> {
     .from('listing_feed')
     .select('*')
     .eq('status', 'published')
+    .eq('admin_hidden', false)
     .order('created_at', { ascending: false })
     .limit(500);
   if (error) throw new Error(`listing_feed: ${error.message}`);

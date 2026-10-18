@@ -24,11 +24,9 @@ export const ListingCard = forwardRef<HTMLElement, Props>(function ListingCard({
     <article
       ref={ref}
       className={`listing-card${selected ? ' is-selected' : ''}${compact ? ' compact' : ''}`}
+      // Mouse convenience only; keyboard and screen-reader users get the explicit
+      // "הצג במפה" button below, so the article itself is not a fake control.
       onClick={() => onFocus?.(listing.id)}
-      tabIndex={onFocus ? 0 : undefined}
-      onKeyDown={(e) => {
-        if (onFocus && e.key === 'Enter' && e.target === e.currentTarget) onFocus(listing.id);
-      }}
       aria-label={`${listing.title}, ${listing.locality}`}
       data-listing-id={listing.id}
     >
@@ -50,7 +48,7 @@ export const ListingCard = forwardRef<HTMLElement, Props>(function ListingCard({
       </div>
       <div className="card-body">
         <div className="card-top">
-          <StatusBadge status={listing.availability} />
+          <StatusBadge status={listing.availability} fictional={listing.isFictional} />
           <span className="agreement-chip">{AGREEMENT_LABEL[listing.agreement]}</span>
         </div>
         <h3 className="card-title">{listing.title}</h3>

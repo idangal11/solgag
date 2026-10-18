@@ -53,7 +53,7 @@ export async function submitInquiry(input: unknown): Promise<InquiryResult> {
 
   // Email after the response is sent; notify never throws, but the action must not fail because of it.
   try {
-    after(() => notifyOwnerOfInquiry({ listingId: listing.id, listingTitle: listing.title, senderName: v.senderName }));
+    after(() => notifyOwnerOfInquiry({ listingId: listing.id, listingTitle: listing.title }));
   } catch (e) {
     console.error('[submitInquiry] could not schedule owner notification', e);
   }

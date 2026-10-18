@@ -52,7 +52,10 @@ export interface Listing {
   images: string[];
   isFictional: boolean;
   isMine: boolean;
+  /** Owner-controlled visibility. */
   status: ListingStatus;
+  /** Hidden by platform staff (moderation). Owners cannot undo it. */
+  adminHidden: boolean;
   createdAt: string;
   updatedAt: string;
 }

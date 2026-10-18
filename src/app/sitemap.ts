@@ -39,6 +39,7 @@ async function publishedListings(): Promise<ListingRef[]> {
         .from('listing_feed')
         .select('id, updated_at')
         .eq('status', 'published')
+        .eq('admin_hidden', false)
         .eq('is_fictional', false)
         .order('updated_at', { ascending: false })
         .order('id')

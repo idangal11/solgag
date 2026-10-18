@@ -28,7 +28,20 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const authUser = await getCurrentUser();
-  const [profile, favoriteIds] = authUser ? await Promise.all([getMyProfile(), getMyFavoriteIds()]) : [null, []];
+  // The shell must render even if these reads fail (e.g. a transient PostgREST
+  // error): degrade to "no profile / no favorites" instead of a global error page.
+  const [profile, favoriteIds] = authUser
+    ? await Promise.all([
+        getMyProfile().catch((e) => {
+          console.error('[layout] profile', e);
+          return null;
+        }),
+        getMyFavoriteIds().catch((e) => {
+          console.error('[layout] favorites', e);
+          return [] as string[];
+        }),
+      ])
+    : [null, [] as string[]];
   const sessionUser: SessionUser | null = authUser
     ? {
         id: authUser.id,
@@ -41,7 +54,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="he" dir="rtl" className={heebo.variable}>
       <body>
         <AppProvider user={sessionUser} initialFavorites={favoriteIds}>
-          <AppShell>{children}</AppShell>
+          <AppShell year={new Date().getFullYear()}>{children}</AppShell>
         </AppProvider>
       </body>
     </html>

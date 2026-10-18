@@ -2,6 +2,7 @@
 
 import { Info, X } from 'lucide-react';
 import { useId, useState } from 'react';
+import { SAMPLE_STATUS } from '@/components/ui';
 import { AVAILABILITY } from '@/lib/labels';
 import type { Availability } from '@/lib/types';
 import { MOBILE_QUERY, useMediaQuery } from './useMediaQuery';
@@ -29,6 +30,10 @@ export function MapLegend() {
               {AVAILABILITY[s].label}
             </li>
           ))}
+          <li>
+            <span className="sw" style={{ background: SAMPLE_STATUS.color }} aria-hidden />
+            {SAMPLE_STATUS.label} (בדויה, ללא פניות)
+          </li>
           <li>
             <span className="sw dashed" aria-hidden /> גבול גג להמחשה (לא מדידה)
           </li>

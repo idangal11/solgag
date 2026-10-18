@@ -2,12 +2,14 @@
 
 import { Calculator as CalcIcon, Info, Loader2, RotateCcw, SunMedium } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { calculate, defaultInputsFor, type FinanceInputs } from '@/lib/finance';
+import { calculate, defaultInputsFor, type FinanceInputs, type SplitMode } from '@/lib/finance';
 import { fmtILS, fmtNum } from '@/lib/labels';
 import type { LatLng } from '@/lib/types';
 
+type NumericKey = Exclude<keyof FinanceInputs, 'splitMode'>;
+
 interface FieldDef {
-  key: keyof FinanceInputs;
+  key: NumericKey;
   label: string;
   unit: string;
   step: number;
@@ -23,7 +25,22 @@ const FIELDS: FieldDef[] = [
   { key: 'installCostIls', label: 'עלות התקנה כוללת', unit: '₪', step: 1000, min: 0, max: 100_000_000 },
   { key: 'opexIlsYear', label: 'הוצאות תפעול שנתיות', unit: '₪ לשנה', step: 500, min: 0, max: 10_000_000 },
   { key: 'reserveIlsYear', label: 'רזרבה לציוד (ממירים וכו׳)', unit: '₪ לשנה', step: 500, min: 0, max: 10_000_000 },
-  { key: 'ownerSharePct', label: 'חלק בעלי הגג', unit: '%', step: 1, min: 0, max: 100 },
+];
+
+const SHARE_FIELD: FieldDef = { key: 'ownerSharePct', label: 'חלק בעלי הגג מהתזרים', unit: '%', step: 1, min: 0, max: 99 };
+const RENT_FIELD: FieldDef = {
+  key: 'ownerFixedRentIls',
+  label: 'דמי שכירות שנתיים לבעלי הגג',
+  unit: '₪ לשנה',
+  step: 1000,
+  min: 0,
+  max: 10_000_000,
+  hint: 'משולמים לבעלים גם כשהתזרים נמוך; המשקיע מקבל את היתרה.',
+};
+
+const MODES: { value: SplitMode; label: string }[] = [
+  { value: 'share', label: 'חלוקת הכנסות (%)' },
+  { value: 'fixed_rent', label: 'שכירות קבועה (₪)' },
 ];
 
 interface PvgisResult {
@@ -33,19 +50,26 @@ interface PvgisResult {
 export function Calculator({
   usableAreaSqm,
   ownerSharePct,
+  rentPerSqmYear,
   location,
 }: {
   usableAreaSqm: number;
   ownerSharePct?: number | null;
+  /** Requested fixed rent, ₪ per usable m² per year → starts in the fixed-rent model. */
+  rentPerSqmYear?: number | null;
   /** When given, offers to fetch a location-specific yield from PVGIS. */
   location?: LatLng;
 }) {
-  const defaults = useMemo(() => defaultInputsFor(usableAreaSqm, ownerSharePct), [usableAreaSqm, ownerSharePct]);
+  const defaults = useMemo(
+    () => defaultInputsFor(usableAreaSqm, ownerSharePct, undefined, rentPerSqmYear ? rentPerSqmYear * usableAreaSqm : null),
+    [usableAreaSqm, ownerSharePct, rentPerSqmYear],
+  );
   const [inputs, setInputs] = useState<FinanceInputs>(defaults);
   const [pvgis, setPvgis] = useState<{ state: 'idle' | 'loading' | 'done' | 'error'; value?: number }>({ state: 'idle' });
   const r = calculate(inputs);
+  const mode: SplitMode = inputs.splitMode ?? 'share';
 
-  const set = (k: keyof FinanceInputs, v: string) => {
+  const set = (k: NumericKey, v: string) => {
     const n = Number(v);
     setInputs((p) => ({ ...p, [k]: Number.isFinite(n) ? n : 0 }));
   };
@@ -71,12 +95,55 @@ export function Calculator({
       ? [
           { label: 'תפעול', value: Math.min(inputs.opexIlsYear, r.gross), color: '#9aa8a1' },
           { label: 'רזרבה', value: Math.max(0, Math.min(inputs.reserveIlsYear, r.gross - inputs.opexIlsYear)), color: '#c6cfca' },
-          { label: 'בעלי הגג', value: Math.max(0, r.owner), color: '#f5b81c' },
+          { label: 'בעלי הגג', value: Math.max(0, Math.min(r.owner, r.gross)), color: '#f5b81c' },
           { label: 'משקיע', value: Math.max(0, r.investor), color: '#1f7a55' },
         ]
       : [];
   const total = segments.reduce((s, x) => s + x.value, 0) || 1;
   const noCash = r.distributable <= 0;
+
+  // Percentages describe the actual split of the distributable cash flow; with
+  // nothing to distribute there is no meaningful percentage to show.
+  const ownerPct = r.ownerPctOfDistributable;
+  const investorPct = ownerPct === null ? null : 100 - ownerPct;
+  const pctLabel = (p: number | null) => (p === null ? '' : ` (${fmtNum(p, p > 0 && p < 1 ? 1 : 0)}%)`);
+
+  const renderField = (f: FieldDef) => (
+    <label key={f.key} className="calc-field">
+      <span className="lbl">{f.label}</span>
+      <div className="input-unit">
+        <input
+          type="number"
+          inputMode="decimal"
+          min={f.min}
+          max={f.max}
+          step={f.step}
+          value={inputs[f.key] ?? 0}
+          onChange={(e) => set(f.key, e.target.value)}
+          aria-label={f.label}
+        />
+        <span className="unit">{f.unit}</span>
+      </div>
+      {f.key === 'ownerSharePct' && (
+        <input type="range" min={0} max={99} step={1} value={inputs.ownerSharePct} onChange={(e) => set('ownerSharePct', e.target.value)} aria-label="חלק בעלי הגג באחוזים" />
+      )}
+      {f.key === 'yieldKwhPerKw' && location && (
+        <span className="pvgis-row">
+          <button type="button" className="btn link sm" onClick={fetchYield} disabled={pvgis.state === 'loading'}>
+            {pvgis.state === 'loading' ? <Loader2 size={14} className="spin" /> : <SunMedium size={14} />} תפוקה לפי מיקום הגג (PVGIS)
+          </button>
+          {pvgis.state === 'done' && <small className="hint">עודכן לפי PVGIS: {fmtNum(pvgis.value ?? 0)} kWh לכל kW (נטייה אופטימלית, 14% הפסדים).</small>}
+          {pvgis.state === 'error' && <small className="hint">שירות PVGIS אינו זמין כרגע — ניתן להזין ערך ידנית.</small>}
+        </span>
+      )}
+      {f.hint && <small className="hint">{f.hint}</small>}
+    </label>
+  );
+
+  const summary =
+    `הכנסה ברוטו ${fmtILS(r.gross)} בשנה. ` +
+    `לבעלי הגג ${fmtILS(r.owner)}, למשקיע ${fmtILS(r.investor)}. ` +
+    (r.paybackYears === null ? 'אין החזר בתרחיש זה.' : `החזר פשוט ${fmtNum(r.paybackYears, 1)} שנים.`);
 
   return (
     <section className="calc card-surface" id="calculator" aria-labelledby="calc-title">
@@ -101,40 +168,31 @@ export function Calculator({
 
       <div className="calc-grid">
         <div className="calc-inputs">
-          {FIELDS.map((f) => (
-            <label key={f.key} className="calc-field">
-              <span className="lbl">{f.label}</span>
-              <div className="input-unit">
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min={f.min}
-                  max={f.max}
-                  step={f.step}
-                  value={inputs[f.key]}
-                  onChange={(e) => set(f.key, e.target.value)}
-                  aria-label={f.label}
-                />
-                <span className="unit">{f.unit}</span>
-              </div>
-              {f.key === 'ownerSharePct' && (
-                <input type="range" min={0} max={50} step={1} value={inputs.ownerSharePct} onChange={(e) => set('ownerSharePct', e.target.value)} aria-label="חלק בעלי הגג באחוזים" />
-              )}
-              {f.key === 'yieldKwhPerKw' && location && (
-                <span className="pvgis-row">
-                  <button type="button" className="btn link sm" onClick={fetchYield} disabled={pvgis.state === 'loading'}>
-                    {pvgis.state === 'loading' ? <Loader2 size={14} className="spin" /> : <SunMedium size={14} />} תפוקה לפי מיקום הגג (PVGIS)
-                  </button>
-                  {pvgis.state === 'done' && <small className="hint">עודכן לפי PVGIS: {fmtNum(pvgis.value ?? 0)} kWh לכל kW (גג שטוח/נטייה אופטימלית, 14% הפסדים).</small>}
-                  {pvgis.state === 'error' && <small className="hint">שירות PVGIS אינו זמין כרגע — ניתן להזין ערך ידנית.</small>}
-                </span>
-              )}
-              {f.hint && <small className="hint">{f.hint}</small>}
-            </label>
-          ))}
+          {FIELDS.map(renderField)}
+          <fieldset className="calc-mode">
+            <legend className="lbl">מודל התשלום לבעלי הגג</legend>
+            <div className="seg">
+              {MODES.map((m) => (
+                <label key={m.value} className={mode === m.value ? 'on' : ''}>
+                  <input
+                    type="radio"
+                    name="split-mode"
+                    value={m.value}
+                    checked={mode === m.value}
+                    onChange={() => setInputs((p) => ({ ...p, splitMode: m.value }))}
+                  />
+                  {m.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          {renderField(mode === 'fixed_rent' ? RENT_FIELD : SHARE_FIELD)}
         </div>
 
-        <div className="calc-results" aria-live="polite">
+        <div className="calc-results">
+          <p className="sr-only" aria-live="polite">
+            {summary}
+          </p>
           <div className="kpi-row">
             <div className="kpi">
               <span className="k">הכנסה ברוטו שנתית</span>
@@ -150,12 +208,18 @@ export function Calculator({
 
           <div className="split">
             <div className="split-col owner">
-              <span className="k">לבעלי הגג ({fmtNum(inputs.ownerSharePct)}%)</span>
+              <span className="k">
+                {mode === 'fixed_rent' ? 'לבעלי הגג (שכירות קבועה)' : 'לבעלי הגג'}
+                {pctLabel(ownerPct)}
+              </span>
               <span className="v">{fmtILS(r.owner)}</span>
               <small>בשנה · כ-{fmtILS(r.ownerMonthly)} בחודש בממוצע</small>
             </div>
             <div className="split-col investor">
-              <span className="k">למשקיע ({fmtNum(100 - inputs.ownerSharePct)}%)</span>
+              <span className="k">
+                {mode === 'fixed_rent' ? 'למשקיע (יתרת התזרים)' : 'למשקיע'}
+                {pctLabel(investorPct)}
+              </span>
               <span className="v">{fmtILS(r.investor)}</span>
               <small>בשנה · כ-{fmtILS(r.investorMonthly)} בחודש בממוצע</small>
             </div>
@@ -183,6 +247,9 @@ export function Calculator({
                   </li>
                 ))}
               </ul>
+              {mode === 'fixed_rent' && r.owner > Math.max(0, r.distributable) && (
+                <p className="hint">השכירות גבוהה מהתזרים לחלוקה בתרחיש זה — המשקיע מממן את ההפרש.</p>
+              )}
             </figure>
           )}
 
@@ -194,6 +261,8 @@ export function Calculator({
               <li>
                 החלוקה בין בעלי הגג למשקיע מחושבת <b>אחרי</b> תפעול ורזרבה, אך <b>לפני</b> החזר ההשקעה הראשונית, מסים ועלויות מימון.
               </li>
+              <li>חלוקת הכנסות: בעלי הגג מקבלים אחוז מהתזרים לחלוקה; כשאין תזרים חיובי — הם לא מקבלים דבר.</li>
+              <li>שכירות קבועה: בעלי הגג מקבלים סכום שנתי קבוע גם כשהתזרים נמוך; המשקיע מקבל את יתרת התזרים (שעלולה להיות שלילית).</li>
               <li>החזר פשוט = עלות התקנה ÷ התזרים השנתי למשקיע. אם התזרים אינו חיובי — אין החזר בתרחיש זה.</li>
               <li>התזרים אינו תשואה נטו ואינו רווח לאחר החזר ההשקעה. אינו כולל ירידת תפוקה, הצמדה, מימון ומיסוי.</li>
             </ul>

@@ -1,29 +1,25 @@
-import type { EmailOtpType } from '@supabase/supabase-js';
 import { NextResponse, type NextRequest } from 'next/server';
 import { safeNextPath, welcomePath } from '@/components/auth/paths';
 import { createClient } from '@/lib/supabase/server';
 
-const EMAIL_OTP_TYPES: readonly string[] = ['signup', 'invite', 'magiclink', 'recovery', 'email_change', 'email'];
-
 /**
- * Landing point for links in auth emails: PKCE (?code=) or token-hash
- * (?token_hash=&type=) links. Sets the session cookie, then continues to `next`.
+ * Landing point for PKCE auth links (?code=). The code can only be exchanged
+ * by the browser that started the sign-in (it holds the PKCE verifier cookie),
+ * so a link sent by someone else cannot log the victim into another account.
+ *
+ * Token-hash links (?token_hash=) are deliberately NOT supported: they log in
+ * whoever opens them, which enables login CSRF. Our emails only contain a code.
  */
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const next = safeNextPath(params.get('next'));
   const code = params.get('code');
-  const tokenHash = params.get('token_hash');
-  const type = params.get('type');
 
   const supabase = await createClient();
   let userId: string | null = null;
 
   if (code) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) userId = data.user?.id ?? null;
-  } else if (tokenHash && type && EMAIL_OTP_TYPES.includes(type)) {
-    const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: type as EmailOtpType });
     if (!error) userId = data.user?.id ?? null;
   }
 

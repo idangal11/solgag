@@ -29,7 +29,15 @@ describe('DEFAULT_ASSUMPTIONS', () => {
 describe('defaultInputsFor', () => {
   it('derives capacity from usable area (6.5 m² per kW, rounded to 5 kW) and per-kW costs', () => {
     // 3,180 m² ÷ 6.5 = 489.2 kW → 490 kW
-    expect(defaultInputsFor(3180)).toEqual(EXAMPLE);
+    expect(defaultInputsFor(3180)).toEqual({ ...EXAMPLE, splitMode: 'share', ownerFixedRentIls: 0 });
+  });
+
+  it('starts in the fixed-rent model when a yearly rent is given', () => {
+    const i = defaultInputsFor(3180, null, undefined, 18 * 3180);
+    expect(i.splitMode).toBe('fixed_rent');
+    expect(i.ownerFixedRentIls).toBe(57_240);
+    expect(defaultInputsFor(3180, null, undefined, 0).splitMode).toBe('share');
+    expect(defaultInputsFor(3180, null, undefined, Number.NaN).splitMode).toBe('share');
   });
 
   it('rounds the install cost to whole thousands', () => {
@@ -146,6 +154,27 @@ describe('calculate', () => {
     const all = calculate({ ...EXAMPLE, ownerSharePct: 250 });
     expect(all.owner).toBeCloseTo(all.distributable, 6);
     expect(all.investor).toBe(0);
+  });
+
+  it('fixed rent: the owner gets the rent, the investor the remainder of the cash flow', () => {
+    const r = calculate({ ...EXAMPLE, splitMode: 'fixed_rent', ownerFixedRentIls: 57_240 });
+    expect(r.owner).toBe(57_240);
+    expect(r.investor).toBeCloseTo(210_700 - 57_240, 6);
+    expect(r.ownerPctOfDistributable).toBeCloseTo((57_240 / 210_700) * 100, 6);
+    expect(r.paybackYears!).toBeCloseTo(1_372_000 / (210_700 - 57_240), 6);
+  });
+
+  it('fixed rent is still owed when cash flow is negative; the investor carries it', () => {
+    const r = calculate({ ...EXAMPLE, opexIlsYear: 300_000, splitMode: 'fixed_rent', ownerFixedRentIls: 50_000 });
+    expect(r.owner).toBe(50_000);
+    expect(r.investor).toBeCloseTo(r.distributable - 50_000, 6);
+    expect(r.ownerPctOfDistributable).toBeNull();
+    expect(r.paybackYears).toBeNull();
+  });
+
+  it('reports the share percentage only when there is something to distribute', () => {
+    expect(calculate(EXAMPLE).ownerPctOfDistributable).toBeCloseTo(12, 6);
+    expect(calculate({ ...EXAMPLE, opexIlsYear: 300_000 }).ownerPctOfDistributable).toBeNull();
   });
 
   it('is consistent with the defaults generated for a listing', () => {

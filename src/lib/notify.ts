@@ -91,15 +91,7 @@ async function send(m: Mailer, to: string, subject: string, content: EmailConten
 }
 
 /** Tell a listing's owner that a new inquiry arrived. */
-export async function notifyOwnerOfInquiry({
-  listingId,
-  listingTitle,
-  senderName,
-}: {
-  listingId: string;
-  listingTitle: string;
-  senderName: string;
-}): Promise<void> {
+export async function notifyOwnerOfInquiry({ listingId, listingTitle }: { listingId: string; listingTitle: string }): Promise<void> {
   try {
     const mailer = getMailer();
     const admin = mailer ? createAdminClient() : null;
@@ -113,15 +105,16 @@ export async function notifyOwnerOfInquiry({
     const to = await contactEmailOf(admin, listing.owner_id);
     if (!to) return;
 
+    // The sender's self-chosen name is NOT put in the email: it is attacker-controlled
+    // text that would appear inside a platform-branded message (phishing vector).
     const title = oneLine(listingTitle);
-    const name = oneLine(senderName, 60);
     await send(mailer, to, `פנייה חדשה על הגג "${title}"`, {
       heading: 'התקבלה פנייה חדשה על הגג שלך',
       paragraphs: [
-        `<b>${esc(name)}</b> שלח/ה פנייה על המודעה <b>"${esc(title)}"</b>.`,
+        `התקבלה פנייה חדשה על המודעה <b>"${esc(title)}"</b>.`,
         'את ההודעה ואת פרטי הקשר של הפונה אפשר לראות באזור האישי, ומשם גם להשיב.',
       ],
-      text: [`${name} שלח/ה פנייה על המודעה "${title}".`, 'את ההודעה ואת פרטי הקשר של הפונה אפשר לראות באזור האישי, ומשם גם להשיב.'],
+      text: [`התקבלה פנייה חדשה על המודעה "${title}".`, 'את ההודעה ואת פרטי הקשר של הפונה אפשר לראות באזור האישי, ומשם גם להשיב.'],
       ctaLabel: 'לצפייה בפנייה',
       ctaHref: `${publicConfig.siteUrl}/dashboard`,
     });

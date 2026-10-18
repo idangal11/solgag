@@ -37,11 +37,12 @@ export function listingBounds(l: { polygon: LatLng[]; center: LatLng }): L.LatLn
 
 const iconCache = new Map<string, L.DivIcon>();
 
-export function pinIcon(status: Availability | 'draft', selected = false): L.DivIcon {
+/** 'sample' = fictional demo listing (neutral pin; it cannot receive inquiries). */
+export function pinIcon(status: Availability | 'draft' | 'sample', selected = false): L.DivIcon {
   const key = `${status}-${selected}`;
   const cached = iconCache.get(key);
   if (cached) return cached;
-  const color = status === 'draft' ? '#0f3d2e' : AVAILABILITY[status].color;
+  const color = status === 'draft' ? '#0f3d2e' : status === 'sample' ? '#6b7a73' : AVAILABILITY[status].color;
   const icon = L.divIcon({
     className: 'roof-pin-wrap',
     html: `<div class="roof-pin${selected ? ' is-selected' : ''}" style="--pin:${color}">

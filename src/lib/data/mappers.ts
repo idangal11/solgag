@@ -50,6 +50,7 @@ export interface ListingFeedRow {
   roof_age_years: number | null;
   is_fictional: boolean;
   status: ListingStatus;
+  admin_hidden: boolean;
   is_mine: boolean;
   created_at: string;
   updated_at: string;
@@ -94,6 +95,7 @@ export function mapListing(r: ListingFeedRow): Listing {
     isFictional: r.is_fictional,
     isMine: r.is_mine,
     status: r.status,
+    adminHidden: r.admin_hidden ?? false,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };
