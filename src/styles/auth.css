@@ -1,0 +1,269 @@
+/* ═════════════ Auth: /login + /account ═════════════ */
+
+/* ---------- Login ---------- */
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px 64px;
+}
+.auth-card {
+  width: min(440px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: rise 0.3s ease both;
+}
+.auth-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+.auth-head p {
+  margin: 0;
+}
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.auth-method {
+  align-self: center;
+}
+.ltr-input {
+  direction: ltr;
+  text-align: right;
+}
+.ltr-input::placeholder {
+  text-align: right;
+}
+.field input.otp-input {
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.45em;
+  text-indent: 0.45em; /* balances the trailing letter-spacing so digits sit centred */
+  text-align: center;
+  padding: 12px;
+}
+.otp-input::placeholder {
+  color: #c4cfc8;
+}
+.auth-sent {
+  margin: 0;
+  font-size: 0.92rem;
+}
+.auth-target {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.auth-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.auth-row .btn.link {
+  white-space: normal;
+  gap: 2px;
+}
+.auth-row .btn.link:disabled {
+  color: var(--muted);
+  text-decoration: none;
+}
+.auth-perks {
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 12px 14px;
+  display: grid;
+  gap: 8px;
+  background: var(--green-50);
+  border-radius: var(--radius-sm);
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+.auth-perks li {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.auth-perks svg {
+  flex: none;
+  margin-top: 3px;
+  color: var(--green-700);
+}
+.auth-legal {
+  margin: 0;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* ---------- Account ---------- */
+.account-page {
+  max-width: 760px;
+}
+.account-head {
+  margin-bottom: 18px;
+}
+.account-head p {
+  margin: 6px 0 0;
+}
+.account-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.welcome-note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--green-900), var(--green-800));
+  color: #e6f1ea;
+  font-size: 0.92rem;
+  animation: rise 0.35s ease both;
+}
+.welcome-note p {
+  margin: 0;
+}
+.welcome-note b,
+.welcome-note svg {
+  color: var(--sun);
+}
+.welcome-note svg {
+  flex: none;
+  margin-top: 2px;
+}
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.role-opts {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.role-opts legend {
+  padding: 0;
+  margin-bottom: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.role-opts .hint,
+.role-opts .err {
+  grid-column: 1 / -1;
+}
+.role-opt-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--green-950);
+}
+.role-opt-title svg {
+  color: var(--green-700);
+}
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.kv-list {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.kv-list > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 10px 12px;
+  background: var(--green-50);
+  border-radius: var(--radius-sm);
+}
+.kv-list dt {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.kv-list dd {
+  margin: 0;
+  font-weight: 600;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.btn.danger {
+  background: var(--danger);
+  color: #fff;
+}
+.btn.danger:hover:not(:disabled) {
+  background: #a93226;
+  box-shadow: var(--shadow-sm);
+}
+
+/* <details> is not reliably a flex container, so spacing is done with margins here. */
+.card-surface.danger-zone {
+  display: block;
+  border-color: #f0c9c4;
+}
+.danger-zone summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+}
+.danger-zone summary::-webkit-details-marker {
+  display: none;
+}
+.danger-zone summary::after {
+  content: '+';
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--muted);
+}
+.danger-zone[open] summary::after {
+  content: '−';
+}
+.danger-zone h2,
+.danger-zone h2 svg {
+  color: var(--danger);
+}
+.danger-text {
+  margin: 12px 0 14px;
+  font-size: 0.9rem;
+}
+.confirm-word {
+  color: var(--danger);
+  font-weight: 800;
+}
+
+@media (max-width: 860px) {
+  .auth-page {
+    padding: 20px 16px 40px;
+  }
+  .auth-card {
+    padding: 22px 18px;
+  }
+  .role-opts {
+    grid-template-columns: 1fr;
+  }
+}

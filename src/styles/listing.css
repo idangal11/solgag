@@ -1,0 +1,127 @@
+/* Listing detail page — additions on top of the "Listing detail" section in globals.css. */
+
+.listing-page h1,
+.listing-page .terms dd,
+.listing-page .owner-quote p,
+.listing-page .tech-list .v {
+  overflow-wrap: anywhere;
+}
+.listing-page .pre-line {
+  white-space: pre-line;
+}
+.listing-page .listing-banner {
+  margin-bottom: 14px;
+}
+.listing-page .detail-head .badges {
+  flex-wrap: wrap;
+}
+
+/* Hero gallery: keep many thumbnails inside the photo */
+.listing-page .thumbs {
+  max-width: calc(100% - 20px);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.listing-page .thumbs::-webkit-scrollbar {
+  display: none;
+}
+.listing-page .thumbs button {
+  flex: none;
+}
+
+/* Trust box */
+.listing-page .verify .d {
+  font-size: 0.8rem;
+  margin-top: 4px;
+  opacity: 0.9;
+}
+.listing-page .tech-list .v {
+  min-width: 0;
+}
+
+/* Owner quote */
+.listing-page .owner-quote p {
+  margin: 0;
+}
+
+/* Mini map */
+.listing-page .mini-map-loading {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: #e7ece8;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+.listing-page .listing-map-link {
+  align-self: flex-start;
+}
+
+/* Action card */
+.listing-page .ac-mine {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+  font-size: 0.86rem;
+  background: var(--sun-100);
+  color: #6b4e00;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+.listing-page .ac-mine .muted {
+  color: #6b4e00;
+}
+.listing-page .ac-mine-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.listing-page .ac-foot {
+  margin: 2px 0 0;
+}
+
+/* Inquiry dialog */
+.listing-page .inq-privacy a {
+  white-space: nowrap;
+}
+.listing-page .inq-done h2:focus {
+  outline: none;
+}
+
+/* Tablet / mobile: the fixed action bar must not cover the page end or the footer. */
+@media (max-width: 1100px) {
+  .page.listing-page {
+    padding-bottom: 48px;
+  }
+  .listing-page .mobile-actionbar {
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+  .route-listing .site-footer {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+  /* Toasts (rendered outside .app) float above the action bar instead of covering it. */
+  body:has(.listing-page .mobile-actionbar) .toasts {
+    bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom) + 84px);
+  }
+}
+
+@media (max-width: 860px) {
+  /* Sit right above the fixed bottom navigation, including the iOS home-indicator inset. */
+  .listing-page .mobile-actionbar {
+    bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom));
+    padding-bottom: 10px;
+  }
+  .route-listing .site-footer {
+    padding-bottom: calc(var(--bottomnav-h) + 96px);
+  }
+  .listing-page .thumbs button {
+    width: 44px;
+    height: 34px;
+  }
+  .listing-page .mini-map {
+    height: 240px;
+  }
+}

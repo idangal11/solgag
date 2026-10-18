@@ -1,0 +1,83 @@
+/* Explore page — additions to the shared explore/map styles in globals.css. */
+
+/* Placeholder while the Leaflet chunk loads (same tone as .leaflet-host). */
+.map-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #e7ece8;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.map-loading svg {
+  color: var(--green-700);
+}
+
+/* Programmatic focus targets (heading after closing the intro, map after closing the preview). */
+.side-head h1:focus:not(:focus-visible) {
+  outline: none;
+}
+.explore-map:focus-visible {
+  outline-offset: -3px;
+}
+
+/* Zero listings: friendly call to publish. */
+.explore-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 30px 20px;
+}
+.explore-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--sun-100);
+  color: var(--sun-600);
+}
+.explore-empty-title {
+  justify-content: center;
+  font-size: 1.05rem;
+  text-wrap: balance;
+}
+.explore-empty p {
+  margin: 0 0 4px;
+  font-size: 0.88rem;
+  text-wrap: pretty;
+}
+
+/* Note over an empty map. */
+.map-empty-note {
+  position: absolute;
+  z-index: 800;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 140px);
+  margin: 0;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  color: var(--green-950);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .map-empty-note {
+    top: auto;
+    bottom: 70px;
+    max-width: calc(100% - 32px);
+    border-radius: var(--radius-sm);
+  }
+}

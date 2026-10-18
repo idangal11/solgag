@@ -1,0 +1,435 @@
+/* ═════════════ Dashboard + inquiry threads ═════════════
+   Builds on globals.css (.dash-head, .kpi-strip, .dash-section, .grid-cards,
+   .inq-list/.inq-row, .seg, .tag, .field, .btn …). Classes here are prefixed
+   with dash- so they do not collide with other areas. */
+
+.dashboard [role='tabpanel'][hidden] {
+  display: none;
+}
+.dashboard .dash-head p a {
+  white-space: nowrap;
+}
+.dash-hint {
+  margin: -4px 0 10px;
+}
+.dash-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ---------- My listings ---------- */
+.dash-my-grid {
+  align-items: start;
+}
+.dash-my-item {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: rise 0.35s ease both;
+}
+.dash-my-item > .listing-card {
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  animation: none;
+  cursor: default;
+}
+.dash-my-item > .listing-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+.dash-manage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px 14px;
+}
+.dash-manage-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.dash-manage-top .tiny {
+  margin-inline-start: auto;
+}
+.dash-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: #fdf1ef;
+  border: 1px solid #f0c9c4;
+  animation: rise 0.2s ease both;
+}
+.dash-confirm b {
+  color: #9b2c20;
+}
+.dash-confirm p {
+  margin: 0;
+}
+.btn.dash-btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.btn.dash-btn-danger:hover:not(:disabled) {
+  background: #a93226;
+}
+
+/* ---------- Ownership verification ---------- */
+.dash-verif {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+.dash-verif-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 10px;
+}
+.dash-verif h4,
+.dash-verif h5 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--green-950);
+}
+.dash-verif h4 {
+  font-size: 0.95rem;
+}
+.dash-verif h4 svg {
+  color: var(--green-700);
+}
+.dash-verif h5 {
+  font-size: 0.84rem;
+  margin-bottom: 4px;
+}
+.dash-verif p {
+  margin: 0;
+}
+.dash-explain {
+  font-size: 0.84rem;
+  background: var(--green-50);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+}
+.dash-explain summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--green-800);
+}
+.dash-explain p {
+  margin: 6px 0 0;
+  color: var(--text);
+}
+.dash-verif-open {
+  align-self: flex-start;
+}
+.dash-verif-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+.dash-verif-form input[type='file'] {
+  padding: 7px 8px;
+  font-size: 0.86rem;
+}
+.dash-file {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow-wrap: anywhere;
+}
+.dash-verif-history ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dash-verif-history li {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  overflow-wrap: anywhere;
+}
+.dash-verif-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+.dash-verif-row time {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.dash-verif-row .btn {
+  margin-inline-start: auto;
+}
+.dash-review-note {
+  color: var(--green-950);
+  background: var(--surface);
+  border-inline-start: 3px solid var(--sun);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* ---------- Inquiry rows ---------- */
+.dash-inq {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dash-inq.is-new {
+  border-inline-start: 4px solid var(--sun);
+}
+.dash-inq .inq-top b a,
+.dash-inq .small a {
+  color: inherit;
+}
+.dash-inq-excerpt {
+  white-space: pre-line;
+}
+.dash-contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.84rem;
+  color: var(--green-700);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.dash-contact:hover {
+  text-decoration: underline;
+}
+.dash-status-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.dash-status-field label {
+  font-weight: 600;
+}
+.dash-status-field select {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: var(--surface);
+  font-size: 0.85rem;
+  color: var(--text);
+  cursor: pointer;
+}
+.dash-status-field select:focus-visible {
+  border-color: var(--green-700);
+}
+.dash-status-field select:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* ---------- Loading skeleton ---------- */
+.dash-skel {
+  min-height: 72px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, #eef1ef 25%, #f6f8f6 50%, #eef1ef 75%);
+  background-size: 200% 100%;
+  animation: dash-shimmer 1.2s linear infinite;
+}
+.dash-skel-card {
+  min-height: 220px;
+  border-radius: var(--radius);
+}
+@keyframes dash-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- Inquiry thread page ---------- */
+.dash-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.dash-back {
+  align-self: flex-start;
+  padding-inline: 0;
+}
+.dash-thread-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
+.dash-thread-head h1 {
+  overflow-wrap: anywhere;
+}
+.dash-thread-head p {
+  margin: 4px 0 0;
+}
+.dash-thread-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.dash-owner-tools {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 16px;
+}
+.dash-owner-tools .hint {
+  flex: 1 1 260px;
+}
+.dash-original {
+  gap: 12px;
+}
+.dash-orig-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+.dash-orig-meta > div {
+  background: var(--green-50);
+  border-radius: 8px;
+  padding: 6px 10px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dash-orig-meta dt {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+.dash-orig-meta dd {
+  margin: 0;
+  font-weight: 600;
+}
+.dash-msg-body {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.dash-orig-body {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.dash-privacy {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.dash-thread-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dash-msgs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dash-msg {
+  max-width: min(78%, 620px);
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  animation: rise 0.25s ease both;
+}
+.dash-msg.theirs {
+  align-self: flex-start;
+  border-start-start-radius: 4px;
+}
+.dash-msg.mine {
+  align-self: flex-end;
+  background: var(--green-100);
+  border-color: #cfe3d8;
+  border-start-end-radius: 4px;
+}
+.dash-msg-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+}
+.dash-msg-meta b {
+  color: var(--green-900);
+}
+.dash-msg-meta time {
+  color: var(--muted);
+}
+.dash-reply {
+  gap: 10px;
+}
+.dash-reply textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+.dash-reply-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+@media (max-width: 860px) {
+  .dash-manage {
+    padding: 12px;
+  }
+  .dash-msg {
+    max-width: 92%;
+  }
+  .dash-thread-head {
+    align-items: flex-start;
+  }
+  .dash-reply-foot .btn {
+    flex: 1 1 auto;
+  }
+  .dash-inq .inq-foot .btn {
+    margin-inline-start: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .dash-verif-row .btn {
+    margin-inline-start: 0;
+  }
+  .dash-status-field {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

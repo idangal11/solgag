@@ -1,0 +1,131 @@
+/* Publish / edit wizard — additions on top of the shared .publish-page styles in globals.css */
+
+.step-title {
+  font-size: 1rem;
+  color: var(--green-900);
+}
+.step-title:focus {
+  outline: none;
+}
+.step-title:focus-visible {
+  outline: 3px solid rgba(245, 184, 28, 0.7);
+  outline-offset: 2px;
+}
+
+.publish-page .err:focus {
+  outline: none;
+}
+
+/* Address search */
+.search-row input {
+  flex: 1;
+  min-width: 0;
+}
+.search-row .btn {
+  flex: none;
+}
+
+/* Map — isolate Leaflet's z-indexes (panes 400, controls 1000) so the sticky
+   mobile wizard nav and the bottom nav stay on top while scrolling. */
+.publish-page .draw-map {
+  position: relative;
+  isolation: isolate;
+}
+.draw-map-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #e7ece8;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* Area + notes */
+.area-readout small {
+  margin-top: 4px;
+}
+.note.info-note {
+  background: #e7f0fb;
+  color: #1f4f80;
+}
+.contact-hint {
+  padding: 9px 0;
+}
+
+/* Agreement radios as a real fieldset (screen readers announce the group name) */
+.agree-fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+.agree-fieldset > legend {
+  padding: 0;
+  margin-bottom: 5px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Photo uploader (a list of thumbnails + an "add" tile) */
+ul.uploader {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.up-add-item {
+  position: relative;
+}
+.up-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.up-input:focus-visible + .up-add {
+  outline: 3px solid rgba(245, 184, 28, 0.7);
+  outline-offset: 2px;
+}
+.up-input:disabled + .up-add {
+  cursor: progress;
+  opacity: 0.7;
+}
+.up-new {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: var(--sun);
+  color: var(--green-950);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+
+.publish-page .form-error {
+  margin: 0;
+}
+
+@media (max-width: 860px) {
+  .publish-page .uploader {
+    gap: 8px;
+  }
+  .publish-page .up-thumb,
+  .publish-page .up-add {
+    width: calc((100vw - 32px - 32px - 16px) / 3);
+    max-width: 120px;
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+  .publish-page .seg {
+    max-width: 100%;
+  }
+  .publish-page .seg button {
+    padding: 7px 11px;
+  }
+  .publish-page .wizard-nav {
+    z-index: 5;
+  }
+}
