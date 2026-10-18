@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { publicConfig } from '@/lib/config';
 import { isInSupportedArea } from '@/lib/geo';
+import { getCurrentUser } from '@/lib/supabase/server';
 
 // Address search for the publish wizard. Google Geocoding when a server key is
 // configured, otherwise OpenStreetMap Nominatim (low volume only — see
@@ -82,6 +83,11 @@ const cachedGeocode = unstable_cache(
 );
 
 export async function GET(req: NextRequest) {
+  // Only the (signed-in) publish wizard uses address search. Requiring a session
+  // keeps anonymous scrapers from burning the geocoding quota / Nominatim policy.
+  if (!(await getCurrentUser())) {
+    return NextResponse.json({ error: 'sign-in required' }, { status: 401 });
+  }
   const parsed = querySchema.safeParse(req.nextUrl.searchParams.get('q') ?? '');
   if (!parsed.success) {
     return NextResponse.json({ error: 'q must be 2-200 characters' }, { status: 400 });
@@ -92,7 +98,7 @@ export async function GET(req: NextRequest) {
   try {
     const results = await cachedGeocode(provider, q.toLocaleLowerCase('he'));
     return NextResponse.json(results, {
-      headers: { 'Cache-Control': `public, max-age=3600, s-maxage=${ONE_DAY}, stale-while-revalidate=3600` },
+      headers: { 'Cache-Control': 'private, max-age=3600' },
     });
   } catch {
     return NextResponse.json({ error: 'geocoding unavailable' }, { status: 502 });

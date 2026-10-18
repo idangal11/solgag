@@ -182,11 +182,55 @@ export async function notifyInquiryReply({ inquiryId }: { inquiryId: string }): 
         paragraphs: [`נוספה הודעה חדשה בשיחה על המודעה <b>"${esc(title)}"</b>.`, 'אפשר לקרוא אותה ולהשיב באזור האישי.'],
         text: [`נוספה הודעה חדשה בשיחה על המודעה "${title}".`, 'אפשר לקרוא אותה ולהשיב באזור האישי.'],
         ctaLabel: 'לקריאת ההודעה',
-        ctaHref: `${publicConfig.siteUrl}/dashboard`,
+        ctaHref: `${publicConfig.siteUrl}/inquiries/${encodeURIComponent(inquiryId)}`,
       },
       `inquiry-message-${latest.id}`,
     );
   } catch (e) {
     console.error('[notify] notifyInquiryReply failed', e);
+  }
+}
+
+/** Tell a listing owner that their ownership-verification request was reviewed. */
+export async function notifyVerificationDecision({ requestId }: { requestId: string }): Promise<void> {
+  try {
+    const mailer = getMailer();
+    const admin = mailer ? createAdminClient() : null;
+    if (!mailer || !admin) return;
+
+    const { data, error } = await admin
+      .from('verification_requests')
+      .select('owner_id, status, listings(title)')
+      .eq('id', requestId)
+      .maybeSingle();
+    if (error) throw new Error(`verification_requests: ${error.message}`);
+    type Ref = { title: string };
+    const req = data as { owner_id: string; status: string; listings: Ref | Ref[] | null } | null;
+    if (!req || req.status === 'pending') return;
+
+    const to = await contactEmailOf(admin, req.owner_id);
+    if (!to) return;
+
+    const listing = Array.isArray(req.listings) ? req.listings[0] : req.listings;
+    const title = oneLine(listing?.title ?? 'המודעה שלך');
+    const approved = req.status === 'approved';
+    const line = approved
+      ? 'צוות הפלטפורמה בדק את מסמך הבעלות שהגשת. המודעה מסומנת כעת "בעלות נבדקה מול מסמכים" — אין בכך אישור משפטי או ערובה.'
+      : 'המסמכים שהוגשו לא הספיקו לאימות הבעלות. אפשר להגיש מסמכים חדשים מהאזור האישי.';
+    await send(
+      mailer,
+      to,
+      approved ? `מסמך הבעלות על "${title}" נבדק` : `אימות הבעלות על "${title}" לא אושר`,
+      {
+        heading: approved ? 'מסמך הבעלות נבדק ואושר' : 'בקשת אימות הבעלות לא אושרה',
+        paragraphs: [`המודעה: <b>"${esc(title)}"</b>.`, esc(line)],
+        text: [`המודעה: "${title}".`, line],
+        ctaLabel: 'לאזור האישי',
+        ctaHref: `${publicConfig.siteUrl}/dashboard`,
+      },
+      `verification-decision-${requestId}`,
+    );
+  } catch (e) {
+    console.error('[notify] notifyVerificationDecision failed', e);
   }
 }

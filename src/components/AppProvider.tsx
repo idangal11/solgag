@@ -85,9 +85,12 @@ export function AppProvider({
         return;
       }
       toast(wasFav ? 'הוסר מהמועדפים' : 'נשמר במועדפים', 'info');
-      router.refresh();
+      // The heart state is already updated optimistically. Refresh server data only
+      // where it matters (e.g. the dashboard favorites list) — not on the map page,
+      // where a refresh would refetch every listing.
+      if (pathname !== '/') router.refresh();
     },
-    [favorites, requireAuth, toast, user, router],
+    [favorites, requireAuth, toast, user, router, pathname],
   );
 
   const value = useMemo<AppContextValue>(

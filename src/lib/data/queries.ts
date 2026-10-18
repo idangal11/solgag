@@ -80,15 +80,29 @@ export async function getFavoriteListings(): Promise<Listing[]> {
 
 const INQUIRY_COLUMNS = 'id, listing_id, sender_id, sender_name, sender_contact, sender_role, message, status, created_at, listings(title)';
 
-/** Inquiries the current user sent, and inquiries received on their listings. */
+/** Inquiries the current user sent, and inquiries received on their own listings. */
 export async function getMyInquiries(): Promise<{ sent: Inquiry[]; received: Inquiry[] }> {
   const user = await getCurrentUser();
   if (!user) return { sent: [], received: [] };
   const supabase = await createClient();
-  const { data, error } = await supabase.from('inquiries').select(INQUIRY_COLUMNS).order('created_at', { ascending: false }).limit(200);
-  if (error) throw new Error(`inquiries: ${error.message}`);
-  const all = (data as unknown as InquiryRow[]).map((r) => mapInquiry(r, user.id));
-  return { sent: all.filter((i) => i.sentByMe), received: all.filter((i) => !i.sentByMe) };
+  // Filter explicitly by role in each query: admins can read every inquiry under
+  // RLS, and "received" must only mean inquiries on listings the user owns.
+  const [sent, received] = await Promise.all([
+    supabase.from('inquiries').select(INQUIRY_COLUMNS).eq('sender_id', user.id).order('created_at', { ascending: false }).limit(200),
+    supabase
+      .from('inquiries')
+      .select(`${INQUIRY_COLUMNS.replace('listings(title)', 'listings!inner(title, owner_id)')}`)
+      .eq('listings.owner_id', user.id)
+      .neq('sender_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(200),
+  ]);
+  if (sent.error) throw new Error(`inquiries: ${sent.error.message}`);
+  if (received.error) throw new Error(`inquiries: ${received.error.message}`);
+  return {
+    sent: (sent.data as unknown as InquiryRow[]).map((r) => mapInquiry(r, user.id)),
+    received: (received.data as unknown as InquiryRow[]).map((r) => mapInquiry(r, user.id)),
+  };
 }
 
 export async function getInquiry(id: string): Promise<Inquiry | null> {

@@ -1,6 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { after } from 'next/server';
+import { notifyVerificationDecision } from '@/lib/notify';
 import { z } from 'zod';
 import type { ActionResult } from '@/components/admin/types';
 import { STORAGE_BUCKETS } from '@/lib/config';
@@ -72,6 +74,8 @@ export async function reviewVerificationRequest(input: { requestId: string; appr
     p_note: note || null,
   });
   if (error) return { ok: false, error: hebrewError(error) };
+  // Email the owner after the response is sent (no-op when email is not configured).
+  after(() => notifyVerificationDecision({ requestId }));
   revalidateSite();
   return { ok: true };
 }

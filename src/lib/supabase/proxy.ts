@@ -31,7 +31,9 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  if (!user && PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))) {
+  const isProtected =
+    PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`)) || /^\/listing\/[^/]+\/edit\/?$/.test(path);
+  if (!user && isProtected) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.search = '';
