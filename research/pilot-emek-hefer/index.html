@@ -61,6 +61,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="data/data.js"></script>
     <script>
+      window.TIER_A_REVIEW = 'בדיקה נוספת של 12 גגות ברמה A (3 בודקים): 5 גגות חשופים מתאימים, 1 עם מערכת חלקית, 2 מכוסים כבר, 3 קווי מתאר שגויים, 1 לא ברור.';
       const { stats, candidates, solar, landuse } = window.PILOT;
       const fmt = (n) => new Intl.NumberFormat('he-IL').format(Math.round(n));
       const luLabel = { industrial: 'תעשייה', commercial: 'מסחר', retail: 'מסחר', farmyard: 'משק', farmland: 'שטח חקלאי', residential: 'מגורים', unmapped: 'לא ממופה' };
