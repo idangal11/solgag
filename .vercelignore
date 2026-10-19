@@ -1,6 +1,7 @@
 # Keep deploy uploads small: local tooling, reference app and test artefacts.
 .tools
 prototype
+research
 e2e
 tests
 test-results
