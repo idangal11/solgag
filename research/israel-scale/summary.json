@@ -1,0 +1,2541 @@
+{
+  "generatedAt": "2026-10-19T17:45:29.023Z",
+  "source": {
+    "index": "https://minedbuildings.z5.web.core.windows.net/global-buildings/dataset-links.csv",
+    "indexBytes": 7171802,
+    "indexLastModified": "Wed, 25 Feb 2026 23:01:46 GMT",
+    "datasetRelease": "2026-02-03",
+    "location": "Israel",
+    "licence": "CDLA-Permissive-2.0 (per brief; repo LICENSE changed 2026-03-11)",
+    "tiles": [
+      {
+        "qk": "122112212",
+        "sizeLabel": "1.3MB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 33.1376,
+          "w": 35.1563,
+          "n": 33.7243,
+          "e": 35.8594
+        }
+      },
+      {
+        "qk": "122112221",
+        "sizeLabel": "13.2MB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 32.5468,
+          "w": 34.4531,
+          "n": 33.1376,
+          "e": 35.1563
+        }
+      },
+      {
+        "qk": "122112223",
+        "sizeLabel": "40.3MB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 31.9522,
+          "w": 34.4531,
+          "n": 32.5468,
+          "e": 35.1563
+        }
+      },
+      {
+        "qk": "122112230",
+        "sizeLabel": "28.9MB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 32.5468,
+          "w": 35.1563,
+          "n": 33.1376,
+          "e": 35.8594
+        }
+      },
+      {
+        "qk": "122112232",
+        "sizeLabel": "2.4MB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 31.9522,
+          "w": 35.1563,
+          "n": 32.5468,
+          "e": 35.8594
+        }
+      },
+      {
+        "qk": "122130000",
+        "sizeLabel": "68.5KB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 31.3536,
+          "w": 33.75,
+          "n": 31.9522,
+          "e": 34.4531
+        }
+      },
+      {
+        "qk": "122130001",
+        "sizeLabel": "27.6MB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 31.3536,
+          "w": 34.4531,
+          "n": 31.9522,
+          "e": 35.1563
+        }
+      },
+      {
+        "qk": "122130002",
+        "sizeLabel": "1.7MB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 30.7513,
+          "w": 33.75,
+          "n": 31.3536,
+          "e": 34.4531
+        }
+      },
+      {
+        "qk": "122130003",
+        "sizeLabel": "17.3MB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 30.7513,
+          "w": 34.4531,
+          "n": 31.3536,
+          "e": 35.1563
+        }
+      },
+      {
+        "qk": "122130010",
+        "sizeLabel": "2.4MB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 31.3536,
+          "w": 35.1563,
+          "n": 31.9522,
+          "e": 35.8594
+        }
+      },
+      {
+        "qk": "122130012",
+        "sizeLabel": "1.8MB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 30.7513,
+          "w": 35.1563,
+          "n": 31.3536,
+          "e": 35.8594
+        }
+      },
+      {
+        "qk": "122130021",
+        "sizeLabel": "475.2KB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 30.1451,
+          "w": 34.4531,
+          "n": 30.7513,
+          "e": 35.1563
+        }
+      },
+      {
+        "qk": "122130023",
+        "sizeLabel": "1.4MB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 29.5352,
+          "w": 34.4531,
+          "n": 30.1451,
+          "e": 35.1563
+        }
+      },
+      {
+        "qk": "122130030",
+        "sizeLabel": "674.3KB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 30.1451,
+          "w": 35.1563,
+          "n": 30.7513,
+          "e": 35.8594
+        }
+      },
+      {
+        "qk": "122130201",
+        "sizeLabel": "56.7KB",
+        "uploadDate": "2026-02-23",
+        "tileBounds": {
+          "s": 28.9216,
+          "w": 34.4531,
+          "n": 29.5352,
+          "e": 35.1563
+        }
+      }
+    ],
+    "rawGzBytes": 146406298,
+    "sizeLabelsAreMiB": true,
+    "neighbourLocationsInIndex": {
+      "WestBank": {
+        "tiles": 6,
+        "approxGzMB": 65,
+        "quadkeys": [
+          "122112223 (12.7MB)",
+          "122112230 (776B)",
+          "122112232 (19.5MB)",
+          "122130001 (17.8MB)",
+          "122130003 (9.2KB)",
+          "122130010 (15.0MB)"
+        ]
+      },
+      "GazaStrip": {
+        "tiles": 3,
+        "approxGzMB": 22.4,
+        "quadkeys": [
+          "122130000 (7.6MB)",
+          "122130001 (6.8MB)",
+          "122130002 (8.0MB)"
+        ]
+      },
+      "GolanHeights": {
+        "tiles": 3,
+        "approxGzMB": 0.8,
+        "quadkeys": [
+          "122112212 (637.1KB)",
+          "122112230 (132.2KB)",
+          "122112231 (5.8KB)"
+        ]
+      },
+      "GolanHeightsSubdistrict": {
+        "tiles": 3,
+        "approxGzMB": 1.7,
+        "quadkeys": [
+          "122112212 (62.4KB)",
+          "122112230 (1.6MB)",
+          "122112231 (5.6KB)"
+        ]
+      }
+    },
+    "neighbourFootprintEstimatesFromGzSize": {
+      "WestBank": {
+        "approxGzMB": 65,
+        "estFootprints": 671404
+      },
+      "GazaStrip": {
+        "approxGzMB": 22.4,
+        "estFootprints": 231376
+      },
+      "GolanHeights": {
+        "approxGzMB": 0.8,
+        "estFootprints": 8263
+      },
+      "GolanHeightsSubdistrict": {
+        "approxGzMB": 1.7,
+        "estFootprints": 17560
+      }
+    },
+    "newerRelease": {
+      "index": "https://bfppub.blob.core.windows.net/%24web/2026-08-13/dataset-links.csv",
+      "lastModified": "Thu, 13 Aug 2026 20:24:50 GMT",
+      "tiles": 15,
+      "sameQuadkeys": true,
+      "sizeLabelSumOld": 139574700,
+      "sizeLabelSumNew": 140074700,
+      "sizeChangePct": 0.36,
+      "perTile": [
+        "122112212: 1.3MB → 1.3MB",
+        "122112221: 13.2MB → 13.2MB",
+        "122112223: 40.3MB → 40.5MB",
+        "122112230: 28.9MB → 29.0MB",
+        "122112232: 2.4MB → 2.4MB",
+        "122130000: 68.5KB → 68.5KB",
+        "122130001: 27.6MB → 27.8MB",
+        "122130002: 1.7MB → 1.7MB",
+        "122130003: 17.3MB → 17.3MB",
+        "122130010: 2.4MB → 2.4MB",
+        "122130012: 1.8MB → 1.8MB",
+        "122130021: 475.2KB → 475.2KB",
+        "122130023: 1.4MB → 1.4MB",
+        "122130030: 674.3KB → 674.3KB",
+        "122130201: 56.7KB → 56.7KB"
+      ]
+    }
+  },
+  "method": {
+    "area": "@turf/area on the footprint geometry (same as pilot)",
+    "centroid": "area-weighted centroid of the outer ring (same as pilot)",
+    "dedupe": "footprints ≥500 m² deduplicated on (centroid to 1e-6°, rounded area); <500 m² not deduplicated",
+    "sizeClasses": [
+      "lt500",
+      "500-1000",
+      "1000-2500",
+      "2500-5000",
+      "5000-10000",
+      "10000+"
+    ]
+  },
+  "quality": {
+    "geomTypes": {
+      "Polygon": 1442217
+    },
+    "parseErrors": 0,
+    "duplicatesGe500": 0,
+    "centroidOutsideFileQuadkey": 5751,
+    "bboxOfCentroids": [
+      34.2681,
+      29.4908,
+      35.6821,
+      33.2863
+    ],
+    "confidenceGe1000": {
+      "withValue": 46979,
+      "missing": 6371,
+      "mean": 0.966,
+      "below0_8": 311
+    },
+    "geometryGe1000": {
+      "avgVertices": 15.5,
+      "avgGeojsonLineBytes": 763
+    }
+  },
+  "national": {
+    "lt500": {
+      "n": 1305022,
+      "areaSqm": 194689900
+    },
+    "500-1000": {
+      "n": 83845,
+      "areaSqm": 57445052
+    },
+    "1000-2500": {
+      "n": 38512,
+      "areaSqm": 57401557
+    },
+    "2500-5000": {
+      "n": 9415,
+      "areaSqm": 32265899
+    },
+    "5000-10000": {
+      "n": 4062,
+      "areaSqm": 28530774
+    },
+    "10000+": {
+      "n": 1361,
+      "areaSqm": 20762453
+    },
+    "all": {
+      "n": 1442217,
+      "areaSqm": 391095634
+    },
+    "ge500": {
+      "n": 137195,
+      "areaSqm": 196405734
+    },
+    "ge1000": {
+      "n": 53350,
+      "areaSqm": 138960682,
+      "kWpDcIfAllUsable": 13896068
+    },
+    "shareGe1000OfAll": 0.03699,
+    "shareGe1000OfGe500": 0.3889,
+    "areaShareGe1000OfAll": 0.3553
+  },
+  "perQuadkey": {
+    "122112212": {
+      "lt500": {
+        "n": 12699,
+        "areaSqm": 1747652
+      },
+      "500-1000": {
+        "n": 493,
+        "areaSqm": 338638
+      },
+      "1000-2500": {
+        "n": 266,
+        "areaSqm": 408685
+      },
+      "2500-5000": {
+        "n": 65,
+        "areaSqm": 224978
+      },
+      "5000-10000": {
+        "n": 20,
+        "areaSqm": 133126
+      },
+      "10000+": {
+        "n": 7,
+        "areaSqm": 82928
+      },
+      "all": {
+        "n": 13550,
+        "areaSqm": 2936007
+      },
+      "ge500": {
+        "n": 851,
+        "areaSqm": 1188355
+      },
+      "ge1000": {
+        "n": 358,
+        "areaSqm": 849717,
+        "kWpDcIfAllUsable": 84972
+      },
+      "shareGe1000OfAll": 0.02642,
+      "shareGe1000OfGe500": 0.4207,
+      "areaShareGe1000OfAll": 0.2894,
+      "gzBytes": 1344931,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 33.1376,
+        "w": 35.1563,
+        "n": 33.7243,
+        "e": 35.8594
+      },
+      "bboxOfCentroids": [
+        35.5313,
+        33.1388,
+        35.6821,
+        33.2863
+      ]
+    },
+    "122112221": {
+      "lt500": {
+        "n": 121551,
+        "areaSqm": 19677891
+      },
+      "500-1000": {
+        "n": 8902,
+        "areaSqm": 6036437
+      },
+      "1000-2500": {
+        "n": 3509,
+        "areaSqm": 5193497
+      },
+      "2500-5000": {
+        "n": 749,
+        "areaSqm": 2560260
+      },
+      "5000-10000": {
+        "n": 254,
+        "areaSqm": 1700655
+      },
+      "10000+": {
+        "n": 87,
+        "areaSqm": 1244654
+      },
+      "all": {
+        "n": 135052,
+        "areaSqm": 36413394
+      },
+      "ge500": {
+        "n": 13501,
+        "areaSqm": 16735503
+      },
+      "ge1000": {
+        "n": 4599,
+        "areaSqm": 10699066,
+        "kWpDcIfAllUsable": 1069907
+      },
+      "shareGe1000OfAll": 0.03405,
+      "shareGe1000OfGe500": 0.3406,
+      "areaShareGe1000OfAll": 0.2938,
+      "gzBytes": 13886910,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 32.5468,
+        "w": 34.4531,
+        "n": 33.1376,
+        "e": 35.1563
+      },
+      "bboxOfCentroids": [
+        34.9063,
+        32.548,
+        35.1549,
+        33.0942
+      ]
+    },
+    "122112223": {
+      "lt500": {
+        "n": 360562,
+        "areaSqm": 59735573
+      },
+      "500-1000": {
+        "n": 30473,
+        "areaSqm": 20965684
+      },
+      "1000-2500": {
+        "n": 13959,
+        "areaSqm": 20635121
+      },
+      "2500-5000": {
+        "n": 2794,
+        "areaSqm": 9408513
+      },
+      "5000-10000": {
+        "n": 856,
+        "areaSqm": 5862988
+      },
+      "10000+": {
+        "n": 193,
+        "areaSqm": 2803646
+      },
+      "all": {
+        "n": 408837,
+        "areaSqm": 119411525
+      },
+      "ge500": {
+        "n": 48275,
+        "areaSqm": 59675952
+      },
+      "ge1000": {
+        "n": 17802,
+        "areaSqm": 38710268,
+        "kWpDcIfAllUsable": 3871027
+      },
+      "shareGe1000OfAll": 0.04354,
+      "shareGe1000OfGe500": 0.3688,
+      "areaShareGe1000OfAll": 0.3242,
+      "gzBytes": 42306174,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 31.9522,
+        "w": 34.4531,
+        "n": 32.5468,
+        "e": 35.1563
+      },
+      "bboxOfCentroids": [
+        34.7148,
+        31.9533,
+        35.1549,
+        32.548
+      ]
+    },
+    "122112230": {
+      "lt500": {
+        "n": 288512,
+        "areaSqm": 42953833
+      },
+      "500-1000": {
+        "n": 11811,
+        "areaSqm": 7920767
+      },
+      "1000-2500": {
+        "n": 4593,
+        "areaSqm": 6833099
+      },
+      "2500-5000": {
+        "n": 1104,
+        "areaSqm": 3744361
+      },
+      "5000-10000": {
+        "n": 380,
+        "areaSqm": 2530253
+      },
+      "10000+": {
+        "n": 80,
+        "areaSqm": 1231502
+      },
+      "all": {
+        "n": 306480,
+        "areaSqm": 65213816
+      },
+      "ge500": {
+        "n": 17968,
+        "areaSqm": 22259983
+      },
+      "ge1000": {
+        "n": 6157,
+        "areaSqm": 14339216,
+        "kWpDcIfAllUsable": 1433922
+      },
+      "shareGe1000OfAll": 0.02009,
+      "shareGe1000OfGe500": 0.3427,
+      "areaShareGe1000OfAll": 0.2199,
+      "gzBytes": 30289908,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 32.5468,
+        "w": 35.1563,
+        "n": 33.1376,
+        "e": 35.8594
+      },
+      "bboxOfCentroids": [
+        35.1549,
+        32.548,
+        35.6731,
+        33.1387
+      ]
+    },
+    "122112232": {
+      "lt500": {
+        "n": 22286,
+        "areaSqm": 3373543
+      },
+      "500-1000": {
+        "n": 1170,
+        "areaSqm": 806868
+      },
+      "1000-2500": {
+        "n": 687,
+        "areaSqm": 1044446
+      },
+      "2500-5000": {
+        "n": 190,
+        "areaSqm": 653771
+      },
+      "5000-10000": {
+        "n": 55,
+        "areaSqm": 364673
+      },
+      "10000+": {
+        "n": 15,
+        "areaSqm": 201707
+      },
+      "all": {
+        "n": 24403,
+        "areaSqm": 6445008
+      },
+      "ge500": {
+        "n": 2117,
+        "areaSqm": 3071465
+      },
+      "ge1000": {
+        "n": 947,
+        "areaSqm": 2264597,
+        "kWpDcIfAllUsable": 226460
+      },
+      "shareGe1000OfAll": 0.03881,
+      "shareGe1000OfGe500": 0.4473,
+      "areaShareGe1000OfAll": 0.3514,
+      "gzBytes": 2475957,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 31.9522,
+        "w": 35.1563,
+        "n": 32.5468,
+        "e": 35.8594
+      },
+      "bboxOfCentroids": [
+        35.1549,
+        32.389,
+        35.5767,
+        32.548
+      ]
+    },
+    "122130000": {
+      "lt500": {
+        "n": 809,
+        "areaSqm": 67723
+      },
+      "500-1000": {
+        "n": 19,
+        "areaSqm": 13311
+      },
+      "1000-2500": {
+        "n": 18,
+        "areaSqm": 26893
+      },
+      "2500-5000": {
+        "n": 2,
+        "areaSqm": 9643
+      },
+      "5000-10000": {
+        "n": 1,
+        "areaSqm": 7061
+      },
+      "10000+": {
+        "n": 0,
+        "areaSqm": 0
+      },
+      "all": {
+        "n": 849,
+        "areaSqm": 124631
+      },
+      "ge500": {
+        "n": 40,
+        "areaSqm": 56908
+      },
+      "ge1000": {
+        "n": 21,
+        "areaSqm": 43597,
+        "kWpDcIfAllUsable": 4360
+      },
+      "shareGe1000OfAll": 0.02473,
+      "shareGe1000OfGe500": 0.525,
+      "areaShareGe1000OfAll": 0.3498,
+      "gzBytes": 70177,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 31.3536,
+        "w": 33.75,
+        "n": 31.9522,
+        "e": 34.4531
+      },
+      "bboxOfCentroids": [
+        34.3665,
+        31.3561,
+        34.4495,
+        31.4468
+      ]
+    },
+    "122130001": {
+      "lt500": {
+        "n": 249276,
+        "areaSqm": 36229701
+      },
+      "500-1000": {
+        "n": 17301,
+        "areaSqm": 11959654
+      },
+      "1000-2500": {
+        "n": 9176,
+        "areaSqm": 13742894
+      },
+      "2500-5000": {
+        "n": 2404,
+        "areaSqm": 8264275
+      },
+      "5000-10000": {
+        "n": 984,
+        "areaSqm": 6674002
+      },
+      "10000+": {
+        "n": 327,
+        "areaSqm": 4911388
+      },
+      "all": {
+        "n": 279468,
+        "areaSqm": 81781915
+      },
+      "ge500": {
+        "n": 30192,
+        "areaSqm": 45552214
+      },
+      "ge1000": {
+        "n": 12891,
+        "areaSqm": 33592560,
+        "kWpDcIfAllUsable": 3359256
+      },
+      "shareGe1000OfAll": 0.04613,
+      "shareGe1000OfGe500": 0.427,
+      "areaShareGe1000OfAll": 0.4108,
+      "gzBytes": 28984586,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 31.3536,
+        "w": 34.4531,
+        "n": 31.9522,
+        "e": 35.1563
+      },
+      "bboxOfCentroids": [
+        34.4518,
+        31.3548,
+        35.1549,
+        31.9533
+      ]
+    },
+    "122130002": {
+      "lt500": {
+        "n": 12584,
+        "areaSqm": 1560425
+      },
+      "500-1000": {
+        "n": 821,
+        "areaSqm": 582181
+      },
+      "1000-2500": {
+        "n": 967,
+        "areaSqm": 1565600
+      },
+      "2500-5000": {
+        "n": 689,
+        "areaSqm": 2461174
+      },
+      "5000-10000": {
+        "n": 444,
+        "areaSqm": 3030023
+      },
+      "10000+": {
+        "n": 210,
+        "areaSqm": 3514386
+      },
+      "all": {
+        "n": 15715,
+        "areaSqm": 12713790
+      },
+      "ge500": {
+        "n": 3131,
+        "areaSqm": 11153364
+      },
+      "ge1000": {
+        "n": 2310,
+        "areaSqm": 10571183,
+        "kWpDcIfAllUsable": 1057118
+      },
+      "shareGe1000OfAll": 0.14699,
+      "shareGe1000OfGe500": 0.7378,
+      "areaShareGe1000OfAll": 0.8315,
+      "gzBytes": 1767683,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 30.7513,
+        "w": 33.75,
+        "n": 31.3536,
+        "e": 34.4531
+      },
+      "bboxOfCentroids": [
+        34.2681,
+        30.7818,
+        34.4517,
+        31.3545
+      ]
+    },
+    "122130003": {
+      "lt500": {
+        "n": 181236,
+        "areaSqm": 21581809
+      },
+      "500-1000": {
+        "n": 7032,
+        "areaSqm": 4806133
+      },
+      "1000-2500": {
+        "n": 2887,
+        "areaSqm": 4311291
+      },
+      "2500-5000": {
+        "n": 620,
+        "areaSqm": 2101599
+      },
+      "5000-10000": {
+        "n": 213,
+        "areaSqm": 1490397
+      },
+      "10000+": {
+        "n": 71,
+        "areaSqm": 1097095
+      },
+      "all": {
+        "n": 192059,
+        "areaSqm": 35388323
+      },
+      "ge500": {
+        "n": 10823,
+        "areaSqm": 13806514
+      },
+      "ge1000": {
+        "n": 3791,
+        "areaSqm": 9000382,
+        "kWpDcIfAllUsable": 900038
+      },
+      "shareGe1000OfAll": 0.01974,
+      "shareGe1000OfGe500": 0.3503,
+      "areaShareGe1000OfAll": 0.2543,
+      "gzBytes": 18165663,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 30.7513,
+        "w": 34.4531,
+        "n": 31.3536,
+        "e": 35.1563
+      },
+      "bboxOfCentroids": [
+        34.4518,
+        30.7525,
+        35.1549,
+        31.3548
+      ]
+    },
+    "122130010": {
+      "lt500": {
+        "n": 17200,
+        "areaSqm": 3412977
+      },
+      "500-1000": {
+        "n": 2700,
+        "areaSqm": 1840575
+      },
+      "1000-2500": {
+        "n": 1052,
+        "areaSqm": 1527465
+      },
+      "2500-5000": {
+        "n": 201,
+        "areaSqm": 666545
+      },
+      "5000-10000": {
+        "n": 49,
+        "areaSqm": 317263
+      },
+      "10000+": {
+        "n": 8,
+        "areaSqm": 124125
+      },
+      "all": {
+        "n": 21210,
+        "areaSqm": 7888950
+      },
+      "ge500": {
+        "n": 4010,
+        "areaSqm": 4475973
+      },
+      "ge1000": {
+        "n": 1310,
+        "areaSqm": 2635398,
+        "kWpDcIfAllUsable": 263540
+      },
+      "shareGe1000OfAll": 0.06176,
+      "shareGe1000OfGe500": 0.3267,
+      "areaShareGe1000OfAll": 0.3341,
+      "gzBytes": 2512486,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 31.3536,
+        "w": 35.1563,
+        "n": 31.9522,
+        "e": 35.8594
+      },
+      "bboxOfCentroids": [
+        35.1549,
+        31.3549,
+        35.4373,
+        31.8103
+      ]
+    },
+    "122130012": {
+      "lt500": {
+        "n": 16799,
+        "areaSqm": 1817986
+      },
+      "500-1000": {
+        "n": 1248,
+        "areaSqm": 854222
+      },
+      "1000-2500": {
+        "n": 476,
+        "areaSqm": 752272
+      },
+      "2500-5000": {
+        "n": 276,
+        "areaSqm": 1005355
+      },
+      "5000-10000": {
+        "n": 331,
+        "areaSqm": 2620909
+      },
+      "10000+": {
+        "n": 101,
+        "areaSqm": 1459692
+      },
+      "all": {
+        "n": 19231,
+        "areaSqm": 8510437
+      },
+      "ge500": {
+        "n": 2432,
+        "areaSqm": 6692451
+      },
+      "ge1000": {
+        "n": 1184,
+        "areaSqm": 5838228,
+        "kWpDcIfAllUsable": 583823
+      },
+      "shareGe1000OfAll": 0.06157,
+      "shareGe1000OfGe500": 0.4868,
+      "areaShareGe1000OfAll": 0.686,
+      "gzBytes": 1905349,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 30.7513,
+        "w": 35.1563,
+        "n": 31.3536,
+        "e": 35.8594
+      },
+      "bboxOfCentroids": [
+        35.1549,
+        30.7529,
+        35.4547,
+        31.3548
+      ]
+    },
+    "122130021": {
+      "lt500": {
+        "n": 4551,
+        "areaSqm": 402913
+      },
+      "500-1000": {
+        "n": 227,
+        "areaSqm": 158812
+      },
+      "1000-2500": {
+        "n": 92,
+        "areaSqm": 136736
+      },
+      "2500-5000": {
+        "n": 41,
+        "areaSqm": 152595
+      },
+      "5000-10000": {
+        "n": 52,
+        "areaSqm": 376984
+      },
+      "10000+": {
+        "n": 36,
+        "areaSqm": 656487
+      },
+      "all": {
+        "n": 4999,
+        "areaSqm": 1884528
+      },
+      "ge500": {
+        "n": 448,
+        "areaSqm": 1481615
+      },
+      "ge1000": {
+        "n": 221,
+        "areaSqm": 1322803,
+        "kWpDcIfAllUsable": 132280
+      },
+      "shareGe1000OfAll": 0.04421,
+      "shareGe1000OfGe500": 0.4933,
+      "areaShareGe1000OfAll": 0.7019,
+      "gzBytes": 486633,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 30.1451,
+        "w": 34.4531,
+        "n": 30.7513,
+        "e": 35.1563
+      },
+      "bboxOfCentroids": [
+        34.4617,
+        30.1471,
+        35.1549,
+        30.7524
+      ]
+    },
+    "122130023": {
+      "lt500": {
+        "n": 11687,
+        "areaSqm": 1502587
+      },
+      "500-1000": {
+        "n": 1138,
+        "areaSqm": 797555
+      },
+      "1000-2500": {
+        "n": 551,
+        "areaSqm": 801408
+      },
+      "2500-5000": {
+        "n": 103,
+        "areaSqm": 341332
+      },
+      "5000-10000": {
+        "n": 39,
+        "areaSqm": 276658
+      },
+      "10000+": {
+        "n": 22,
+        "areaSqm": 291868
+      },
+      "all": {
+        "n": 13540,
+        "areaSqm": 4011408
+      },
+      "ge500": {
+        "n": 1853,
+        "areaSqm": 2508821
+      },
+      "ge1000": {
+        "n": 715,
+        "areaSqm": 1711266,
+        "kWpDcIfAllUsable": 171127
+      },
+      "shareGe1000OfAll": 0.05281,
+      "shareGe1000OfGe500": 0.3859,
+      "areaShareGe1000OfAll": 0.4266,
+      "gzBytes": 1461292,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 29.5352,
+        "w": 34.4531,
+        "n": 30.1451,
+        "e": 35.1563
+      },
+      "bboxOfCentroids": [
+        34.7083,
+        29.5365,
+        35.1544,
+        30.1448
+      ]
+    },
+    "122130030": {
+      "lt500": {
+        "n": 4778,
+        "areaSqm": 578719
+      },
+      "500-1000": {
+        "n": 474,
+        "areaSqm": 338071
+      },
+      "1000-2500": {
+        "n": 261,
+        "areaSqm": 398754
+      },
+      "2500-5000": {
+        "n": 169,
+        "areaSqm": 645153
+      },
+      "5000-10000": {
+        "n": 375,
+        "areaSqm": 3088052
+      },
+      "10000+": {
+        "n": 203,
+        "areaSqm": 3131378
+      },
+      "all": {
+        "n": 6260,
+        "areaSqm": 8180128
+      },
+      "ge500": {
+        "n": 1482,
+        "areaSqm": 7601409
+      },
+      "ge1000": {
+        "n": 1008,
+        "areaSqm": 7263337,
+        "kWpDcIfAllUsable": 726334
+      },
+      "shareGe1000OfAll": 0.16102,
+      "shareGe1000OfGe500": 0.6802,
+      "areaShareGe1000OfAll": 0.8879,
+      "gzBytes": 690468,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 30.1451,
+        "w": 35.1563,
+        "n": 30.7513,
+        "e": 35.8594
+      },
+      "bboxOfCentroids": [
+        35.1549,
+        30.3435,
+        35.2893,
+        30.7524
+      ]
+    },
+    "122130201": {
+      "lt500": {
+        "n": 492,
+        "areaSqm": 46567
+      },
+      "500-1000": {
+        "n": 36,
+        "areaSqm": 26143
+      },
+      "1000-2500": {
+        "n": 18,
+        "areaSqm": 23396
+      },
+      "2500-5000": {
+        "n": 8,
+        "areaSqm": 26344
+      },
+      "5000-10000": {
+        "n": 9,
+        "areaSqm": 57729
+      },
+      "10000+": {
+        "n": 1,
+        "areaSqm": 11597
+      },
+      "all": {
+        "n": 564,
+        "areaSqm": 191775
+      },
+      "ge500": {
+        "n": 72,
+        "areaSqm": 145208
+      },
+      "ge1000": {
+        "n": 36,
+        "areaSqm": 119065,
+        "kWpDcIfAllUsable": 11907
+      },
+      "shareGe1000OfAll": 0.06383,
+      "shareGe1000OfGe500": 0.5,
+      "areaShareGe1000OfAll": 0.6209,
+      "gzBytes": 58081,
+      "uploadDate": "2026-02-23",
+      "tileBounds": {
+        "s": 28.9216,
+        "w": 34.4531,
+        "n": 29.5352,
+        "e": 35.1563
+      },
+      "bboxOfCentroids": [
+        34.8859,
+        29.4908,
+        34.9439,
+        29.5362
+      ]
+    }
+  },
+  "latitudeBands": {
+    "north_gt32_5": {
+      "lt500": {
+        "n": 466927,
+        "areaSqm": 70930163
+      },
+      "500-1000": {
+        "n": 22902,
+        "areaSqm": 15438362
+      },
+      "1000-2500": {
+        "n": 9135,
+        "areaSqm": 13579883
+      },
+      "2500-5000": {
+        "n": 2065,
+        "areaSqm": 7027393
+      },
+      "5000-10000": {
+        "n": 691,
+        "areaSqm": 4608824
+      },
+      "10000+": {
+        "n": 187,
+        "areaSqm": 2730518
+      },
+      "all": {
+        "n": 501907,
+        "areaSqm": 114315143
+      },
+      "ge500": {
+        "n": 34980,
+        "areaSqm": 43384979
+      },
+      "ge1000": {
+        "n": 12078,
+        "areaSqm": 27946618,
+        "kWpDcIfAllUsable": 2794662
+      },
+      "shareGe1000OfAll": 0.02406,
+      "shareGe1000OfGe500": 0.3453,
+      "areaShareGe1000OfAll": 0.2445
+    },
+    "center_31_7to32_5": {
+      "lt500": {
+        "n": 501221,
+        "areaSqm": 82046718
+      },
+      "500-1000": {
+        "n": 43650,
+        "areaSqm": 30066220
+      },
+      "1000-2500": {
+        "n": 20543,
+        "areaSqm": 30406741
+      },
+      "2500-5000": {
+        "n": 4375,
+        "areaSqm": 14784785
+      },
+      "5000-10000": {
+        "n": 1398,
+        "areaSqm": 9527464
+      },
+      "10000+": {
+        "n": 343,
+        "areaSqm": 4987265
+      },
+      "all": {
+        "n": 571530,
+        "areaSqm": 171819193
+      },
+      "ge500": {
+        "n": 70309,
+        "areaSqm": 89772475
+      },
+      "ge1000": {
+        "n": 26659,
+        "areaSqm": 59706255,
+        "kWpDcIfAllUsable": 5970625
+      },
+      "shareGe1000OfAll": 0.04664,
+      "shareGe1000OfGe500": 0.3792,
+      "areaShareGe1000OfAll": 0.3475
+    },
+    "south_lt31_7": {
+      "lt500": {
+        "n": 336874,
+        "areaSqm": 41713018
+      },
+      "500-1000": {
+        "n": 17293,
+        "areaSqm": 11940470
+      },
+      "1000-2500": {
+        "n": 8834,
+        "areaSqm": 13414932
+      },
+      "2500-5000": {
+        "n": 2975,
+        "areaSqm": 10453722
+      },
+      "5000-10000": {
+        "n": 1973,
+        "areaSqm": 14394486
+      },
+      "10000+": {
+        "n": 831,
+        "areaSqm": 13044670
+      },
+      "all": {
+        "n": 368780,
+        "areaSqm": 104961298
+      },
+      "ge500": {
+        "n": 31906,
+        "areaSqm": 63248279
+      },
+      "ge1000": {
+        "n": 14613,
+        "areaSqm": 51307810,
+        "kWpDcIfAllUsable": 5130781
+      },
+      "shareGe1000OfAll": 0.03963,
+      "shareGe1000OfGe500": 0.458,
+      "areaShareGe1000OfAll": 0.4888
+    }
+  },
+  "ge1000ByHalfDegreeLatitude": {
+    "33.0": {
+      "n": 1385,
+      "areaSqm": 2973596
+    },
+    "32.5": {
+      "n": 10693,
+      "areaSqm": 24973021
+    },
+    "32.0": {
+      "n": 16324,
+      "areaSqm": 35810707
+    },
+    "31.5": {
+      "n": 13924,
+      "areaSqm": 33207977
+    },
+    "31.0": {
+      "n": 7558,
+      "areaSqm": 24593992
+    },
+    "30.5": {
+      "n": 2308,
+      "areaSqm": 12417018
+    },
+    "30.0": {
+      "n": 492,
+      "areaSqm": 3430644
+    },
+    "29.5": {
+      "n": 665,
+      "areaSqm": 1552426
+    },
+    "29.0": {
+      "n": 1,
+      "areaSqm": 1300
+    }
+  },
+  "greenLineCheck": {
+    "note": "Approximate hand-drawn outlines (±1–2 km); footprints near the line can be misassigned. Use with the probes.",
+    "interpretation": "Probe boxes beyond the Green Line (East Jerusalem neighbourhoods, WB settlements and their industrial zones, WB Palestinian cities, Golan, Gaza) are empty except the Old City/Sheikh Jarrah box, whose few footprints are the Mount Scopus enclave edge (easternmost centroid ≈35.243E) — the pre-1967 Israeli enclave on Mount Scopus IS populated, while all controls are populated too; the index lists WestBank, GazaStrip, GolanHeights and GolanHeightsSubdistrict as separate Locations. The non-zero byApproxRegion westBank/golan/gaza counts are Israeli towns along the line (Modiin, Rosh HaAyin/Kafr Qasim, Taibe/Tira, Umm al-Fahm/Wadi Ara, Gilboa, Jerusalem corridor, Hula/Dan, Nahal Oz/Eshkol) caught by the coarse outline — see outlineHitsTopCells. Conclusion: Location \"Israel\" = the 1949 armistice lines (incl. the Mount Scopus enclave), excluding East Jerusalem, the West Bank, the Golan Heights and Gaza.",
+    "byApproxRegion": {
+      "israelProper": {
+        "lt500": {
+          "n": 1260317,
+          "areaSqm": 187231257
+        },
+        "500-1000": {
+          "n": 80431,
+          "areaSqm": 55113205
+        },
+        "1000-2500": {
+          "n": 36782,
+          "areaSqm": 54839811
+        },
+        "2500-5000": {
+          "n": 9088,
+          "areaSqm": 31176605
+        },
+        "5000-10000": {
+          "n": 3984,
+          "areaSqm": 28021778
+        },
+        "10000+": {
+          "n": 1348,
+          "areaSqm": 20568469
+        },
+        "all": {
+          "n": 1391950,
+          "areaSqm": 376951125
+        },
+        "ge500": {
+          "n": 131633,
+          "areaSqm": 189719868
+        },
+        "ge1000": {
+          "n": 51202,
+          "areaSqm": 134606663,
+          "kWpDcIfAllUsable": 13460666
+        },
+        "shareGe1000OfAll": 0.03678,
+        "shareGe1000OfGe500": 0.389,
+        "areaShareGe1000OfAll": 0.3571
+      },
+      "westBank": {
+        "lt500": {
+          "n": 40810,
+          "areaSqm": 6967739
+        },
+        "500-1000": {
+          "n": 3305,
+          "areaSqm": 2256885
+        },
+        "1000-2500": {
+          "n": 1588,
+          "areaSqm": 2320614
+        },
+        "2500-5000": {
+          "n": 245,
+          "areaSqm": 804784
+        },
+        "5000-10000": {
+          "n": 58,
+          "areaSqm": 376571
+        },
+        "10000+": {
+          "n": 7,
+          "areaSqm": 100012
+        },
+        "all": {
+          "n": 46013,
+          "areaSqm": 12826604
+        },
+        "ge500": {
+          "n": 5203,
+          "areaSqm": 5858865
+        },
+        "ge1000": {
+          "n": 1898,
+          "areaSqm": 3601981,
+          "kWpDcIfAllUsable": 360198
+        },
+        "shareGe1000OfAll": 0.04125,
+        "shareGe1000OfGe500": 0.3648,
+        "areaShareGe1000OfAll": 0.2808
+      },
+      "golan": {
+        "lt500": {
+          "n": 1803,
+          "areaSqm": 249588
+        },
+        "500-1000": {
+          "n": 36,
+          "areaSqm": 23405
+        },
+        "1000-2500": {
+          "n": 34,
+          "areaSqm": 54909
+        },
+        "2500-5000": {
+          "n": 6,
+          "areaSqm": 25319
+        },
+        "5000-10000": {
+          "n": 2,
+          "areaSqm": 16109
+        },
+        "10000+": {
+          "n": 0,
+          "areaSqm": 0
+        },
+        "all": {
+          "n": 1881,
+          "areaSqm": 369329
+        },
+        "ge500": {
+          "n": 78,
+          "areaSqm": 119742
+        },
+        "ge1000": {
+          "n": 42,
+          "areaSqm": 96337,
+          "kWpDcIfAllUsable": 9634
+        },
+        "shareGe1000OfAll": 0.02233,
+        "shareGe1000OfGe500": 0.5385,
+        "areaShareGe1000OfAll": 0.2608
+      },
+      "gaza": {
+        "lt500": {
+          "n": 2092,
+          "areaSqm": 241316
+        },
+        "500-1000": {
+          "n": 73,
+          "areaSqm": 51558
+        },
+        "1000-2500": {
+          "n": 108,
+          "areaSqm": 186223
+        },
+        "2500-5000": {
+          "n": 76,
+          "areaSqm": 259191
+        },
+        "5000-10000": {
+          "n": 18,
+          "areaSqm": 116316
+        },
+        "10000+": {
+          "n": 6,
+          "areaSqm": 93971
+        },
+        "all": {
+          "n": 2373,
+          "areaSqm": 948575
+        },
+        "ge500": {
+          "n": 281,
+          "areaSqm": 707259
+        },
+        "ge1000": {
+          "n": 208,
+          "areaSqm": 655701,
+          "kWpDcIfAllUsable": 65570
+        },
+        "shareGe1000OfAll": 0.08765,
+        "shareGe1000OfGe500": 0.7402,
+        "areaShareGe1000OfAll": 0.6912
+      }
+    },
+    "westBankDeepInside3km": {
+      "lt500": {
+        "n": 5589,
+        "areaSqm": 1086522
+      },
+      "500-1000": {
+        "n": 464,
+        "areaSqm": 312424
+      },
+      "1000-2500": {
+        "n": 201,
+        "areaSqm": 289620
+      },
+      "2500-5000": {
+        "n": 31,
+        "areaSqm": 100099
+      },
+      "5000-10000": {
+        "n": 7,
+        "areaSqm": 52189
+      },
+      "10000+": {
+        "n": 1,
+        "areaSqm": 11430
+      },
+      "all": {
+        "n": 6293,
+        "areaSqm": 1852283
+      },
+      "ge500": {
+        "n": 704,
+        "areaSqm": 765761
+      },
+      "ge1000": {
+        "n": 240,
+        "areaSqm": 453338,
+        "kWpDcIfAllUsable": 45334
+      },
+      "shareGe1000OfAll": 0.03814,
+      "shareGe1000OfGe500": 0.3409,
+      "areaShareGe1000OfAll": 0.2447
+    },
+    "outlineHitsTopCells": {
+      "westBank 32.10N 34.95E": 5546,
+      "westBank 32.50N 35.15E": 5382,
+      "westBank 32.25N 35.00E": 4281,
+      "westBank 31.85N 35.00E": 4112,
+      "westBank 31.90N 35.00E": 2750,
+      "westBank 32.05N 34.95E": 2642,
+      "westBank 32.50N 35.25E": 2577,
+      "westBank 32.50N 35.30E": 2170,
+      "westBank 31.75N 35.20E": 2068,
+      "westBank 32.20N 34.95E": 1983,
+      "westBank 32.50N 35.10E": 1584,
+      "westBank 32.35N 35.00E": 1219,
+      "westBank 32.20N 35.00E": 1133,
+      "gaza 31.55N 34.50E": 1056,
+      "westBank 31.85N 34.95E": 1025,
+      "westBank 32.45N 35.10E": 1010,
+      "westBank 32.40N 35.45E": 842,
+      "westBank 31.90N 34.95E": 787,
+      "golan 33.15N 35.65E": 687,
+      "golan 33.10N 35.60E": 644
+    },
+    "beyondLineProbes": {
+      "total": 21,
+      "withZeroFootprints": 20
+    },
+    "probes": [
+      {
+        "name": "Tel Aviv (control)",
+        "lat": 32.08,
+        "lng": 34.78,
+        "kind": "israel",
+        "footprints": 2288,
+        "ge1000": 150,
+        "easternmostCentroidLng": 34.788
+      },
+      {
+        "name": "Haifa Bay industry (control)",
+        "lat": 32.8,
+        "lng": 35.05,
+        "kind": "israel",
+        "footprints": 643,
+        "ge1000": 59,
+        "easternmostCentroidLng": 35.058
+      },
+      {
+        "name": "Beer Sheva (control)",
+        "lat": 31.25,
+        "lng": 34.79,
+        "kind": "israel",
+        "footprints": 2276,
+        "ge1000": 77,
+        "easternmostCentroidLng": 34.7979
+      },
+      {
+        "name": "Eilat (control)",
+        "lat": 29.56,
+        "lng": 34.95,
+        "kind": "israel",
+        "footprints": 1986,
+        "ge1000": 116,
+        "easternmostCentroidLng": 34.958
+      },
+      {
+        "name": "Kiryat Shmona (control)",
+        "lat": 33.21,
+        "lng": 35.57,
+        "kind": "israel",
+        "footprints": 1858,
+        "ge1000": 40,
+        "easternmostCentroidLng": 35.578
+      },
+      {
+        "name": "West Jerusalem centre (control)",
+        "lat": 31.785,
+        "lng": 35.205,
+        "kind": "israel",
+        "footprints": 1344,
+        "ge1000": 151,
+        "easternmostCentroidLng": 35.213
+      },
+      {
+        "name": "Mount Scopus (pre-1967 Israeli enclave)",
+        "lat": 31.795,
+        "lng": 35.245,
+        "kind": "enclave1949",
+        "footprints": 565,
+        "ge1000": 25,
+        "easternmostCentroidLng": 35.2508
+      },
+      {
+        "name": "East Jerusalem — Old City/Sheikh Jarrah",
+        "lat": 31.785,
+        "lng": 35.235,
+        "kind": "eastJerusalem",
+        "footprints": 19,
+        "ge1000": 2,
+        "easternmostCentroidLng": 35.2429
+      },
+      {
+        "name": "East Jerusalem — Silwan/Ras al-Amud",
+        "lat": 31.768,
+        "lng": 35.24,
+        "kind": "eastJerusalem",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "East Jerusalem — Beit Hanina",
+        "lat": 31.83,
+        "lng": 35.222,
+        "kind": "eastJerusalem",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "East Jerusalem — Pisgat Zeev",
+        "lat": 31.83,
+        "lng": 35.245,
+        "kind": "eastJerusalem",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "East Jerusalem — Atarot industrial zone",
+        "lat": 31.857,
+        "lng": 35.215,
+        "kind": "eastJerusalem",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "East Jerusalem — Gilo",
+        "lat": 31.735,
+        "lng": 35.19,
+        "kind": "eastJerusalem",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "WB settlement — Ariel",
+        "lat": 32.105,
+        "lng": 35.175,
+        "kind": "westBank",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "WB settlement — Barkan industrial zone",
+        "lat": 32.11,
+        "lng": 35.105,
+        "kind": "westBank",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "WB settlement — Maale Adumim",
+        "lat": 31.775,
+        "lng": 35.3,
+        "kind": "westBank",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "WB settlement — Mishor Adumim industrial zone",
+        "lat": 31.792,
+        "lng": 35.335,
+        "kind": "westBank",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "WB settlement — Modiin Illit",
+        "lat": 31.93,
+        "lng": 35.04,
+        "kind": "westBank",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "WB settlement — Beitar Illit",
+        "lat": 31.7,
+        "lng": 35.118,
+        "kind": "westBank",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "WB settlement — Kiryat Arba",
+        "lat": 31.53,
+        "lng": 35.12,
+        "kind": "westBank",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "WB Palestinian city — Ramallah",
+        "lat": 31.903,
+        "lng": 35.205,
+        "kind": "westBank",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "WB Palestinian city — Nablus",
+        "lat": 32.222,
+        "lng": 35.255,
+        "kind": "westBank",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "WB Palestinian city — Hebron",
+        "lat": 31.532,
+        "lng": 35.095,
+        "kind": "westBank",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "WB Palestinian city — Jenin",
+        "lat": 32.46,
+        "lng": 35.3,
+        "kind": "westBank",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "Golan — Katzrin",
+        "lat": 32.99,
+        "lng": 35.69,
+        "kind": "golan",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "Golan — Majdal Shams",
+        "lat": 33.27,
+        "lng": 35.77,
+        "kind": "golan",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "Gaza — Gaza City",
+        "lat": 31.515,
+        "lng": 34.455,
+        "kind": "gaza",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      },
+      {
+        "name": "Gaza — Khan Yunis",
+        "lat": 31.345,
+        "lng": 34.305,
+        "kind": "gaza",
+        "footprints": 0,
+        "ge1000": 0,
+        "easternmostCentroidLng": null
+      }
+    ]
+  },
+  "largestGe1000": [
+    {
+      "areaSqm": 105778,
+      "lat": 31.24552,
+      "lng": 34.44326,
+      "qk": "122130002"
+    },
+    {
+      "areaSqm": 57106,
+      "lat": 30.89174,
+      "lng": 34.4024,
+      "qk": "122130002"
+    },
+    {
+      "areaSqm": 55558,
+      "lat": 31.26223,
+      "lng": 34.46572,
+      "qk": "122130003"
+    },
+    {
+      "areaSqm": 53838,
+      "lat": 31.26285,
+      "lng": 34.40949,
+      "qk": "122130002"
+    },
+    {
+      "areaSqm": 53652,
+      "lat": 31.71001,
+      "lng": 34.83012,
+      "qk": "122130001"
+    },
+    {
+      "areaSqm": 52843,
+      "lat": 30.89196,
+      "lng": 34.39497,
+      "qk": "122130002"
+    },
+    {
+      "areaSqm": 50312,
+      "lat": 31.21457,
+      "lng": 34.44106,
+      "qk": "122130002"
+    },
+    {
+      "areaSqm": 48250,
+      "lat": 30.36994,
+      "lng": 35.12925,
+      "qk": "122130021"
+    },
+    {
+      "areaSqm": 47802,
+      "lat": 31.26551,
+      "lng": 34.41876,
+      "qk": "122130002"
+    },
+    {
+      "areaSqm": 47698,
+      "lat": 31.22642,
+      "lng": 34.38893,
+      "qk": "122130002"
+    },
+    {
+      "areaSqm": 46319,
+      "lat": 31.41318,
+      "lng": 34.59957,
+      "qk": "122130001"
+    },
+    {
+      "areaSqm": 44607,
+      "lat": 32.47226,
+      "lng": 34.94492,
+      "qk": "122112223"
+    },
+    {
+      "areaSqm": 43728,
+      "lat": 30.6652,
+      "lng": 35.25407,
+      "qk": "122130030"
+    },
+    {
+      "areaSqm": 41395,
+      "lat": 30.3784,
+      "lng": 35.1591,
+      "qk": "122130030"
+    },
+    {
+      "areaSqm": 41213,
+      "lat": 30.37278,
+      "lng": 35.13936,
+      "qk": "122130021"
+    },
+    {
+      "areaSqm": 40060,
+      "lat": 31.57897,
+      "lng": 34.76103,
+      "qk": "122130001"
+    },
+    {
+      "areaSqm": 39605,
+      "lat": 31.37348,
+      "lng": 34.78478,
+      "qk": "122130001"
+    },
+    {
+      "areaSqm": 39493,
+      "lat": 31.26464,
+      "lng": 34.41715,
+      "qk": "122130002"
+    },
+    {
+      "areaSqm": 39382,
+      "lat": 31.96594,
+      "lng": 34.89578,
+      "qk": "122112223"
+    },
+    {
+      "areaSqm": 38894,
+      "lat": 30.54457,
+      "lng": 35.19276,
+      "qk": "122130030"
+    },
+    {
+      "areaSqm": 38808,
+      "lat": 30.54653,
+      "lng": 35.193,
+      "qk": "122130030"
+    },
+    {
+      "areaSqm": 38354,
+      "lat": 31.23629,
+      "lng": 34.44256,
+      "qk": "122130002"
+    },
+    {
+      "areaSqm": 37280,
+      "lat": 31.63107,
+      "lng": 34.55231,
+      "qk": "122130001"
+    },
+    {
+      "areaSqm": 36907,
+      "lat": 30.54862,
+      "lng": 35.19114,
+      "qk": "122130030"
+    },
+    {
+      "areaSqm": 36792,
+      "lat": 32.89707,
+      "lng": 35.16222,
+      "qk": "122112230"
+    },
+    {
+      "areaSqm": 35864,
+      "lat": 31.25346,
+      "lng": 34.42223,
+      "qk": "122130002"
+    },
+    {
+      "areaSqm": 35515,
+      "lat": 31.22561,
+      "lng": 34.44541,
+      "qk": "122130002"
+    },
+    {
+      "areaSqm": 34709,
+      "lat": 32.33011,
+      "lng": 34.99496,
+      "qk": "122112223"
+    },
+    {
+      "areaSqm": 33706,
+      "lat": 31.71794,
+      "lng": 34.65234,
+      "qk": "122130001"
+    },
+    {
+      "areaSqm": 33494,
+      "lat": 30.89133,
+      "lng": 34.40913,
+      "qk": "122130002"
+    }
+  ],
+  "pilotCalibration": {
+    "bbox": {
+      "s": 32.3,
+      "w": 34.85,
+      "n": 32.42,
+      "e": 35
+    },
+    "msByClassMeasuredNow": {
+      "lt500": {
+        "n": 38689,
+        "areaSqm": 5659156
+      },
+      "500-1000": {
+        "n": 2141,
+        "areaSqm": 1460943
+      },
+      "1000-2500": {
+        "n": 1428,
+        "areaSqm": 2162585
+      },
+      "2500-5000": {
+        "n": 505,
+        "areaSqm": 1772146
+      },
+      "5000-10000": {
+        "n": 288,
+        "areaSqm": 2118322
+      },
+      "10000+": {
+        "n": 73,
+        "areaSqm": 1019903
+      },
+      "all": {
+        "n": 43124,
+        "areaSqm": 14193056
+      },
+      "ge500": {
+        "n": 4435,
+        "areaSqm": 8533900
+      },
+      "ge1000": {
+        "n": 2294,
+        "areaSqm": 7072956,
+        "kWpDcIfAllUsable": 707296
+      },
+      "shareGe1000OfAll": 0.0532,
+      "shareGe1000OfGe500": 0.5172,
+      "areaShareGe1000OfAll": 0.4983
+    },
+    "msGe1000MeasuredNow": 2294,
+    "msGe1000PilotAudit": 2293,
+    "pilotFunnel": {
+      "rawLargeRoofs": 2482,
+      "candidates": 992,
+      "tierA": 238,
+      "tierB": 231,
+      "tierC": 523
+    },
+    "flatRatiosPerMsGe1000": {
+      "rawLargeRoofs": 1.082,
+      "candidates": 0.4324,
+      "A": 0.1037,
+      "B": 0.1007,
+      "C": 0.228
+    },
+    "pilotTiersBySizeClass": {
+      "1000-2500": {
+        "A": 152,
+        "B": 166,
+        "C": 265
+      },
+      "2500-5000": {
+        "A": 59,
+        "B": 52,
+        "C": 147
+      },
+      "5000-10000": {
+        "A": 21,
+        "B": 7,
+        "C": 77
+      },
+      "10000+": {
+        "A": 6,
+        "B": 6,
+        "C": 34
+      }
+    },
+    "sizeClassRatios": {
+      "1000-2500": {
+        "pilotMs": 1428,
+        "A": 0.1064,
+        "B": 0.1162,
+        "C": 0.1856
+      },
+      "2500-5000": {
+        "pilotMs": 505,
+        "A": 0.1168,
+        "B": 0.103,
+        "C": 0.2911
+      },
+      "5000-10000": {
+        "pilotMs": 288,
+        "A": 0.0729,
+        "B": 0.0243,
+        "C": 0.2674
+      },
+      "10000+": {
+        "pilotMs": 73,
+        "A": 0.0822,
+        "B": 0.0822,
+        "C": 0.4658
+      }
+    },
+    "meanCandidateAreaSqmByTier": {
+      "A": 2693,
+      "B": 2393,
+      "C": 3818
+    },
+    "tierAReview": {
+      "n": 12,
+      "bare": 5,
+      "partial": 1,
+      "fullPv": 2,
+      "wrongOutline": 3,
+      "unclear": 1,
+      "wilson95": {
+        "bare": {
+          "p": 0.417,
+          "low": 0.193,
+          "high": 0.68
+        },
+        "barePlusPartial": {
+          "p": 0.5,
+          "low": 0.254,
+          "high": 0.746
+        }
+      }
+    }
+  },
+  "nationalScaling": {
+    "msGe1000National": 53350,
+    "flat": {
+      "A": 5535,
+      "B": 5372,
+      "C": 12163,
+      "raw": 57722,
+      "excluded": 34652
+    },
+    "sizeStratified": {
+      "A": 5607,
+      "B": 5657,
+      "C": 11607,
+      "raw": 57722,
+      "excluded": 34851
+    },
+    "transferUncertainty": {
+      "low": 0.5,
+      "high": 1.5,
+      "note": "judgement: pilot is one 188 km² area; national land-use mix and OSM coverage differ"
+    },
+    "precision": {
+      "A": {
+        "measured": true,
+        "central": 0.5,
+        "low": 0.254,
+        "high": 0.746,
+        "bareOnly": 0.4166666666666667
+      },
+      "B": {
+        "measured": false,
+        "central": 0.2,
+        "low": 0.1,
+        "high": 0.3
+      },
+      "C": {
+        "measured": false,
+        "central": 0.05,
+        "low": 0.02,
+        "high": 0.1
+      },
+      "excluded": {
+        "measured": false,
+        "central": 0.02,
+        "low": 0,
+        "high": 0.05
+      }
+    },
+    "assumptions": {
+      "SECONDS_PER_ROOF": [
+        5,
+        10,
+        20
+      ],
+      "PRODUCTIVE_HOURS_PER_DAY": 6,
+      "USABLE_RATIO": 0.65,
+      "SQM_PER_KWP": 6.5,
+      "TILES_PER_ROOF": {
+        "oneView": 24,
+        "twoViews": 48
+      },
+      "OUTLINE_FIX": {
+        "share": 0.25,
+        "seconds": [
+          60,
+          120
+        ]
+      },
+      "ARCGIS": {
+        "freeTiles": 2000000,
+        "usdPer1000": 0.15,
+        "source": "https://location.arcgis.com/pricing/",
+        "seen": "2026-10-19"
+      }
+    },
+    "scaledByLatitudeBand": {
+      "north_gt32_5": {
+        "msGe1000": 12078,
+        "tierA": 1253,
+        "tierAB": 2469,
+        "tierABC": 5223
+      },
+      "center_31_7to32_5": {
+        "msGe1000": 26659,
+        "tierA": 2766,
+        "tierAB": 5450,
+        "tierABC": 11528
+      },
+      "south_lt31_7": {
+        "msGe1000": 14613,
+        "tierA": 1516,
+        "tierAB": 2988,
+        "tierABC": 6319
+      }
+    }
+  },
+  "scenarios": [
+    {
+      "id": "A",
+      "label": "Tier A only (both sources agree + industrial/commercial/farmyard zone or non-residential tag)",
+      "tiers": [
+        "A"
+      ],
+      "roofsToReview": {
+        "central": 5535,
+        "sizeStratified": 5607,
+        "low": 2768,
+        "high": 8303
+      },
+      "reviewHours": {
+        "5s": {
+          "singlePassHours": 7.7,
+          "singlePassPersonDays": 1.3,
+          "doubleReviewHours": 15.4,
+          "rangeSinglePassHours": [
+            3.8,
+            11.5
+          ]
+        },
+        "10s": {
+          "singlePassHours": 15.4,
+          "singlePassPersonDays": 2.6,
+          "doubleReviewHours": 30.8,
+          "rangeSinglePassHours": [
+            7.7,
+            23.1
+          ]
+        },
+        "20s": {
+          "singlePassHours": 30.8,
+          "singlePassPersonDays": 5.1,
+          "doubleReviewHours": 61.5,
+          "rangeSinglePassHours": [
+            15.4,
+            46.1
+          ]
+        }
+      },
+      "outlineFixHoursIfCorrectedNotRejected": {
+        "share": 0.25,
+        "60s": 23.1,
+        "120s": 46.1
+      },
+      "publishableOpportunities": {
+        "central": 2768,
+        "low": 703,
+        "high": 6194,
+        "bareRoofOnlyCentral": 2306
+      },
+      "publishablePerReviewHourAt10s": 180,
+      "publishableCapacityMWpDcCentral": 745,
+      "imageryTileLoads": {
+        "oneViewOnePass": 132840,
+        "twoViewsOnePass": 265680,
+        "twoViewsTwoReviewers": 531360
+      },
+      "imageryCostIllustrationArcgisUsd": {
+        "note": "one-off review load if billed as ArcGIS basemap tiles in a single period; licence fit for QA is UNCERTAIN (see notes)",
+        "oneViewOnePass": 0,
+        "twoViewsOnePass": 0,
+        "twoViewsTwoReviewers": 0,
+        "twoViewsTwoReviewersNoFreeTier": 80
+      }
+    },
+    {
+      "id": "AB",
+      "label": "Tier A + B",
+      "tiers": [
+        "A",
+        "B"
+      ],
+      "roofsToReview": {
+        "central": 10907,
+        "sizeStratified": 11264,
+        "low": 5454,
+        "high": 16361
+      },
+      "reviewHours": {
+        "5s": {
+          "singlePassHours": 15.1,
+          "singlePassPersonDays": 2.5,
+          "doubleReviewHours": 30.3,
+          "rangeSinglePassHours": [
+            7.6,
+            22.7
+          ]
+        },
+        "10s": {
+          "singlePassHours": 30.3,
+          "singlePassPersonDays": 5,
+          "doubleReviewHours": 60.6,
+          "rangeSinglePassHours": [
+            15.2,
+            45.4
+          ]
+        },
+        "20s": {
+          "singlePassHours": 60.6,
+          "singlePassPersonDays": 10.1,
+          "doubleReviewHours": 121.2,
+          "rangeSinglePassHours": [
+            30.3,
+            90.9
+          ]
+        }
+      },
+      "outlineFixHoursIfCorrectedNotRejected": {
+        "share": 0.25,
+        "60s": 45.4,
+        "120s": 90.9
+      },
+      "publishableOpportunities": {
+        "central": 3842,
+        "low": 972,
+        "high": 8611,
+        "bareRoofOnlyCentral": 3381
+      },
+      "publishablePerReviewHourAt10s": 126.8,
+      "publishableCapacityMWpDcCentral": 1002,
+      "imageryTileLoads": {
+        "oneViewOnePass": 261768,
+        "twoViewsOnePass": 523536,
+        "twoViewsTwoReviewers": 1047072
+      },
+      "imageryCostIllustrationArcgisUsd": {
+        "note": "one-off review load if billed as ArcGIS basemap tiles in a single period; licence fit for QA is UNCERTAIN (see notes)",
+        "oneViewOnePass": 0,
+        "twoViewsOnePass": 0,
+        "twoViewsTwoReviewers": 0,
+        "twoViewsTwoReviewersNoFreeTier": 157
+      }
+    },
+    {
+      "id": "ABC",
+      "label": "All land-use-filtered candidates (A + B + C)",
+      "tiers": [
+        "A",
+        "B",
+        "C"
+      ],
+      "roofsToReview": {
+        "central": 23070,
+        "sizeStratified": 22872,
+        "low": 11535,
+        "high": 34605
+      },
+      "reviewHours": {
+        "5s": {
+          "singlePassHours": 32,
+          "singlePassPersonDays": 5.3,
+          "doubleReviewHours": 64.1,
+          "rangeSinglePassHours": [
+            16,
+            48.1
+          ]
+        },
+        "10s": {
+          "singlePassHours": 64.1,
+          "singlePassPersonDays": 10.7,
+          "doubleReviewHours": 128.2,
+          "rangeSinglePassHours": [
+            32,
+            96.1
+          ]
+        },
+        "20s": {
+          "singlePassHours": 128.2,
+          "singlePassPersonDays": 21.4,
+          "doubleReviewHours": 256.3,
+          "rangeSinglePassHours": [
+            64.1,
+            192.3
+          ]
+        }
+      },
+      "outlineFixHoursIfCorrectedNotRejected": {
+        "share": 0.25,
+        "60s": 96.1,
+        "120s": 192.3
+      },
+      "publishableOpportunities": {
+        "central": 4450,
+        "low": 1093,
+        "high": 10436,
+        "bareRoofOnlyCentral": 3989
+      },
+      "publishablePerReviewHourAt10s": 69.4,
+      "publishableCapacityMWpDcCentral": 1235,
+      "imageryTileLoads": {
+        "oneViewOnePass": 553680,
+        "twoViewsOnePass": 1107360,
+        "twoViewsTwoReviewers": 2214720
+      },
+      "imageryCostIllustrationArcgisUsd": {
+        "note": "one-off review load if billed as ArcGIS basemap tiles in a single period; licence fit for QA is UNCERTAIN (see notes)",
+        "oneViewOnePass": 0,
+        "twoViewsOnePass": 0,
+        "twoViewsTwoReviewers": 32,
+        "twoViewsTwoReviewersNoFreeTier": 332
+      }
+    },
+    {
+      "id": "unfiltered",
+      "label": "Every roof ≥1000 m² (OSM ∪ MS), no land-use filter — upper bound",
+      "tiers": [
+        "A",
+        "B",
+        "C",
+        "excluded"
+      ],
+      "roofsToReview": {
+        "central": 57722,
+        "sizeStratified": 57722,
+        "low": 28861,
+        "high": 86583
+      },
+      "reviewHours": {
+        "5s": {
+          "singlePassHours": 80.2,
+          "singlePassPersonDays": 13.4,
+          "doubleReviewHours": 160.3,
+          "rangeSinglePassHours": [
+            40.1,
+            120.3
+          ]
+        },
+        "10s": {
+          "singlePassHours": 160.3,
+          "singlePassPersonDays": 26.7,
+          "doubleReviewHours": 320.7,
+          "rangeSinglePassHours": [
+            80.2,
+            240.5
+          ]
+        },
+        "20s": {
+          "singlePassHours": 320.7,
+          "singlePassPersonDays": 53.4,
+          "doubleReviewHours": 641.4,
+          "rangeSinglePassHours": [
+            160.3,
+            481
+          ]
+        }
+      },
+      "outlineFixHoursIfCorrectedNotRejected": {
+        "share": 0.25,
+        "60s": 240.5,
+        "120s": 481
+      },
+      "publishableOpportunities": {
+        "central": 5143,
+        "low": 1093,
+        "high": 13035,
+        "bareRoofOnlyCentral": 4682
+      },
+      "publishablePerReviewHourAt10s": 32.1,
+      "publishableCapacityMWpDcCentral": 1499,
+      "imageryTileLoads": {
+        "oneViewOnePass": 1385328,
+        "twoViewsOnePass": 2770656,
+        "twoViewsTwoReviewers": 5541312
+      },
+      "imageryCostIllustrationArcgisUsd": {
+        "note": "one-off review load if billed as ArcGIS basemap tiles in a single period; licence fit for QA is UNCERTAIN (see notes)",
+        "oneViewOnePass": 0,
+        "twoViewsOnePass": 116,
+        "twoViewsTwoReviewers": 531,
+        "twoViewsTwoReviewersNoFreeTier": 831
+      }
+    }
+  ]
+}
