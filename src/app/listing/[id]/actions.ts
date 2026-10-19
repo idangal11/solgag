@@ -6,7 +6,7 @@ import { inquiryBlock } from '@/components/listing/inquiryGate';
 import { getListing } from '@/lib/data/queries';
 import { notifyOwnerOfInquiry } from '@/lib/notify';
 import { createClient, getCurrentUser } from '@/lib/supabase/server';
-import { fieldErrors, inquirySchema } from '@/lib/validation';
+import { fieldErrors, type InquiryInput, inquirySchema } from '@/lib/validation';
 
 export type InquiryResult =
   | { ok: true }
@@ -17,8 +17,17 @@ const GENERIC_ERROR = 'שליחת הפנייה נכשלה. נסו שוב בעו�
 export async function submitInquiry(input: unknown): Promise<InquiryResult> {
   const parsed = inquirySchema.safeParse(input);
   if (!parsed.success) return { ok: false, fieldErrors: fieldErrors(parsed.error) };
-  const v = parsed.data;
+  // An unexpected failure (Supabase unreachable, a thrown query error) becomes a Hebrew
+  // result instead of a rejected promise, so the dialog keeps everything the user typed.
+  try {
+    return await sendInquiry(parsed.data);
+  } catch (e) {
+    console.error('[submitInquiry] failed', e);
+    return { ok: false, error: GENERIC_ERROR };
+  }
+}
 
+async function sendInquiry(v: InquiryInput): Promise<InquiryResult> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, needsAuth: true, error: 'כדי לשלוח פנייה יש להתחבר' };
 

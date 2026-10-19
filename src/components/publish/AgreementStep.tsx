@@ -1,26 +1,32 @@
 'use client';
 
 import { AlertTriangle, Info } from 'lucide-react';
-import { AGREEMENT_HINT, AGREEMENT_LABEL, AVAILABILITY, BUILDING_LABEL, fmtSqm, VERIFICATION } from '@/lib/labels';
-import type { AgreementModel, Availability } from '@/lib/types';
-import { totalArea, usableArea, type Draft } from './draft';
+import { AGREEMENT_HINT, AGREEMENT_LABEL, AVAILABILITY, BUILDING_LABEL, fmtSqm, TECH_ASSESSMENT, VERIFICATION } from '@/lib/labels';
+import type { AgreementModel, Availability, OwnerVerification, TechAssessment } from '@/lib/types';
+import { declarationText, totalArea, usableArea, type Draft } from './draft';
 import { FieldError, errProps } from './FieldError';
+
+/** Edit mode: the listing's trust statuses now, and as the DB guard will leave them after this save. */
+export interface TrustStatus {
+  ownerBefore: OwnerVerification;
+  ownerAfter: OwnerVerification;
+  techBefore: TechAssessment;
+  techAfter: TechAssessment;
+}
 
 interface Props {
   d: Draft;
   set: <K extends keyof Draft>(k: K, v: Draft[K]) => void;
   errors: Record<string, string>;
-  isEdit: boolean;
-  /** Edit mode: saving will reset a verified/pending ownership status. */
-  resetsVerification: boolean;
+  /** null when creating a listing (it always starts unverified and unassessed). */
+  status: TrustStatus | null;
 }
 
-const DECLARATION_TEXT =
-  'אני מצהיר/ה כי אני הבעלים של המבנה או מורשה כדין להציע את הגג להתקשרות, וכי הפרטים שמסרתי נכונים למיטב ידיעתי. ידוע לי שהפלטפורמה לא אימתה את הבעלות ולא ביצעה בדיקה הנדסית.';
-
-export function AgreementStep({ d, set, errors, isEdit, resetsVerification }: Props) {
+export function AgreementStep({ d, set, errors, status }: Props) {
   const total = totalArea(d);
   const usable = usableArea(d);
+  const resetsOwnership = !!status && status.ownerAfter !== status.ownerBefore;
+  const resetsSurvey = !!status && status.techAfter !== status.techBefore;
 
   return (
     <div className="form-grid">
@@ -115,18 +121,25 @@ export function AgreementStep({ d, set, errors, isEdit, resetsVerification }: Pr
         {d.areaMode === 'polygon' && <span className="muted"> (השטח הסופי יחושב בשרת מתוך השרטוט)</span>}
       </div>
 
-      {resetsVerification ? (
-        <p className="note span2">
-          <AlertTriangle size={15} />
-          שיניתם את המיקום או את גבולות הגג. לאחר השמירה סטטוס הבעלות יחזור ל„{VERIFICATION.not_verified.label}״.
+      {!status && (
+        <p className="note info-note span2">
+          <Info size={15} aria-hidden />
+          המודעה תוצג עם התווית „{VERIFICATION.not_verified.label}״ עד שיוגשו מסמכי בעלות וייבדקו על ידי צוות הפלטפורמה.
         </p>
-      ) : (
-        !isEdit && (
-          <p className="note info-note span2">
-            <Info size={15} />
-            המודעה תוצג עם התווית „{VERIFICATION.not_verified.label}״ עד שיוגשו מסמכי בעלות וייבדקו על ידי צוות הפלטפורמה.
-          </p>
-        )
+      )}
+      {status && resetsOwnership && (
+        <p className="note span2">
+          <AlertTriangle size={15} aria-hidden />
+          {`שיניתם פרטים שנבדקו באימות הבעלות (מיקום, גבולות הגג, יישוב או שם בעלי הגג). לאחר השמירה סטטוס הבעלות יחזור ל„${VERIFICATION[status.ownerAfter].label}״${
+            status.ownerBefore === 'pending' ? ', ובקשת האימות הממתינה תבוטל' : ''
+          }.`}
+        </p>
+      )}
+      {status && resetsSurvey && (
+        <p className="note span2">
+          <AlertTriangle size={15} aria-hidden />
+          {`שיניתם נתוני גג, שטח או מיקום. לאחר השמירה התווית „${TECH_ASSESSMENT[status.techBefore].label}״ תוחלף ב„${TECH_ASSESSMENT[status.techAfter].label}״.`}
+        </p>
       )}
 
       <label className={`declare span2${errors.declared ? ' invalid' : ''}`}>
@@ -136,7 +149,7 @@ export function AgreementStep({ d, set, errors, isEdit, resetsVerification }: Pr
           onChange={(e) => set('declared', e.target.checked)}
           {...errProps('declared', errors)}
         />
-        <span>{DECLARATION_TEXT}</span>
+        <span>{declarationText(status?.ownerAfter ?? 'not_verified', status?.techAfter ?? 'not_assessed')}</span>
       </label>
       <FieldError id="err-declared" msg={errors.declared} className="span2" />
       <FieldError id="err-_" msg={errors._} className="span2" />

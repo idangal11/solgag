@@ -31,6 +31,18 @@
   position: relative;
   isolation: isolate;
 }
+/* Locate mode: marks the point „סימון במרכז המפה" will use. Above the map panes
+   (400) and below Leaflet's controls (1000); never intercepts clicks or drags. */
+.publish-page .map-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
+  z-index: 500;
+  pointer-events: none;
+}
 .draw-map-loading {
   display: flex;
   align-items: center;
@@ -51,6 +63,40 @@
 }
 .contact-hint {
   padding: 9px 0;
+}
+.publish-page .link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--green-900);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* Restored-draft notice above the stepper */
+.publish-page .restore-note {
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+}
+.publish-page .restore-note > svg {
+  margin-top: 0;
+}
+.restore-note .restore-text {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.restore-note .restore-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: auto;
 }
 
 /* Agreement radios as a real fieldset (screen readers announce the group name) */

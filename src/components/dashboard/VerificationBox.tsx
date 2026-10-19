@@ -2,6 +2,7 @@
 
 import { FileText, FileUp, LoaderCircle, Paperclip, ShieldCheck } from 'lucide-react';
 import { useEffect, useId, useRef, useState, useTransition, type FormEvent } from 'react';
+import { callAction } from '@/app/dashboard/_lib/callAction';
 import { submitVerificationRequest } from '@/app/dashboard/actions';
 import { useApp } from '@/components/AppProvider';
 import { Tag } from '@/components/ui';
@@ -91,23 +92,47 @@ export function VerificationBox({ listingId, listingTitle, status, requests, doc
       return;
     }
     setError(null);
+    const fail = (msg: string) => {
+      setError(msg);
+      toast(msg, 'error');
+    };
     startTransition(async () => {
       const docs = createClient().storage.from(STORAGE_BUCKETS.ownershipDocs);
-      const path = `${user.id}/${listingId}/${crypto.randomUUID()}.${EXT_BY_TYPE[type]}`;
-      const { error: uploadError } = await docs.upload(path, file, { contentType: type, upsert: false });
+      // Must be exactly "<uid>/<listing id>/<file>" with a file name matching
+      // ^[A-Za-z0-9][A-Za-z0-9._-]{0,120}$ — the storage INSERT policy and the
+      // verification_requests.document_path policy both enforce that format
+      // (the listing id as Postgres prints a uuid: lowercase).
+      const path = `${user.id}/${listingId.toLowerCase()}/${crypto.randomUUID().toLowerCase()}.${EXT_BY_TYPE[type]}`;
+      let uploadError: { message?: string } | null = null;
+      try {
+        ({ error: uploadError } = await docs.upload(path, file, { contentType: type, upsert: false }));
+      } catch (e) {
+        uploadError = { message: e instanceof Error ? e.message : String(e) };
+      }
       if (uploadError) {
         console.error('ownership doc upload', uploadError);
-        const msg = 'העלאת המסמך נכשלה. בדקו את החיבור ונסו שוב.';
-        setError(msg);
-        toast(msg, 'error');
+        // The upload policy refuses (RLS) when the listing folder is full (10 documents).
+        fail(
+          /row-level security/i.test(uploadError.message ?? '')
+            ? 'לא ניתן להעלות מסמך נוסף למודעה זו (ייתכן שהגעת למספר המסמכים המרבי). לבירור אפשר לפנות לצוות האתר.'
+            : 'העלאת המסמך נכשלה. בדקו את החיבור ונסו שוב.',
+        );
         return;
       }
-      const res = await submitVerificationRequest({ listingId, documentPath: path, note: note.trim() });
+      const res = await callAction(() => submitVerificationRequest({ listingId, documentPath: path, note: note.trim() }));
       if (!res.ok) {
-        // Best effort: drop the now-unreferenced upload (a no-op unless storage allows it).
+        if (res.reason === 'network') {
+          // The request may still be saved (lost response, or still running on the
+          // server), so keep the upload: deleting it now could race the insert and
+          // leave staff a request whose document is gone.
+          fail('החיבור לשרת נכשל, וייתכן שהבקשה לא נשלחה. רעננו את העמוד: אם הבקשה נקלטה היא תופיע ברשימה, ואם לא — אפשר להגיש שוב.');
+          return;
+        }
+        // The action answered with an error, or never ran (stale page): no request
+        // references the upload, and storage lets the owner delete an unreferenced
+        // document, so drop it (best effort).
         void docs.remove([path]).catch(() => undefined);
-        setError(res.error);
-        toast(res.error, 'error');
+        fail(res.error);
         return;
       }
       reset();
@@ -134,7 +159,10 @@ export function VerificationBox({ listingId, listingTitle, status, requests, doc
           צוות סולגג בודק ידנית שהמסמך שהגשת — למשל נסח טאבו, חוזה חכירה או הרשאה בכתב מבעלי הנכס — תואם למבנה ולמפרסם.
           זו בדיקת מסמכים בלבד: היא אינה חוות דעת משפטית, אינה בדיקה הנדסית ואינה ערובה לזכויות בנכס.
         </p>
-        <p>המסמך נשמר באחסון פרטי ונגיש רק לך ולצוות הבדיקה. שינוי המיקום או גבולות המבנה בעריכת המודעה מבטל אימות קיים.</p>
+        <p>
+          המסמך נשמר באחסון פרטי ונגיש רק לך ולצוות הבדיקה. שינוי המיקום, גבולות המבנה, היישוב או שם המפרסם בעריכת המודעה מבטל אימות קיים
+          ובקשה שממתינה לבדיקה.
+        </p>
       </details>
 
       {canSubmit && !open && (
@@ -159,7 +187,11 @@ export function VerificationBox({ listingId, listingTitle, status, requests, doc
           </label>
           {file && (
             <span className="small muted dash-file">
-              <Paperclip size={14} aria-hidden /> {file.name} · {fmtNum(file.size / (1024 * 1024), 1)}MB
+              <Paperclip size={14} aria-hidden />
+              {/* Isolate the user's file name so a Hebrew name keeps its extension and the size stays apart. */}
+              <span>
+                <bdi>{file.name}</bdi> · <bdi dir="ltr">{fmtNum(file.size / (1024 * 1024), 1)}MB</bdi>
+              </span>
             </span>
           )}
           <label className="field">
@@ -203,8 +235,16 @@ export function VerificationBox({ listingId, listingTitle, status, requests, doc
                       </a>
                     )}
                   </div>
-                  {r.note && <p className="small">ההערה שלך: {r.note}</p>}
-                  {r.reviewNote && <p className="small dash-review-note">הערת הצוות: {r.reviewNote}</p>}
+                  {r.note && (
+                    <p className="small">
+                      ההערה שלך: <bdi>{r.note}</bdi>
+                    </p>
+                  )}
+                  {r.reviewNote && (
+                    <p className="small dash-review-note">
+                      הערת הצוות: <bdi>{r.reviewNote}</bdi>
+                    </p>
+                  )}
                   {r.reviewedAt && (
                     <span className="tiny muted" suppressHydrationWarning>
                       נבדקה {fmtDate(r.reviewedAt)}

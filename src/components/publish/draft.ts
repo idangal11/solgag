@@ -1,5 +1,15 @@
 import { isInSupportedArea, isSelfIntersecting, polygonAreaSqm, polygonCentroid } from '@/lib/geo';
-import type { AgreementModel, AreaSource, Availability, BuildingType, LatLng, Listing, Region } from '@/lib/types';
+import type {
+  AgreementModel,
+  AreaSource,
+  Availability,
+  BuildingType,
+  LatLng,
+  Listing,
+  OwnerVerification,
+  Region,
+  TechAssessment,
+} from '@/lib/types';
 import { fieldErrors, listingSchema, type ListingInput } from '@/lib/validation';
 
 // Form state of the publish/edit wizard. Numeric inputs stay strings while the
@@ -38,6 +48,10 @@ export interface Draft {
 export const STEPS = ['בעלים ומבנה', 'מיקום וגבולות', 'פרטים ותמונות', 'הסכם ופרסום'] as const;
 
 export const USABLE_PCT = { min: 20, max: 95, default: 65 } as const;
+/**
+ * Same cap as listingSchema (polygon max 200) and the DB (footprint_size_limit:
+ * st_npoints ≤ 201, i.e. 200 vertices plus the closing point added by polygonEWKT).
+ */
 export const MAX_VERTICES = 200;
 
 export function newDraft(ownerDisplayName = ''): Draft {
@@ -70,9 +84,16 @@ export function newDraft(ownerDisplayName = ''): Draft {
 
 const str = (n: number | null) => (n === null ? '' : String(n));
 
+/** Same point within ~0.1 m (absorbs float noise from the PostGIS round trip). */
+export const sameLatLng = (a: LatLng, b: LatLng) => Math.abs(a[0] - b[0]) < 1e-6 && Math.abs(a[1] - b[1]) < 1e-6;
+
 export function draftFromListing(l: Listing): Draft {
   const manual = l.areaSource !== 'polygon';
   const pct = l.totalAreaSqm > 0 ? Math.round((l.usableAreaSqm / l.totalAreaSqm) * 100) : USABLE_PCT.default;
+  // A listing published with only a drawn outline stores the outline's centroid as
+  // its point. Keep it "unset" so the point follows the outline when it is redrawn,
+  // exactly as when the listing was created (effectiveLocation falls back to it).
+  const followsFootprint = l.polygon.length >= 3 && sameLatLng(l.center, roundLatLng(polygonCentroid(l.polygon)));
   return {
     ownerDisplayName: l.ownerDisplayName,
     title: l.title,
@@ -80,7 +101,7 @@ export function draftFromListing(l: Listing): Draft {
     locality: l.locality,
     region: l.region,
     description: l.description,
-    location: l.center,
+    location: followsFootprint ? null : l.center,
     polygon: l.polygon,
     areaMode: manual ? 'manual' : 'polygon',
     manualArea: manual ? String(l.totalAreaSqm) : '',
@@ -203,7 +224,9 @@ export function validateDraft(d: Draft): { data: ListingInput | null; errors: Re
   if (!loc) errors.location = FALLBACK.location;
   else if (!isInSupportedArea(loc)) errors.location = 'המיקום מחוץ לאזור הנתמך — כרגע ניתן לפרסם גגות בישראל בלבד';
 
-  if (d.polygon.length >= 3) {
+  if (d.polygon.length > MAX_VERTICES) {
+    errors.polygon = `השרטוט מורכב מדי: עד ${MAX_VERTICES} נקודות (יש ${d.polygon.length}). מחקו נקודות מיותרות.`;
+  } else if (d.polygon.length >= 3) {
     if (isSelfIntersecting(d.polygon)) {
       errors.polygon = 'קווי השרטוט חוצים זה את זה. גררו או מחקו נקודות כך שגבול הגג לא יחצה את עצמו.';
     } else if (d.polygon.some((p) => !isInSupportedArea(p))) {
@@ -242,4 +265,79 @@ export function locationChanged(d: Draft, initial: Draft): boolean {
 export function footprintChanged(d: Draft, initial: Draft): boolean {
   const ring = (x: Draft) => (x.polygon.length >= 3 ? x.polygon : []);
   return !sameRing(ring(d), ring(initial));
+}
+
+/**
+ * Edits that make the DB guard reset ownership verification (verified/pending →
+ * not_verified): the building's point or outline, the locality or the publisher name.
+ */
+export function ownershipFactsChanged(d: Draft, initial: Draft): boolean {
+  return (
+    locationChanged(d, initial) ||
+    footprintChanged(d, initial) ||
+    d.locality.trim() !== initial.locality.trim() ||
+    d.ownerDisplayName.trim() !== initial.ownerDisplayName.trim()
+  );
+}
+
+/** The roof area as stored, or the usable share of it, would change. */
+export function areaChanged(d: Draft, initial: Draft): boolean {
+  if (d.areaMode !== initial.areaMode) return true;
+  // Polygon areas are recomputed by the DB from the footprint itself.
+  const totalMoved = d.areaMode === 'polygon' ? footprintChanged(d, initial) : totalArea(d) !== totalArea(initial);
+  return totalMoved || d.usablePct !== initial.usablePct;
+}
+
+/**
+ * Edits that make the DB guard downgrade a technical survey ('assessed' /
+ * 'survey_planned' → 'owner_reported'): location, outline, area or roof data.
+ */
+export function techFactsChanged(d: Draft, initial: Draft): boolean {
+  const text = (s: string) => s.trim();
+  return (
+    locationChanged(d, initial) ||
+    footprintChanged(d, initial) ||
+    areaChanged(d, initial) ||
+    text(d.roofType) !== text(initial.roofType) ||
+    text(d.shading) !== text(initial.shading) ||
+    text(d.grid) !== text(initial.grid) ||
+    parseNum(d.roofAge) !== parseNum(initial.roofAge)
+  );
+}
+
+const DECLARATION_BASE =
+  'אני מצהיר/ה כי אני הבעלים של המבנה או מורשה כדין להציע את הגג להתקשרות, וכי הפרטים שמסרתי נכונים למיטב ידיעתי.';
+
+/**
+ * The owner re-confirms the declaration on every save, so its last sentence must
+ * match the statuses the listing will show after saving: an owner of a verified
+ * or surveyed listing is never asked to state that it was not checked.
+ */
+export function declarationText(owner: OwnerVerification, tech: TechAssessment): string {
+  const verified = owner === 'verified';
+  const surveyed = tech === 'assessed';
+  if (!verified && !surveyed) return `${DECLARATION_BASE} ידוע לי שהפלטפורמה לא אימתה את הבעלות ולא ביצעה בדיקה הנדסית.`;
+  if (!verified) return `${DECLARATION_BASE} ידוע לי שהפלטפורמה לא אימתה את הבעלות, ושהסקר הטכני אינו מהווה ערובה.`;
+  if (!surveyed) {
+    return `${DECLARATION_BASE} ידוע לי שבדיקת מסמכי הבעלות בפלטפורמה אינה מהווה אישור משפטי, ושהפלטפורמה לא ביצעה בדיקה הנדסית.`;
+  }
+  return `${DECLARATION_BASE} ידוע לי שבדיקת מסמכי הבעלות והסקר הטכני בפלטפורמה אינם מהווים אישור משפטי או ערובה.`;
+}
+
+/**
+ * True when the point lies clearly outside the outline's bounding box (~30 m
+ * margin): the pin and the outline were probably put on different buildings.
+ * A box, not the polygon itself, so the warning does not flicker while corners
+ * are still being added.
+ */
+export function isFarFromRing([lat, lng]: LatLng, ring: LatLng[], margin = 0.0003): boolean {
+  if (ring.length < 3) return false;
+  const lats = ring.map((p) => p[0]);
+  const lngs = ring.map((p) => p[1]);
+  return (
+    lat < Math.min(...lats) - margin ||
+    lat > Math.max(...lats) + margin ||
+    lng < Math.min(...lngs) - margin ||
+    lng > Math.max(...lngs) + margin
+  );
 }

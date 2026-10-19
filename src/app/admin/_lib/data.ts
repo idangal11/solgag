@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { notFound } from 'next/navigation';
-import type { AdminListingRow, AdminVerificationItem } from '@/components/admin/types';
+import type { AdminListingRow, AdminVerificationItem, ListingVisibility } from '@/components/admin/types';
 import { getMyProfile } from '@/lib/data/queries';
 import { createClient } from '@/lib/supabase/server';
 import type { ListingStatus, OwnerVerification, Profile, TechAssessment, VerificationStatus } from '@/lib/types';
@@ -19,9 +19,13 @@ export async function requireAdmin(): Promise<Profile> {
 const COUNT_ONLY = { count: 'exact', head: true } as const;
 
 export interface AdminCounts {
-  published: number;
-  publishedFictional: number;
-  hidden: number;
+  /** Published by the owner and not hidden by staff — what the public sees. */
+  visible: number;
+  visibleFictional: number;
+  /** Hidden by the owner (and not by staff). */
+  ownerHidden: number;
+  /** Hidden by staff, whatever the owner's status. */
+  adminHidden: number;
   pendingVerifications: number;
   inquiriesLastWeek: number;
 }
@@ -29,17 +33,21 @@ export interface AdminCounts {
 export async function getAdminCounts(): Promise<AdminCounts> {
   const supabase = await createClient();
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const listings = () => supabase.from('listings').select('id', COUNT_ONLY);
   const results = await Promise.all([
-    supabase.from('listings').select('id', COUNT_ONLY).eq('status', 'published'),
-    supabase.from('listings').select('id', COUNT_ONLY).eq('status', 'published').eq('is_fictional', true),
-    supabase.from('listings').select('id', COUNT_ONLY).eq('status', 'hidden'),
+    listings().eq('status', 'published').eq('admin_hidden', false),
+    listings().eq('status', 'published').eq('admin_hidden', false).eq('is_fictional', true),
+    listings().eq('status', 'hidden').eq('admin_hidden', false),
+    listings().eq('admin_hidden', true),
     supabase.from('verification_requests').select('id', COUNT_ONLY).eq('status', 'pending'),
     supabase.from('inquiries').select('id', COUNT_ONLY).gte('created_at', weekAgo),
   ]);
   const failed = results.find((r) => r.error);
   if (failed?.error) throw new Error(`admin counts: ${failed.error.message}`);
-  const [published, publishedFictional, hidden, pendingVerifications, inquiriesLastWeek] = results.map((r) => r.count ?? 0);
-  return { published, publishedFictional, hidden, pendingVerifications, inquiriesLastWeek };
+  const [visible, visibleFictional, ownerHidden, adminHidden, pendingVerifications, inquiriesLastWeek] = results.map(
+    (r) => r.count ?? 0,
+  );
+  return { visible, visibleFictional, ownerHidden, adminHidden, pendingVerifications, inquiriesLastWeek };
 }
 
 /** For the nav badge; never fails the whole admin layout. */
@@ -134,7 +142,7 @@ export const ADMIN_LISTINGS_LIMIT = 200;
 
 export interface ListingFilters {
   q: string;
-  status: 'all' | ListingStatus;
+  visibility: 'all' | ListingVisibility;
   kind: 'all' | 'real' | 'fictional';
 }
 
@@ -144,6 +152,7 @@ interface AdminListingFeedRow {
   locality: string;
   owner_display_name: string;
   status: ListingStatus;
+  admin_hidden: boolean;
   is_fictional: boolean;
   owner_verification: OwnerVerification;
   tech_assessment: TechAssessment;
@@ -158,10 +167,15 @@ export async function getAdminListings(f: ListingFilters): Promise<{ rows: Admin
   // listing_feed is security_invoker, so admin RLS returns hidden listings too.
   let query = supabase
     .from('listing_feed')
-    .select('id, title, locality, owner_display_name, status, is_fictional, owner_verification, tech_assessment, created_at', {
-      count: 'exact',
-    });
-  if (f.status !== 'all') query = query.eq('status', f.status);
+    .select(
+      'id, title, locality, owner_display_name, status, admin_hidden, is_fictional, owner_verification, tech_assessment, created_at',
+      { count: 'exact' },
+    );
+  // The three visibility values partition all listings (see ListingVisibility).
+  if (f.visibility === 'admin_hidden') query = query.eq('admin_hidden', true);
+  else if (f.visibility !== 'all') {
+    query = query.eq('admin_hidden', false).eq('status', f.visibility === 'public' ? 'published' : 'hidden');
+  }
   if (f.kind !== 'all') query = query.eq('is_fictional', f.kind === 'fictional');
   const term = f.q.replace(FILTER_SYNTAX, ' ').trim();
   if (term) {
@@ -177,6 +191,7 @@ export async function getAdminListings(f: ListingFilters): Promise<{ rows: Admin
     locality: r.locality,
     ownerDisplayName: r.owner_display_name,
     status: r.status,
+    adminHidden: r.admin_hidden,
     isFictional: r.is_fictional,
     ownerVerification: r.owner_verification,
     techAssessment: r.tech_assessment,

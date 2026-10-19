@@ -11,12 +11,15 @@ export interface InquiryBlock {
   short: string;
 }
 
-export type InquiryGateListing = Pick<Listing, 'isMine' | 'isFictional' | 'status' | 'availability'>;
+export type InquiryGateListing = Pick<Listing, 'isMine' | 'isFictional' | 'status' | 'adminHidden' | 'availability'>;
 
 export function inquiryBlock(l: InquiryGateListing): InquiryBlock | null {
   if (l.isMine) return { reason: 'mine', text: 'זו המודעה שלך', short: 'זו המודעה שלך' };
   if (l.isFictional) return { reason: 'fictional', text: 'מודעה לדוגמה — לא ניתן לשלוח פנייה', short: 'מודעה לדוגמה — אין פניות' };
-  if (l.status !== 'published') return { reason: 'hidden', text: 'המודעה מוסתרת ואינה פתוחה לפניות', short: 'מוסתרת — אין פניות' };
+  // Owner-hidden and staff-hidden (moderation) listings are both closed to inquiries.
+  if (l.status !== 'published' || l.adminHidden) {
+    return { reason: 'hidden', text: 'המודעה מוסתרת ואינה פתוחה לפניות', short: 'מוסתרת — אין פניות' };
+  }
   if (l.availability === 'unavailable') return { reason: 'unavailable', text: 'הגג אינו זמין כרגע לפניות', short: 'לא זמין לפניות כרגע' };
   return null;
 }

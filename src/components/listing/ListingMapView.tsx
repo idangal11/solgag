@@ -13,9 +13,11 @@ export interface ListingMapViewProps {
   /** Dashed outline: the shape is an illustration, not a real boundary. */
   illustrative: boolean;
   availability: Availability;
+  /** Sample (fictional) listing: neutral pin, it cannot take inquiries. */
+  fictional?: boolean;
 }
 
-export default function ListingMapView({ center, polygon, illustrative, availability }: ListingMapViewProps) {
+export default function ListingMapView({ center, polygon, illustrative, availability, fictional = false }: ListingMapViewProps) {
   return (
     <MapContainer
       bounds={listingBounds({ polygon, center })}
@@ -27,7 +29,7 @@ export default function ListingMapView({ center, polygon, illustrative, availabi
       className="leaflet-host"
     >
       <BaseLayers defaultAerial />
-      <ZoomControl position="topright" />
+      <ZoomControl position="topright" zoomInTitle="התקרב" zoomOutTitle="התרחק" />
       {polygon.length >= 3 ? (
         <Polygon
           positions={polygon}
@@ -35,7 +37,7 @@ export default function ListingMapView({ center, polygon, illustrative, availabi
           pathOptions={{ color: '#f5b81c', weight: 3, fillOpacity: 0.2, dashArray: illustrative ? '7 6' : undefined }}
         />
       ) : (
-        <Marker position={center} icon={pinIcon(availability)} interactive={false} keyboard={false} />
+        <Marker position={center} icon={pinIcon(fictional ? 'sample' : availability)} interactive={false} keyboard={false} />
       )}
     </MapContainer>
   );

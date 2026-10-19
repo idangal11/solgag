@@ -41,29 +41,89 @@ export async function setDashboardRole(role: UserRole): Promise<ActionResult> {
   return { ok: true };
 }
 
+// Not exported: a 'use server' module may only export async functions.
+const ADMIN_HIDDEN_ERROR = 'המודעה הוסתרה על ידי צוות האתר, ולכן לא ניתן לשנות את מצב הפרסום שלה. לבירור אפשר לפנות לצוות האתר.';
+
 /** Hide a listing from search/map (and new inquiries), or publish it again. */
 export async function setListingStatus(listingId: string, status: ListingStatus): Promise<ActionResult> {
   if (!idSchema.safeParse(listingId).success || !statusSchema.safeParse(status).success) return fail('בקשה לא תקינה');
   const s = await session();
   if (!s) return fail(NOT_SIGNED_IN);
+  // A listing hidden by staff (admin_hidden) stays hidden whatever its status, so
+  // do not touch it at all — otherwise "published again" would be a false claim.
   const { data, error } = await s.supabase
     .from('listings')
     .update({ status })
     .eq('id', listingId)
     .eq('owner_id', s.user.id)
+    .eq('admin_hidden', false)
     .select('id');
   if (error) {
     console.error('setListingStatus', error);
     return fail(dbErrorMessage(error, 'לא הצלחנו לעדכן את סטטוס המודעה. נסו שוב.'));
   }
-  if (!data?.length) return fail('המודעה לא נמצאה או שאין לך הרשאה לעדכן אותה.');
+  if (!data?.length) {
+    const { data: row } = await s.supabase
+      .from('listings')
+      .select('admin_hidden')
+      .eq('id', listingId)
+      .eq('owner_id', s.user.id)
+      .maybeSingle();
+    if (row?.admin_hidden) {
+      revalidatePath('/dashboard');
+      return fail(ADMIN_HIDDEN_ERROR);
+    }
+    return fail('המודעה לא נמצאה או שאין לך הרשאה לעדכן אותה.');
+  }
   revalidateListing(listingId);
   return { ok: true };
 }
 
+/** Every object in one storage folder (paged; folders are capped at a few files, older ones may hold more). */
+async function listFolder(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  bucket: string,
+  folder: string,
+): Promise<string[]> {
+  const PAGE = 100;
+  const out: string[] = [];
+  for (let offset = 0; offset < 1000; offset += PAGE) {
+    const { data, error } = await supabase.storage.from(bucket).list(folder, { limit: PAGE, offset });
+    if (error) {
+      console.warn('deleteListing: list failed', bucket, folder, error.message);
+      break;
+    }
+    // Entries without an id are sub-folders; uploads never create those.
+    for (const f of data ?? []) if (f.id && f.name) out.push(`${folder}/${f.name}`);
+    if (!data || data.length < PAGE) break;
+  }
+  return out;
+}
+
+/** Removes objects and logs when storage silently skipped some (RLS filters rows instead of failing). */
+async function removeObjects(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  bucket: string,
+  paths: string[],
+  listingId: string,
+): Promise<void> {
+  if (!paths.length) return;
+  const { data, error } = await supabase.storage.from(bucket).remove(paths);
+  if (error) {
+    console.warn('deleteListing: storage cleanup failed', bucket, listingId, error.message);
+  } else if ((data?.length ?? 0) < paths.length) {
+    console.warn('deleteListing: storage cleanup removed fewer objects than requested', bucket, listingId, {
+      requested: paths.length,
+      removed: data?.length ?? 0,
+    });
+  }
+}
+
 /**
  * Deletes a listing (images rows, inquiries, messages and verification requests
- * cascade in the DB), then removes its photos from storage. Storage cleanup
+ * cascade in the DB), then removes its photos and ownership documents from
+ * storage. Every upload lives at `<uid>/<listing id>/<file>` (enforced by the
+ * storage policies), so that folder is the whole cleanup scope. Storage cleanup
  * failures are logged but do not fail the action — the listing is already gone.
  */
 export async function deleteListing(listingId: string): Promise<ActionResult> {
@@ -71,20 +131,22 @@ export async function deleteListing(listingId: string): Promise<ActionResult> {
   const s = await session();
   if (!s) return fail(NOT_SIGNED_IN);
   const { supabase, user } = s;
-  const folder = `${user.id}/${listingId}`;
+  // Storage names are case-sensitive and uploads use the DB's lowercase uuid text,
+  // while the uuid comparisons in the queries below are not.
+  const folder = `${user.id}/${listingId.toLowerCase()}`;
 
-  // Collect the photo paths before the rows cascade away.
-  const paths = new Set<string>();
-  const [{ data: imageRows }, { data: files }, { data: docs }] = await Promise.all([
+  // Collect the paths before the rows cascade away. Owners can list their own
+  // folders in both buckets ("listing-images: users read own files",
+  // "ownership-docs: owner or admin reads").
+  const [{ data: imageRows }, files, docs] = await Promise.all([
     supabase.from('listing_images').select('storage_path').eq('listing_id', listingId),
-    supabase.storage.from(STORAGE_BUCKETS.listingImages).list(folder, { limit: 100 }),
-    supabase.storage.from(STORAGE_BUCKETS.ownershipDocs).list(folder, { limit: 100 }),
+    listFolder(supabase, STORAGE_BUCKETS.listingImages, folder),
+    listFolder(supabase, STORAGE_BUCKETS.ownershipDocs, folder),
   ]);
+  const paths = new Set<string>(files);
   for (const r of (imageRows ?? []) as { storage_path: string }[]) {
-    if (r.storage_path.startsWith(`${user.id}/`)) paths.add(r.storage_path);
-  }
-  for (const f of files ?? []) {
-    if (f.name && f.id) paths.add(`${folder}/${f.name}`);
+    // Only this listing's own folder: never a file another listing might use.
+    if (r.storage_path.startsWith(`${folder}/`)) paths.add(r.storage_path);
   }
 
   const { data, error } = await supabase.from('listings').delete().eq('id', listingId).eq('owner_id', user.id).select('id');
@@ -94,17 +156,13 @@ export async function deleteListing(listingId: string): Promise<ActionResult> {
   }
   if (!data?.length) return fail('המודעה לא נמצאה או שאין לך הרשאה למחוק אותה.');
 
-  if (paths.size) {
-    const { error: storageError } = await supabase.storage.from(STORAGE_BUCKETS.listingImages).remove([...paths]);
-    if (storageError) console.warn('deleteListing: storage cleanup failed', listingId, storageError.message);
-  }
-  // Ownership documents lose their verification_requests rows with the listing.
-  // Removing them needs a delete policy on ownership-docs; until then this is a no-op.
-  const docPaths = (docs ?? []).filter((f) => f.id).map((f) => `${folder}/${f.name}`);
-  if (docPaths.length) {
-    const { error: docsError } = await supabase.storage.from(STORAGE_BUCKETS.ownershipDocs).remove(docPaths);
-    if (docsError) console.warn('deleteListing: ownership-docs cleanup failed', listingId, docsError.message);
-  }
+  // Ownership documents become removable by their owner once the cascade has
+  // dropped the verification_requests rows that referenced them
+  // ("ownership-docs: users delete own unreferenced files").
+  await Promise.all([
+    removeObjects(supabase, STORAGE_BUCKETS.listingImages, [...paths], listingId),
+    removeObjects(supabase, STORAGE_BUCKETS.ownershipDocs, docs, listingId),
+  ]);
 
   revalidateListing(listingId);
   return { ok: true };
@@ -116,6 +174,8 @@ const verificationSchema = z.object({
   note: z.string().trim().max(1000, 'ההערה ארוכה מדי (עד 1000 תווים)'),
 });
 
+// <uuid>.<ext> — a subset of the storage / verification_requests rule
+// (^[A-Za-z0-9][A-Za-z0-9._-]{0,120}$, no "..") that VerificationBox uploads to.
 const DOC_FILE = /^[0-9a-f-]{36}\.(pdf|jpg|png|webp)$/i;
 
 /**
@@ -130,7 +190,9 @@ export async function submitVerificationRequest(input: { listingId: string; docu
   if (!s) return fail(NOT_SIGNED_IN);
   const { listingId, documentPath, note } = parsed.data;
 
-  const prefix = `${s.user.id}/${listingId}/`;
+  // Same rule as the storage upload policy and the verification_requests insert
+  // policy: "<uid>/<listing id as lowercase uuid text>/<uuid>.<ext>".
+  const prefix = `${s.user.id}/${listingId.toLowerCase()}/`;
   if (!documentPath.startsWith(prefix) || !DOC_FILE.test(documentPath.slice(prefix.length))) {
     return fail('נתיב המסמך אינו תקין.');
   }

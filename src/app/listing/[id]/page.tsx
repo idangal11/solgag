@@ -1,8 +1,9 @@
-import { ArrowRight, Building2, ClipboardCheck, EyeOff, Info, MapPin, Maximize2, Sun } from 'lucide-react';
+import { Building2, ClipboardCheck, EyeOff, Info, MapPin, Maximize2, ShieldAlert, Sun } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Calculator } from '@/components/Calculator';
+import { BackToSearch } from '@/components/listing/BackToSearch';
 import { ListingActions } from '@/components/listing/ListingActions';
 import { ListingGallery } from '@/components/listing/ListingGallery';
 import { ListingLocation } from '@/components/listing/ListingLocation';
@@ -39,7 +40,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       url: `/listing/${listing.id}`,
       images: listing.images[0] ? [{ url: listing.images[0], alt: `תמונה של ${listing.title}` }] : undefined,
     },
-    robots: listing.isFictional || listing.status !== 'published' ? { index: false, follow: true } : undefined,
+    robots:
+      listing.isFictional || listing.status !== 'published' || listing.adminHidden ? { index: false, follow: true } : undefined,
   };
 }
 
@@ -52,17 +54,35 @@ export default async function ListingPage({ params }: Params) {
     name: profile?.fullName ?? '',
     contact: profile?.contactEmail || profile?.phone || '',
   };
+  // Only listings on the public map can be focused there.
+  const onPublicMap = listing.status === 'published' && !listing.adminHidden;
 
   return (
     <div className="page listing-page">
-      <Link className="back-link" href="/">
-        <ArrowRight size={16} aria-hidden="true" /> חזרה לחיפוש
-      </Link>
+      <BackToSearch fallbackHref={onPublicMap ? `/?focus=${listing.id}` : '/'} />
 
-      {listing.status !== 'published' && (
-        <p className="note listing-banner">
-          <EyeOff size={15} aria-hidden="true" /> המודעה מוסתרת ואינה מוצגת לציבור או בחיפוש.
-        </p>
+      {listing.adminHidden ? (
+        // Only the owner and staff can open a listing hidden by moderation.
+        <div className="note listing-banner listing-banner-mod" role="note">
+          <ShieldAlert size={15} aria-hidden="true" />
+          <span>
+            <b>המודעה הוסתרה על ידי צוות הפלטפורמה.</b>{' '}
+            {listing.isMine ? (
+              <>
+                היא אינה מוצגת לציבור או בחיפוש ואינה פתוחה לפניות, וגם שינוי הסטטוס באזור האישי לא יפרסם אותה מחדש. לבירור
+                או לערעור — <Link href="/about#contact-title">פנו אלינו</Link>.
+              </>
+            ) : (
+              'היא אינה מוצגת לציבור או בחיפוש ואינה פתוחה לפניות.'
+            )}
+          </span>
+        </div>
+      ) : (
+        listing.status !== 'published' && (
+          <p className="note listing-banner">
+            <EyeOff size={15} aria-hidden="true" /> המודעה מוסתרת ואינה מוצגת לציבור או בחיפוש.
+          </p>
+        )
       )}
 
       <div className="detail-grid">
@@ -76,6 +96,7 @@ export default async function ListingPage({ params }: Params) {
               isFictional: listing.isFictional,
               isMine: listing.isMine,
               status: listing.status,
+              adminHidden: listing.adminHidden,
             }}
           />
 
@@ -92,7 +113,11 @@ export default async function ListingPage({ params }: Params) {
               </span>
               <Building2 size={16} aria-hidden="true" /> {BUILDING_LABEL[listing.buildingType]}
             </p>
-            <p className="status-desc">{AVAILABILITY[listing.availability].desc}</p>
+            <p className="status-desc">
+              {listing.isFictional
+                ? 'מודעה לדוגמה להמחשת השירות — אין מאחוריה בעלים אמיתיים ולא ניתן לשלוח עליה פנייה.'
+                : AVAILABILITY[listing.availability].desc}
+            </p>
           </header>
 
           {listing.isFictional && (
@@ -142,6 +167,7 @@ export default async function ListingPage({ params }: Params) {
             isFictional: listing.isFictional,
             isMine: listing.isMine,
             status: listing.status,
+            adminHidden: listing.adminHidden,
             availability: listing.availability,
           }}
           prefill={prefill}

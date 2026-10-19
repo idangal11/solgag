@@ -43,15 +43,43 @@ async function getMyVerificationRequests(userId: string): Promise<{ requests: Ve
   return { requests, documentUrls };
 }
 
+/**
+ * Ids among `ids` of listings the current user cannot see under RLS — hidden by
+ * their owner or by staff. (Deleting a listing deletes its inquiries, so a
+ * listing referenced by one of my inquiries always still exists.)
+ */
+async function getNotVisibleListingIds(ids: string[]): Promise<string[]> {
+  const unique = [...new Set(ids)];
+  if (!unique.length) return [];
+  const supabase = await createClient();
+  const CHUNK = 80; // keeps the PostgREST URL short
+  const chunks: string[][] = [];
+  for (let i = 0; i < unique.length; i += CHUNK) chunks.push(unique.slice(i, i + CHUNK));
+  const results = await Promise.all(chunks.map((c) => supabase.from('listings').select('id').in('id', c)));
+  const visible = new Set<string>();
+  for (const r of results) {
+    if (r.error) {
+      // Degrade to "visible": the row then links to the listing, as before.
+      console.warn('listing visibility lookup', r.error.message);
+      return [];
+    }
+    for (const row of (r.data ?? []) as { id: string }[]) visible.add(row.id);
+  }
+  return unique.filter((id) => !visible.has(id));
+}
+
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const user = await getCurrentUser();
   if (!user) redirect('/login?next=%2Fdashboard');
 
-  const [{ tab }, profile, listings, inquiries, favorites, verification] = await Promise.all([
+  const [{ tab }, profile, listings, { inquiries, hiddenSentListingIds }, favorites, verification] = await Promise.all([
     searchParams,
     getMyProfile(),
     getMyListings(),
-    getMyInquiries(),
+    getMyInquiries().then(async (inquiries) => ({
+      inquiries,
+      hiddenSentListingIds: await getNotVisibleListingIds(inquiries.sent.map((i) => i.listingId)),
+    })),
     getFavoriteListings(),
     getMyVerificationRequests(user.id),
   ]);
@@ -67,7 +95,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         initialTab={initialTab}
         name={profile?.fullName.trim() || null}
         owner={<OwnerPanel listings={listings} received={received} requests={verification.requests} documentUrls={verification.documentUrls} />}
-        investor={<InvestorPanel favorites={favorites} sent={inquiries.sent} />}
+        investor={<InvestorPanel favorites={favorites} sent={inquiries.sent} hiddenListingIds={hiddenSentListingIds} />}
       />
     </div>
   );

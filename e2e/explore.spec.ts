@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { expectNoHorizontalScroll, FICTIONAL_RIBBON, SEED_TITLES, waitForHydration } from './helpers';
+import { expectNoHorizontalScroll, FICTIONAL_RIBBON, OPEN_STATUS_LABEL, SAMPLE_STATUS_LABEL, SEED_TITLES, waitForHydration } from './helpers';
 
 // The explore page as an anonymous visitor. Requires the demo seed (npx supabase db reset).
 
@@ -15,11 +15,15 @@ test.describe('explore map (anonymous)', () => {
 
   test('shows the map and the 12 fictional demo listings, clearly labelled', async ({ page, isMobile }) => {
     const list = page.getByRole('complementary', { name: 'רשימת גגות' });
-    await expect(list.getByRole('article').filter({ hasText: FICTIONAL_RIBBON })).toHaveCount(SEED_TITLES.length);
+    const samples = list.getByRole('article').filter({ hasText: FICTIONAL_RIBBON });
+    await expect(samples).toHaveCount(SEED_TITLES.length);
     for (const title of SEED_TITLES) {
       await expect(list.getByRole('heading', { name: title, exact: true })).toBeVisible();
     }
     await expect(list.getByText(/12 מהם מודעות לדוגמה \(בדויות\)/)).toBeVisible();
+    // A sample listing cannot take inquiries, so its status is "sample listing", never "open to inquiries".
+    await expect(samples.locator('.badge.status')).toHaveText(Array<string>(SEED_TITLES.length).fill(SAMPLE_STATUS_LABEL));
+    await expect(samples.filter({ hasText: OPEN_STATUS_LABEL })).toHaveCount(0);
     await expectNoHorizontalScroll(page);
 
     if (isMobile) await page.getByRole('button', { name: 'מפה', exact: true }).click();
@@ -27,7 +31,10 @@ test.describe('explore map (anonymous)', () => {
     await expect(map.locator('.leaflet-container')).toBeVisible();
     // Every rooftop has a pin; the demo ones say they are fictional.
     await expect.poll(() => map.locator('.leaflet-marker-icon').count()).toBeGreaterThanOrEqual(SEED_TITLES.length);
-    await expect(map.locator(`.leaflet-marker-icon[title*="${FICTIONAL_RIBBON}"]`)).toHaveCount(SEED_TITLES.length);
+    const samplePins = map.locator(`.leaflet-marker-icon[title*="${FICTIONAL_RIBBON}"]`);
+    await expect(samplePins).toHaveCount(SEED_TITLES.length);
+    await expect(map.locator(`.leaflet-marker-icon[title*="${FICTIONAL_RIBBON}"][title*="${OPEN_STATUS_LABEL}"]`)).toHaveCount(0);
+    await expect(samplePins.first()).toHaveAttribute('title', new RegExp(` · ${SAMPLE_STATUS_LABEL} · `));
     await expectNoHorizontalScroll(page);
   });
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useId, useOptimistic, useTransition } from 'react';
+import { callAction } from '@/app/dashboard/_lib/callAction';
 import { setInquiryStatus } from '@/app/inquiries/actions';
 import { useApp } from '@/components/AppProvider';
 import { INQUIRY_STATUS } from '@/lib/labels';
@@ -17,9 +18,10 @@ export function InquiryStatusSelect({ inquiryId, status, label = 'עדכון ס�
 
   const change = (next: InquiryStatus) => {
     if (next === status) return;
+    // On failure the optimistic value falls back to `status` when the transition ends.
     startTransition(async () => {
       setShown(next);
-      const res = await setInquiryStatus(inquiryId, next);
+      const res = await callAction(() => setInquiryStatus(inquiryId, next));
       if (!res.ok) toast(res.error, 'error');
       else toast(`סטטוס הפנייה עודכן: ${INQUIRY_STATUS[next].label}`, 'info');
     });

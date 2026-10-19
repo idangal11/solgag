@@ -1,14 +1,32 @@
 'use client';
 
 import { CircleCheck, CircleX, ExternalLink, FileText, LoaderCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
 import { getVerificationDocumentUrl, reviewVerificationRequest } from '@/app/admin/actions';
 import { useApp } from '@/components/AppProvider';
 import { VERIFICATION } from '@/lib/labels';
+import { callAction } from './callAction';
 
-/** Document viewer + approve/reject controls for one pending ownership request. */
-export function VerificationReview({ requestId, listingTitle }: { requestId: string; listingTitle: string }) {
+/** review_verification's refusal wording (plus the way forward), shown before the admin even tries. */
+const LISTING_CHANGED = 'המודעה השתנתה מאז הגשת המסמך — לא ניתן לאשר את הבקשה הזו. אפשר לדחות אותה, והמפרסם יוכל להגיש מסמך מעודכן.';
+
+/**
+ * Document viewer + approve/reject controls for one pending ownership request.
+ * `canApprove` is false when the listing is no longer 'pending' (its owner changed
+ * the facts the document vouches for); the database refuses such an approval anyway.
+ */
+export function VerificationReview({
+  requestId,
+  listingTitle,
+  canApprove = true,
+}: {
+  requestId: string;
+  listingTitle: string;
+  canApprove?: boolean;
+}) {
   const { toast } = useApp();
+  const router = useRouter();
   const hintId = useId();
   const [note, setNote] = useState('');
   const [docLoading, setDocLoading] = useState(false);
@@ -22,11 +40,12 @@ export function VerificationReview({ requestId, listingTitle }: { requestId: str
     setDocLoading(true);
     // Open the tab inside the click (popup blockers allow it), then point it at the signed URL.
     const win = window.open('', '_blank');
-    const res = await getVerificationDocumentUrl(requestId).catch(() => ({ ok: false as const, error: 'החיבור לשרת נכשל. נסו שוב.' }));
+    const res = await callAction(() => getVerificationDocumentUrl(requestId));
     setDocLoading(false);
     if (!res.ok) {
       win?.close();
       setError(res.error);
+      if (res.stale) router.refresh();
       return;
     }
     setDocViewed(true);
@@ -45,13 +64,13 @@ export function VerificationReview({ requestId, listingTitle }: { requestId: str
     if (!window.confirm(question)) return;
     setError(null);
     startTransition(async () => {
-      const res = await reviewVerificationRequest({ requestId, approve, note }).catch(() => ({
-        ok: false as const,
-        error: 'החיבור לשרת נכשל. נסו שוב.',
-      }));
+      const res = await callAction(() => reviewVerificationRequest({ requestId, approve, note }));
       if (!res.ok) {
+        // Database messages (e.g. "the listing changed since submission") are shown as is.
         setError(res.error);
         toast(res.error, 'error');
+        // Already decided, auto-cancelled or refused because the listing changed: show the current queue.
+        if (res.stale) router.refresh();
         return;
       }
       toast(approve ? 'הבעלות אושרה והסימון במודעה עודכן' : 'הבקשה נדחתה והסימון במודעה עודכן');
@@ -101,8 +120,8 @@ export function VerificationReview({ requestId, listingTitle }: { requestId: str
           type="button"
           className="btn primary sm"
           onClick={() => decide(true)}
-          disabled={!docViewed || pending}
-          aria-describedby={docViewed ? undefined : hintId}
+          disabled={!canApprove || !docViewed || pending}
+          aria-describedby={canApprove && docViewed ? undefined : hintId}
         >
           {pending ? <LoaderCircle size={15} className="spin" aria-hidden /> : <CircleCheck size={15} aria-hidden />}
           אישור בעלות
@@ -110,10 +129,16 @@ export function VerificationReview({ requestId, listingTitle }: { requestId: str
         <button type="button" className="btn danger-ghost sm" onClick={() => decide(false)} disabled={pending}>
           <CircleX size={15} aria-hidden /> דחיית הבקשה
         </button>
-        {!docViewed && (
+        {!canApprove ? (
           <span className="hint" id={hintId}>
-            יש לצפות במסמך לפני אישור.
+            {LISTING_CHANGED}
           </span>
+        ) : (
+          !docViewed && (
+            <span className="hint" id={hintId}>
+              יש לצפות במסמך לפני אישור.
+            </span>
+          )
         )}
       </div>
     </div>

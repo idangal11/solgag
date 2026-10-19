@@ -9,7 +9,13 @@ export const contactSchema = z
   .string()
   .trim()
   .max(254)
-  .refine((v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || /^\+?[0-9\-\s]{9,15}$/.test(v), 'נא להזין טלפון או דוא״ל תקינים');
+  // Same strict address pattern the dashboard uses before turning a contact into a
+  // mailto: link, so values like "a@b.co?bcc=…" are rejected at the source.
+  .refine(
+    (v) =>
+      /^[A-Za-z0-9._+-]{1,64}@[A-Za-z0-9-]{1,63}(?:\.[A-Za-z0-9-]{1,63})*\.[A-Za-z]{2,24}$/.test(v) || /^\+?[0-9\-\s]{9,15}$/.test(v),
+    'נא להזין טלפון או דוא״ל תקינים',
+  );
 
 export const inquirySchema = z.object({
   listingId: z.uuid(),
@@ -44,7 +50,8 @@ export const listingSchema = z
     locality: trimmed(2, 80, 'נא להזין יישוב'),
     description: z.string().trim().max(3000, 'עד 3000 תווים'),
     location: latLng,
-    polygon: z.array(latLng).max(200),
+    // 200 vertices + the closing point = the DB cap (footprint_size_limit, ≤ 201 points).
+    polygon: z.array(latLng).max(200, 'השרטוט מורכב מדי: עד 200 נקודות'),
     areaSource: z.enum(['polygon', 'manual_measured', 'manual_estimate']),
     totalAreaSqm: z.number().min(50, 'השטח קטן מדי לגג מסחרי (פחות מ-50 מ״ר)').max(500000, 'שטח גדול מדי'),
     usableAreaSqm: z.number().positive(),

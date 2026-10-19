@@ -66,45 +66,78 @@ export async function compressImage(file: File): Promise<Blob> {
   throw new Error('too-large');
 }
 
+/** Outcome of a batch of photo operations; `reason` explains the first failure in Hebrew. */
+export interface ImageResult {
+  failed: number;
+  reason?: string;
+}
+
+type ApiError = { message?: string; statusCode?: string; status?: number; code?: string } | null;
+
+const hasHebrew = (s: string) => /[֐-׿]/.test(s);
+
+/** Storage / PostgREST error → a short Hebrew explanation. */
+function imageErrorReason(error: ApiError): string {
+  const message = error?.message ?? '';
+  const status = String(error?.statusCode ?? error?.status ?? '');
+  // Domain errors from the DB triggers (e.g. "up to 8 photos") are already in Hebrew.
+  if (hasHebrew(message)) return message;
+  if (status === '413' || /maximum allowed size|too large/i.test(message)) return 'הקובץ גדול מהמותר (עד 5MB לתמונה).';
+  if (status === '415' || /mime type/i.test(message)) return 'סוג הקובץ אינו נתמך (JPEG, PNG או WebP בלבד).';
+  if (status === '403' || error?.code === '42501' || /row-level security|unauthorized/i.test(message)) {
+    return 'השרת סירב לשמור את התמונה: ייתכן שהמודעה הגיעה למגבלת הקבצים, או שתוקף ההתחברות פג.';
+  }
+  return 'בעיית חיבור לשרת התמונות.';
+}
+
+/** Storage keys must stay "<uid>/<listing id>/<safe name>" — the only shape the storage policy accepts. */
+export function listingImagePath(userId: string, listingId: string, sortOrder: number): string {
+  return `${userId}/${listingId}/${sortOrder}-${crypto.randomUUID()}.jpg`;
+}
+
 /**
  * Uploads pending photos in order and records them in listing_images.
- * Returns how many failed; a failure never rolls back the listing itself.
+ * A failure never rolls back the listing itself.
  */
 export async function uploadListingImages(
   supabase: SupabaseClient,
   { userId, listingId, images, firstSortOrder }: { userId: string; listingId: string; images: PendingImage[]; firstSortOrder: number },
-): Promise<number> {
-  let failed = 0;
+): Promise<ImageResult> {
+  const result: ImageResult = { failed: 0 };
+  const fail = (error: ApiError) => {
+    result.failed++;
+    result.reason ??= imageErrorReason(error);
+  };
+  const bucket = supabase.storage.from(STORAGE_BUCKETS.listingImages);
   for (let i = 0; i < images.length; i++) {
     const sortOrder = Math.min(50, firstSortOrder + i);
-    const path = `${userId}/${listingId}/${sortOrder}-${crypto.randomUUID()}.jpg`;
-    const bucket = supabase.storage.from(STORAGE_BUCKETS.listingImages);
+    const path = listingImagePath(userId, listingId, sortOrder);
     const { error: uploadError } = await bucket.upload(path, images[i].blob, {
       contentType: 'image/jpeg',
       cacheControl: '31536000',
       upsert: false,
     });
     if (uploadError) {
-      failed++;
+      fail(uploadError as ApiError);
       continue;
     }
     const { error: rowError } = await supabase
       .from('listing_images')
       .insert({ listing_id: listingId, storage_path: path, sort_order: sortOrder });
     if (rowError) {
-      failed++;
+      fail(rowError);
       await bucket.remove([path]);
     }
   }
-  return failed;
+  return result;
 }
 
 /**
  * Deletes listing_images rows, then their files (the bucket is public, so the
- * file itself must go too). Returns how many photos were not fully removed.
+ * file itself must go too; owners may read and delete their own folder).
  */
-export async function removeListingImages(supabase: SupabaseClient, images: ExistingImage[]): Promise<number> {
-  if (!images.length) return 0;
+export async function removeListingImages(supabase: SupabaseClient, images: ExistingImage[]): Promise<ImageResult> {
+  if (!images.length) return { failed: 0 };
   const { data, error } = await supabase
     .from('listing_images')
     .delete()
@@ -113,13 +146,42 @@ export async function removeListingImages(supabase: SupabaseClient, images: Exis
       images.map((i) => i.id),
     )
     .select('id');
-  if (error) return images.length;
+  if (error) return { failed: images.length, reason: imageErrorReason(error) };
   const deleted = new Set((data ?? []).map((r: { id: string }) => r.id));
   const paths = images.filter((i) => deleted.has(i.id)).map((i) => i.path);
   let removedFiles = 0;
+  let storageError: ApiError = null;
   if (paths.length) {
-    const { data: files, error: storageError } = await supabase.storage.from(STORAGE_BUCKETS.listingImages).remove(paths);
-    removedFiles = storageError ? 0 : (files?.length ?? 0);
+    const res = await supabase.storage.from(STORAGE_BUCKETS.listingImages).remove(paths);
+    storageError = res.error as ApiError;
+    removedFiles = res.error ? 0 : (res.data?.length ?? 0);
   }
-  return images.length - Math.min(deleted.size, removedFiles);
+  const failed = images.length - Math.min(deleted.size, removedFiles);
+  if (!failed) return { failed: 0 };
+  return {
+    failed,
+    reason: deleted.size < images.length ? 'לא ניתן היה להסיר את התמונה מהמודעה.' : imageErrorReason(storageError ?? { status: 403 }),
+  };
+}
+
+/**
+ * Removes files in the listing's folder that no listing_images row references
+ * (left behind by an interrupted upload). The storage policy caps a folder at
+ * 12 files, so orphans would otherwise block new photos. Recent files are kept:
+ * another tab may be between its upload and its row insert. Best effort.
+ */
+export async function pruneOrphanFiles(supabase: SupabaseClient, { userId, listingId }: { userId: string; listingId: string }) {
+  const folder = `${userId}/${listingId}`;
+  const bucket = supabase.storage.from(STORAGE_BUCKETS.listingImages);
+  const [{ data: files, error: listError }, { data: rows, error: rowsError }] = await Promise.all([
+    bucket.list(folder, { limit: 100 }),
+    supabase.from('listing_images').select('storage_path').eq('listing_id', listingId),
+  ]);
+  if (listError || rowsError || !files) return;
+  const referenced = new Set((rows ?? []).map((r: { storage_path: string }) => r.storage_path));
+  const cutoff = Date.now() - 15 * 60 * 1000;
+  const orphans = files
+    .filter((f) => f.id && f.created_at && !referenced.has(`${folder}/${f.name}`) && Date.parse(f.created_at) < cutoff)
+    .map((f) => `${folder}/${f.name}`);
+  if (orphans.length) await bucket.remove(orphans);
 }

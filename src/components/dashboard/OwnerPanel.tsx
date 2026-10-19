@@ -14,7 +14,9 @@ interface Props {
 
 /** "בעלי גג" tab: KPIs, my listings with management, and inquiries received on them. */
 export function OwnerPanel({ listings, received, requests, documentUrls }: Props) {
-  const published = listings.filter((l) => l.status === 'published').length;
+  // A listing hidden by staff is not public, whatever its owner-set status.
+  const published = listings.filter((l) => l.status === 'published' && !l.adminHidden).length;
+  const staffHidden = listings.filter((l) => l.adminHidden).length;
   const fresh = received.filter((i) => i.status === 'new').length;
   const usable = listings.reduce((s, l) => s + l.usableAreaSqm, 0);
 
@@ -24,7 +26,10 @@ export function OwnerPanel({ listings, received, requests, documentUrls }: Props
         <div className="kpi">
           <span className="k">המודעות שלי</span>
           <span className="v">{listings.length}</span>
-          <small>מפורסמות: {published}</small>
+          <small>
+            מפורסמות: {published}
+            {staffHidden > 0 && ` · הוסתרו על ידי צוות האתר: ${staffHidden}`}
+          </small>
         </div>
         <div className="kpi">
           <span className="k">פניות שהתקבלו</span>

@@ -24,6 +24,8 @@ const RUN = Date.now().toString(36);
 const OWNER_NAME = 'בעלת גג לבדיקה';
 const INVESTOR_NAME = 'משקיע לבדיקה';
 const LISTING_PATH = /\/listing\/[0-9a-f-]{36}$/;
+/** The manual rooftop: 4,200 m² × 65% = 2,730 usable m² at a requested 18 ₪/m² a year. */
+const MANUAL_YEARLY_RENT = 18 * 2730;
 /** Stubbed address-search result: an industrial zone in Petah Tikva. */
 const PLACE = { label: 'קריית אריה, פתח תקווה', lat: 32.1037, lng: 34.8634 };
 
@@ -176,6 +178,11 @@ test.describe('owner ↔ investor journey', () => {
     await expect(calc).toContainText('לא תחזית, לא ייעוץ ולא הצעת השקעה');
     const capacity = calc.getByLabel('הספק מותקן משוער', { exact: true });
     await waitForHydration(capacity);
+    // The rooftop asks for a fixed rent, so the calculator starts in that model: 18 ₪/m² × 2,730 m² = 49,140 ₪ a year.
+    await expect(calc.getByRole('radio', { name: 'שכירות קבועה (₪)', exact: true })).toBeChecked();
+    await expect(calc.getByLabel('דמי שכירות שנתיים לבעלי הגג', { exact: true })).toHaveValue(String(MANUAL_YEARLY_RENT));
+    await expect(calc.getByLabel('חלק בעלי הגג מהתזרים', { exact: true })).toHaveCount(0);
+    await expect(calc.locator('.split-col.owner .v')).toContainText(MANUAL_YEARLY_RENT.toLocaleString('en-US'));
     await capacity.fill('490');
     await calc.getByLabel('תפוקה שנתית לכל kW', { exact: true }).fill('1650');
     await calc.getByLabel('מחיר מכירת חשמל', { exact: true }).fill('0.3');
@@ -252,5 +259,12 @@ test.describe('owner ↔ investor journey', () => {
     await expect(page.getByRole('listitem').filter({ hasText: replyText })).toBeVisible();
     // The sender cannot change the status — only the listing owner sees that control.
     await expect(page.getByRole('combobox', { name: 'סטטוס הפנייה' })).toHaveCount(0);
+  });
+
+  test('after signing in again, the saved rooftop is shown as saved straight away', async ({ page }) => {
+    // A fresh browser and the in-page code sign-in: favorites must be loaded for the account that just signed in.
+    await loginWithEmailOtp(page, investorEmail, { next: manualListingPath });
+    await expect(page.getByRole('heading', { level: 1, name: manualTitle })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'שמור במועדפים' })).toHaveAttribute('aria-pressed', 'true');
   });
 });

@@ -1,8 +1,9 @@
 'use client';
 
-import { Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, Pencil, ShieldAlert, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useId, useRef, useState, useTransition } from 'react';
+import { callAction } from '@/app/dashboard/_lib/callAction';
 import { deleteListing, setListingStatus } from '@/app/dashboard/actions';
 import { useApp } from '@/components/AppProvider';
 import { ListingCard } from '@/components/ListingCard';
@@ -25,19 +26,28 @@ export function MyListingItem({ listing, requests, documentUrls }: Props) {
   const [confirming, setConfirming] = useState(false);
   const cancelBtn = useRef<HTMLButtonElement>(null);
   const deleteBtn = useRef<HTMLButtonElement>(null);
-  const published = listing.status === 'published';
+  // Staff moderation wins over the owner's own publish/hide choice: the DB keeps
+  // an admin-hidden listing out of search, the map and new inquiries whatever its status.
+  const adminHidden = listing.adminHidden;
+  const published = listing.status === 'published' && !adminHidden;
 
   useEffect(() => {
     if (confirming) cancelBtn.current?.focus();
   }, [confirming]);
 
-  const toggle = () =>
+  const toggle = () => {
+    if (adminHidden) return;
     startTransition(async () => {
       const next = published ? 'hidden' : 'published';
-      const res = await setListingStatus(listing.id, next);
-      if (!res.ok) toast(res.error, 'error');
-      else toast(next === 'hidden' ? 'המודעה הוסתרה מהחיפוש ומהמפה' : 'המודעה פורסמה מחדש', 'info');
+      const res = await callAction(() => setListingStatus(listing.id, next));
+      if (!res.ok) {
+        toast(
+          res.reason === 'network' ? 'החיבור לשרת נכשל, וייתכן שמצב הפרסום לא עודכן. רעננו את העמוד כדי לראות את המצב העדכני.' : res.error,
+          'error',
+        );
+      } else toast(next === 'hidden' ? 'המודעה הוסתרה מהחיפוש ומהמפה' : 'המודעה פורסמה מחדש', 'info');
     });
+  };
 
   const closeConfirm = () => {
     setConfirming(false);
@@ -46,9 +56,12 @@ export function MyListingItem({ listing, requests, documentUrls }: Props) {
 
   const remove = () =>
     startTransition(async () => {
-      const res = await deleteListing(listing.id);
+      const res = await callAction(() => deleteListing(listing.id));
       if (!res.ok) {
-        toast(res.error, 'error');
+        toast(
+          res.reason === 'network' ? 'החיבור לשרת נכשל, וייתכן שהמודעה לא נמחקה. רעננו את העמוד כדי לראות את המצב העדכני.' : res.error,
+          'error',
+        );
         return;
       }
       toast('המודעה נמחקה');
@@ -60,30 +73,45 @@ export function MyListingItem({ listing, requests, documentUrls }: Props) {
       <ListingCard listing={listing} />
       <div className="dash-manage" role="group" aria-label={`ניהול המודעה ${listing.title}`}>
         <div className="dash-manage-top">
-          <Tag tone={published ? 'ok' : 'muted'} icon={published ? <Eye size={14} aria-hidden /> : <EyeOff size={14} aria-hidden />}>
-            {published ? 'מפורסמת' : 'מוסתרת'}
-          </Tag>
+          {adminHidden ? (
+            <Tag tone="bad" icon={<ShieldAlert size={14} aria-hidden />}>
+              הוסתרה על ידי צוות האתר
+            </Tag>
+          ) : (
+            <Tag tone={published ? 'ok' : 'muted'} icon={published ? <Eye size={14} aria-hidden /> : <EyeOff size={14} aria-hidden />}>
+              {published ? 'מפורסמת' : 'מוסתרת'}
+            </Tag>
+          )}
           <span className="tiny muted" suppressHydrationWarning>
             עודכנה {fmtDate(listing.updatedAt)}
           </span>
         </div>
-        {!published && (
-          <p className="hint">המודעה מוסתרת: היא אינה מופיעה בחיפוש ובמפה, ולא ניתן לשלוח עליה פניות חדשות. שיחות קיימות ממשיכות.</p>
+        {adminHidden ? (
+          <p className="hint dash-admin-hidden">
+            צוות האתר הסתיר את המודעה: היא אינה מופיעה בחיפוש ובמפה, ולא ניתן לשלוח עליה פניות חדשות. שיחות קיימות ממשיכות. אי אפשר לפרסם
+            אותה מחדש מכאן — לבירור אפשר לפנות לצוות האתר (פרטי הקשר בעמוד <Link href="/about#contact-title">אודות</Link>).
+          </p>
+        ) : (
+          !published && (
+            <p className="hint">המודעה מוסתרת: היא אינה מופיעה בחיפוש ובמפה, ולא ניתן לשלוח עליה פניות חדשות. שיחות קיימות ממשיכות.</p>
+          )
         )}
         <div className="dash-btns">
           <Link className="btn ghost sm" href={`/listing/${listing.id}/edit`} aria-label={`עריכה — ${listing.title}`}>
             <Pencil size={15} aria-hidden /> עריכה
           </Link>
-          <button
-            type="button"
-            className="btn ghost sm"
-            onClick={toggle}
-            disabled={pending}
-            aria-label={`${published ? 'הסתרה' : 'פרסום מחדש'} — ${listing.title}`}
-          >
-            {published ? <EyeOff size={15} aria-hidden /> : <Eye size={15} aria-hidden />}
-            {published ? 'הסתרה' : 'פרסום מחדש'}
-          </button>
+          {!adminHidden && (
+            <button
+              type="button"
+              className="btn ghost sm"
+              onClick={toggle}
+              disabled={pending}
+              aria-label={`${published ? 'הסתרה' : 'פרסום מחדש'} — ${listing.title}`}
+            >
+              {published ? <EyeOff size={15} aria-hidden /> : <Eye size={15} aria-hidden />}
+              {published ? 'הסתרה' : 'פרסום מחדש'}
+            </button>
+          )}
           <button
             ref={deleteBtn}
             type="button"
@@ -111,8 +139,8 @@ export function MyListingItem({ listing, requests, documentUrls }: Props) {
           >
             <b id={`${id}-del-t`}>למחוק את המודעה לצמיתות?</b>
             <p id={`${id}-del-d`} className="small">
-              המחיקה תסיר גם את התמונות, את הפניות וההודעות שהתקבלו על המודעה ואת בקשות אימות הבעלות. לא ניתן לשחזר. כדי רק להפסיק לקבל פניות
-              אפשר להסתיר את המודעה.
+              המחיקה תסיר גם את התמונות, את הפניות וההודעות שהתקבלו על המודעה ואת בקשות אימות הבעלות. לא ניתן לשחזר.
+              {!adminHidden && ' כדי רק להפסיק לקבל פניות אפשר להסתיר את המודעה.'}
             </p>
             <div className="dash-btns">
               <button type="button" className="btn sm dash-btn-danger" onClick={remove} disabled={pending}>

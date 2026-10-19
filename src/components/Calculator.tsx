@@ -192,7 +192,16 @@ export function Calculator({
                     name="split-mode"
                     value={m.value}
                     checked={mode === m.value}
-                    onChange={() => setInputs((p) => ({ ...p, splitMode: m.value }))}
+                    onChange={() =>
+                      setInputs((p) => ({
+                        ...p,
+                        splitMode: m.value,
+                        // Switching to fixed rent with no rent yet: start from an illustrative
+                        // ₪15 per usable m² per year instead of a meaningless ₪0.
+                        ownerFixedRentIls:
+                          m.value === 'fixed_rent' && !p.ownerFixedRentIls ? Math.round((usableAreaSqm * 15) / 1000) * 1000 : p.ownerFixedRentIls,
+                      }))
+                    }
                   />
                   {m.label}
                 </label>

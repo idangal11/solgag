@@ -10,11 +10,12 @@ import {
   Map as MapIcon,
   Search,
   ShieldCheck,
+  TriangleAlert,
   Warehouse,
 } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { EmailLink, Fill, OPERATOR } from '@/components/site/legalInfo';
+import { contactEmailsPending, EmailLink, Fill, OPERATOR } from '@/components/site/legalInfo';
 import { TrustLabels } from '@/components/site/TrustLabels';
 import { AGREEMENT_HINT, AGREEMENT_LABEL, TECH_ASSESSMENT, VERIFICATION } from '@/lib/labels';
 import type { AgreementModel } from '@/lib/types';
@@ -45,9 +46,9 @@ const DOES = [
   'מציגה על מפה וברשימה מודעות שבעלי גגות פרסמו.',
   'מחשבת את שטח הגג מהשרטוט של המפרסם. השרטוט עצמו אינו מדידה.',
   'מאפשרת לשלוח פניות ולהתכתב, ושולחת התראה בדוא״ל על פנייה או הודעה חדשה.',
-  'בודקת מסמכי בעלות או הרשאה כשהבעלים בוחרים להגיש אותם, ומסמנת את התוצאה במודעה.',
+  'בודקת מסמכי בעלות או הרשאה כשהבעלים בוחרים להגיש אותם, ומסמנת את התוצאה במודעה. הסימון מתבטל אם המפרסם משנה אחר כך את מיקום המבנה, את גבולות הגג, את היישוב או את שם המפרסם.',
   'מסמנת במפורש מודעות לדוגמה (בדויות) וגבולות להמחשה.',
-  'מסתירה או מסירה תוכן שמפר את תנאי השימוש.',
+  'מסתירה מודעות שמפרות את תנאי השימוש — מודעה מוסתרת אינה מוצגת ואי אפשר לפנות אליה — ומוחקת אותן כשצריך, יחד עם התמונות והמסמכים שלהן.',
 ];
 
 const DOES_NOT = [
@@ -167,17 +168,30 @@ export default function AboutPage() {
         <TrustLabels />
       </section>
 
-      <section className="about-section" aria-labelledby="contact-title">
+      <section className="about-section" id="contact" aria-labelledby="contact-title">
         <h2 id="contact-title">
           <Mail size={20} aria-hidden /> יצירת קשר
         </h2>
         <div className="card-surface about-contact">
           <p>
-            שאלות, דיווח על מודעה בעייתית או בקשה למחיקת חשבון: <EmailLink value={OPERATOR.contactEmail} />
+            <b>שאלות ודיווח על מודעה בעייתית:</b> <EmailLink value={OPERATOR.contactEmail} />
           </p>
           <p>
-            בקשות בנושא פרטיות: <EmailLink value={OPERATOR.privacyEmail} />
+            <b>מחיקת חשבון:</b> אפשר למחוק בעצמכם בעמוד <Link href="/account">החשבון שלי</Link>, תחת &quot;מחיקת חשבון&quot;. אם המחיקה האוטומטית אינה זמינה,
+            כתבו אל <EmailLink value={OPERATOR.contactEmail} /> ונמחק את החשבון עבורכם.
           </p>
+          <p>
+            <b>בקשות בנושא פרטיות:</b> <EmailLink value={OPERATOR.privacyEmail} />
+          </p>
+          {contactEmailsPending && (
+            <div className="draft-note" role="note">
+              <TriangleAlert size={18} aria-hidden />
+              <p>
+                כתובות הדוא״ל לפניות טרם הוגדרו, והן יושלמו לפני ההשקה הציבורית. עד אז אפשר לעדכן פרטים ולמחוק את החשבון בעמוד{' '}
+                <Link href="/account">החשבון שלי</Link>, ולהסתיר או למחוק מודעות <Link href="/dashboard">באזור האישי</Link>.
+              </p>
+            </div>
+          )}
           <p className="muted small">
             השירות מופעל על ידי <Fill value={OPERATOR.name} />. ראו גם <Link href="/terms">תנאי שימוש</Link> ו<Link href="/privacy">מדיניות פרטיות</Link>.
           </p>

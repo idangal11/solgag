@@ -1,9 +1,10 @@
-import { Search, Wrench } from 'lucide-react';
+import { Search, ShieldAlert, Wrench } from 'lucide-react';
 import type { Metadata } from 'next';
 import Form from 'next/form';
 import Link from 'next/link';
-import { LISTING_STATUS_LABEL } from '@/components/admin/labels';
+import { VISIBILITY_LABEL } from '@/components/admin/labels';
 import { ListingAdminRow } from '@/components/admin/ListingAdminRow';
+import type { ListingVisibility } from '@/components/admin/types';
 import { Tag } from '@/components/ui';
 import { fmtNum, TECH_ASSESSMENT } from '@/lib/labels';
 import type { TechAssessment } from '@/lib/types';
@@ -15,12 +16,18 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? '';
 
+const VISIBILITY_VALUES = Object.keys(VISIBILITY_LABEL) as ListingVisibility[];
+/** Links from before the staff/owner split (?status=published|hidden). */
+const LEGACY_STATUS: Record<string, ListingVisibility> = { published: 'public', hidden: 'owner_hidden' };
+
 function parseFilters(sp: Awaited<SearchParams>): ListingFilters {
-  const status = first(sp.status);
+  const visibility = first(sp.visibility) || first(sp.status);
   const kind = first(sp.kind);
   return {
     q: first(sp.q).trim().slice(0, 80),
-    status: status === 'published' || status === 'hidden' ? status : 'all',
+    visibility: (VISIBILITY_VALUES as string[]).includes(visibility)
+      ? (visibility as ListingVisibility)
+      : (LEGACY_STATUS[visibility] ?? 'all'),
     kind: kind === 'real' || kind === 'fictional' ? kind : 'all',
   };
 }
@@ -36,7 +43,7 @@ export default async function AdminListingsPage({ searchParams }: { searchParams
   await requireAdmin();
   const filters = parseFilters(await searchParams);
   const { rows, total } = await getAdminListings(filters);
-  const filtered = filters.q !== '' || filters.status !== 'all' || filters.kind !== 'all';
+  const filtered = filters.q !== '' || filters.visibility !== 'all' || filters.kind !== 'all';
 
   return (
     <>
@@ -47,17 +54,28 @@ export default async function AdminListingsPage({ searchParams }: { searchParams
         </div>
       </div>
 
+      <p className="note admin-guidance">
+        <ShieldAlert size={15} aria-hidden />
+        <span>
+          „הסתרה” כאן היא הסתרה של צוות האתר: המודעה לא מוצגת לציבור ולא מקבלת פניות חדשות, והמפרסם לא יכול לבטל אותה. היא
+          נפרדת מהסטטוס שהמפרסם בוחר בעצמו (מפורסמת/מוסתרת), שאינו משתנה כאן — ביטול ההסתרה מחזיר את המודעה למצב שהמפרסם בחר.
+        </span>
+      </p>
+
       <Form action="/admin/listings" className="admin-filters" role="search" aria-label="סינון מודעות">
         <label className="field grow">
           <span>חיפוש</span>
           <input type="search" name="q" defaultValue={filters.q} placeholder="כותרת, יישוב או שם מפרסם" maxLength={80} />
         </label>
         <label className="field">
-          <span>סטטוס</span>
-          <select name="status" defaultValue={filters.status}>
+          <span>נראות</span>
+          <select name="visibility" defaultValue={filters.visibility}>
             <option value="all">הכול</option>
-            <option value="published">{LISTING_STATUS_LABEL.published}</option>
-            <option value="hidden">{LISTING_STATUS_LABEL.hidden}</option>
+            {VISIBILITY_VALUES.map((v) => (
+              <option key={v} value={v}>
+                {VISIBILITY_LABEL[v]}
+              </option>
+            ))}
           </select>
         </label>
         <label className="field">
@@ -109,7 +127,8 @@ export default async function AdminListingsPage({ searchParams }: { searchParams
             <thead>
               <tr>
                 <th scope="col">מודעה</th>
-                <th scope="col">סטטוס</th>
+                <th scope="col">סטטוס המפרסם</th>
+                <th scope="col">הסתרת צוות</th>
                 <th scope="col">סוג</th>
                 <th scope="col">אימות בעלות</th>
                 <th scope="col">התאמה טכנית</th>

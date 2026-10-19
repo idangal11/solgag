@@ -12,15 +12,27 @@
 .listing-page .listing-banner {
   margin-bottom: 14px;
 }
+.listing-page .listing-banner-mod {
+  background: #fdecea;
+  color: #8a1c13;
+}
+.listing-page .listing-banner-mod a {
+  color: inherit;
+  font-weight: 700;
+}
 .listing-page .detail-head .badges {
   flex-wrap: wrap;
 }
 
-/* Hero gallery: keep many thumbnails inside the photo */
+/* Hero gallery: keep many thumbnails inside the photo.
+   The strip scrolls (overflow clips), so it gets 6px of padding — cancelled by an
+   equal negative margin — to leave room for the focus ring (2px offset + 3px). */
 .listing-page .thumbs {
-  max-width: calc(100% - 20px);
+  max-width: calc(100% - 8px);
   overflow-x: auto;
   scrollbar-width: none;
+  padding: 6px;
+  margin: -6px;
 }
 .listing-page .thumbs::-webkit-scrollbar {
   display: none;
@@ -45,6 +57,13 @@
 }
 
 /* Mini map */
+/* The Leaflet container is focusable (arrow-key panning), but its own ring is clipped by
+   .mini-map's overflow and painted under the tiles — draw the ring on the wrapper. */
+.listing-page .mini-map:has(.leaflet-container:focus-visible) {
+  outline: 3px solid var(--green-700);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px rgba(245, 184, 28, 0.55);
+}
 .listing-page .mini-map-loading {
   height: 100%;
   display: grid;
@@ -90,6 +109,9 @@
 .listing-page .inq-done h2:focus {
   outline: none;
 }
+.listing-page .inq-loading {
+  color: #fff;
+}
 
 /* Tablet / mobile: the fixed action bar must not cover the page end or the footer. */
 @media (max-width: 1100px) {
@@ -121,7 +143,72 @@
     width: 44px;
     height: 34px;
   }
+  /* A wide thumbnail strip would cover the "sample" / "your listing" ribbon at the bottom.
+     Thumbnails only exist with 2+ photos, when the top-corner image note is absent. */
+  .listing-page .hero-media.has-thumbs .ribbon {
+    top: 12px;
+    bottom: auto;
+  }
   .listing-page .mini-map {
     height: 240px;
+  }
+}
+
+/* ---------- Route loading skeleton (loading.tsx) ---------- */
+.listing-skel .skel {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, #eef1ef 25%, #f6f8f6 50%, #eef1ef 75%);
+  background-size: 200% 100%;
+  animation: listing-shimmer 1.2s linear infinite;
+}
+.listing-skel .skel-back {
+  width: 110px;
+  height: 18px;
+  margin-bottom: 14px;
+}
+.listing-skel .hero-media.skel {
+  border-radius: var(--radius);
+  box-shadow: none;
+}
+.listing-skel .skel-chip {
+  width: 150px;
+  height: 22px;
+  border-radius: 999px;
+}
+.listing-skel .skel-title {
+  width: min(70%, 420px);
+  height: 30px;
+}
+.listing-skel .skel-line {
+  width: min(45%, 260px);
+  height: 16px;
+}
+.listing-skel .skel-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.listing-skel .stat.skel {
+  min-height: 86px;
+  border: 0;
+}
+.listing-skel .skel-card {
+  min-height: 220px;
+  border-radius: var(--radius);
+}
+.listing-skel .action-card.skel {
+  min-height: 300px;
+  border: 0;
+}
+.listing-skel .skel-status {
+  margin: 0;
+}
+.listing-skel .skel-steps {
+  height: 44px;
+  margin-bottom: 16px;
+}
+@keyframes listing-shimmer {
+  to {
+    background-position: -200% 0;
   }
 }

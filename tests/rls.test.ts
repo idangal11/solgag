@@ -12,7 +12,11 @@
  * The suite creates and deletes users, so it refuses a non-local URL unless RLS_ALLOW_REMOTE=1.
  * Everything it creates (users → listings/inquiries/favorites by cascade, uploaded files,
  * a fallback fictional listing) is removed in afterAll.
+ *
+ * Listing fixtures are created with the service role (seedListing): an API user may only
+ * publish 5 listings per hour, so insertListing() is reserved for tests about that path.
  */
+import { randomUUID } from 'node:crypto';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { pointEWKT, polygonAreaSqm, polygonEWKT } from '@/lib/geo';
@@ -39,6 +43,16 @@ const EARTH_RADIUS_M = 6_371_008.8;
 const DEG = Math.PI / 180;
 const POINT: LatLng = [32.09025, 34.8803]; // industrial zone, Petah Tikva
 
+// Messages raised by the listings_guard trigger (supabase/migrations/20261019010000_review_fixes.sql).
+const MSG = {
+  footprintTooComplex: 'פוליגון הגג מורכב מדי (עד 200 נקודות, ללא חורים)',
+  hourlyLimit: 'פרסמת מודעות רבות בזמן קצר. נסו שוב מאוחר יותר.',
+  dailyLimit: 'הגעת למספר המודעות המרבי ליום. נסו שוב מחר.',
+  accountLimit: 'הגעת למספר המודעות המרבי לחשבון. פנו אלינו להגדלת המכסה.',
+  approveChangedListing: 'המודעה השתנתה מאז הגשת המסמך — לא ניתן לאשר את הבקשה הזו',
+  requestNotPending: 'הבקשה לא נמצאה או שכבר נבדקה',
+} as const;
+
 /** widthM (east–west) × heightM (north–south) rectangle with its south-west corner at `sw`. */
 function rectangle([lat, lng]: LatLng, widthM: number, heightM: number): LatLng[] {
   const dLat = heightM / (EARTH_RADIUS_M * DEG);
@@ -50,6 +64,24 @@ function rectangle([lat, lng]: LatLng, widthM: number, heightM: number): LatLng[
     [lat + dLat, lng],
   ];
 }
+
+/** A regular n-gon of radius `radiusM` around `center` (a valid, convex ring). */
+function circle([lat, lng]: LatLng, radiusM: number, n: number): LatLng[] {
+  const dLat = radiusM / (EARTH_RADIUS_M * DEG);
+  const dLng = radiusM / (EARTH_RADIUS_M * Math.cos(lat * DEG) * DEG);
+  return Array.from({ length: n }, (_, i) => {
+    const a = (2 * Math.PI * i) / n;
+    return [lat + dLat * Math.sin(a), lng + dLng * Math.cos(a)] as LatLng;
+  });
+}
+
+/** EWKT polygon with one or more rings (the first is the outer boundary, the rest are holes). */
+function polygonWithRingsEWKT(...rings: LatLng[][]): string {
+  const ringText = (ring: LatLng[]) => `(${[...ring, ring[0]].map(([lat, lng]) => `${lng} ${lat}`).join(',')})`;
+  return `SRID=4326;POLYGON(${rings.map(ringText).join(',')})`;
+}
+
+const hoursAgo = (h: number) => new Date(Date.now() - h * 3_600_000).toISOString();
 
 // 1×1 transparent PNG and a minimal PDF — Storage checks the declared MIME type, not the bytes.
 const PNG = Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64'));
@@ -86,6 +118,7 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
   let spammer: TestUser;
 
   let openListing: string; // real, published, available listing of `owner`
+  let investorListing: string; // a listing of `investor` (so `investor` has an own upload folder)
   let fictionalListing: string;
 
   const userIds: string[] = [];
@@ -110,10 +143,36 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
     };
   }
 
+  /** Through the API as `user` — counts towards that user's listing rate limit (5 per hour). */
   async function insertListing(user: TestUser, over: Record<string, unknown> = {}): Promise<string> {
     const { data, error } = await user.client.from('listings').insert(listingRow(over)).select('id').single();
     if (error) throw new Error(`insert listing failed: ${error.message}`);
     return (data as { id: string }).id;
+  }
+
+  /**
+   * Fixture listing of `user`, created with the service role: no rate limit, and trust columns
+   * (owner_verification, tech_assessment, created_at …) are stored as given. It is dated two days
+   * back by default, so fixtures never count towards the user's hourly or daily listing limit.
+   */
+  async function seedListing(user: TestUser, over: Record<string, unknown> = {}): Promise<string> {
+    const { data, error } = await db
+      .from('listings')
+      .insert({ ...listingRow({ created_at: hoursAgo(48), ...over }), owner_id: user.id })
+      .select('id')
+      .single();
+    if (error) throw new Error(`seed listing failed: ${error.message}`);
+    return (data as { id: string }).id;
+  }
+
+  /** `count` hidden fixture listings of `user` created `createdHoursAgo` hours ago. */
+  async function seedManyListings(user: TestUser, count: number, createdHoursAgo: number) {
+    const rows = Array.from({ length: count }, (_, i) => ({
+      ...listingRow({ title: `גג ותיק ${i + 1} ${RUN}`, status: 'hidden', created_at: hoursAgo(createdHoursAgo) }),
+      owner_id: user.id,
+    }));
+    const { error } = await db.from('listings').insert(rows);
+    if (error) throw new Error(`seed ${count} listings failed: ${error.message}`);
   }
 
   /** The row as stored, read with the service role. */
@@ -121,6 +180,12 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
     const { data, error } = await db.from(table).select(columns).eq('id', id).single();
     if (error) throw new Error(`read ${table} ${id}: ${error.message}`);
     return data as unknown as Record<string, unknown>;
+  }
+
+  /** Service-role write used to put a fixture into a state an API user cannot reach. */
+  async function forceListing(id: string, values: Record<string, unknown>) {
+    const { error } = await db.from('listings').update(values).eq('id', id);
+    if (error) throw new Error(`force listing ${id}: ${error.message}`);
   }
 
   function inquiryRow(listingId: string, sender: TestUser, over: Record<string, unknown> = {}) {
@@ -154,15 +219,47 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
   async function upload(user: TestUser | null, bucket: string, path: string, body: Uint8Array, contentType: string) {
     const client = user?.client ?? anon;
     const res = await client.storage.from(bucket).upload(path, body, { contentType, upsert: false });
-    if (!res.error) uploads.push({ bucket, path });
+    // Clean up by the key Storage actually stored (it may normalise the path we sent).
+    const stored = res.data?.fullPath?.startsWith(`${bucket}/`) ? res.data.fullPath.slice(bucket.length + 1) : path;
+    if (!res.error) uploads.push({ bucket, path: stored });
     return res;
   }
+
+  /** Storage refused the upload by policy — not merely because that file name is already taken. */
+  function expectUploadRefused(res: { error: DbError | null }) {
+    expectRefused(res);
+    expect(res.error?.message).not.toMatch(/already exists|duplicate/i);
+  }
+
+  const uploadPhoto = (user: TestUser | null, path: string) => upload(user, 'listing-images', path, PNG, 'image/png');
+  const uploadDoc = (user: TestUser | null, path: string) => upload(user, 'ownership-docs', path, PDF, 'application/pdf');
 
   async function fileExists(bucket: string, path: string): Promise<boolean> {
     const slash = path.lastIndexOf('/');
     const { data, error } = await db.storage.from(bucket).list(path.slice(0, slash), { search: path.slice(slash + 1) });
     if (error) throw new Error(`list ${bucket}: ${error.message}`);
     return (data ?? []).some((f) => f.name === path.slice(slash + 1));
+  }
+
+  /** File names in a folder, as `client` is allowed to list them. */
+  async function listNames(client: SupabaseClient, bucket: string, folder: string): Promise<string[]> {
+    const { data, error } = await client.storage.from(bucket).list(folder, { limit: 100 });
+    if (error) return [];
+    return (data ?? []).filter((f) => f.id).map((f) => f.name);
+  }
+
+  /** The owner uploads a document and submits it for `listingId`; returns the request id. */
+  async function submitVerification(listingId: string, label: string): Promise<string> {
+    const path = `${owner.id}/${listingId}/${label}-${RUN}.pdf`;
+    expectOk(await uploadDoc(owner, path));
+    const res = await owner.client
+      .from('verification_requests')
+      .insert({ listing_id: listingId, owner_id: owner.id, document_path: path })
+      .select('id')
+      .single();
+    expectOk(res);
+    expect((await stored('listings', listingId)).owner_verification).toBe('pending');
+    return (res.data as { id: string }).id;
   }
 
   beforeAll(async () => {
@@ -184,7 +281,8 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
     const { error: adminError } = await db.from('profiles').update({ is_admin: true }).eq('id', adminUser.id);
     if (adminError) throw new Error(`could not make the admin user: ${adminError.message}`);
 
-    openListing = await insertListing(owner, { agreement: 'fixed_rent', rent_per_sqm_year: 18 });
+    openListing = await seedListing(owner, { agreement: 'fixed_rent', rent_per_sqm_year: 18 });
+    investorListing = await seedListing(investor, { title: `גג של המשקיעה ${RUN}`, status: 'hidden' });
 
     // Prefer a seeded demo listing; create one only if the seed was not loaded.
     const { data: seeded } = await db
@@ -225,13 +323,26 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
   // ─── Listings ───────────────────────────────────────────────────────
   describe('listings', () => {
     it('anon can read published listings (table and listing_feed)', async () => {
-      const feed = await anon.from('listing_feed').select('id, is_mine, status, owner_verification').eq('id', openListing).single();
+      const feed = await anon.from('listing_feed').select('id, is_mine, status, owner_verification, admin_hidden').eq('id', openListing).single();
       expectOk(feed);
-      expect(feed.data).toMatchObject({ id: openListing, is_mine: false, status: 'published', owner_verification: 'not_verified' });
+      expect(feed.data).toMatchObject({ id: openListing, is_mine: false, status: 'published', owner_verification: 'not_verified', admin_hidden: false });
 
       const table = await anon.from('listings').select('id').eq('status', 'published').limit(5);
       expectOk(table);
       expect(table.data?.length).toBeGreaterThan(0);
+    });
+
+    it('anon cannot read, or filter by, the owner’s account id — listing_feed does not expose it', async () => {
+      expectRefused(await anon.from('listings').select('id, owner_id').eq('id', openListing), '42501');
+      expectRefused(await anon.from('listings').select('id').eq('owner_id', owner.id), '42501');
+
+      const feed = await anon.from('listing_feed').select('*').eq('id', openListing).single();
+      expectOk(feed);
+      expect(feed.data).not.toHaveProperty('owner_id');
+      expect(feed.data).toMatchObject({ id: openListing, is_mine: false });
+
+      // Signed-in owners still see their own listings as theirs.
+      expect((await owner.client.from('listing_feed').select('is_mine').eq('id', openListing).single()).data).toEqual({ is_mine: true });
     });
 
     it('anon cannot create, change or delete listings', async () => {
@@ -250,6 +361,7 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
             is_fictional: true,
             polygon_illustrative: true,
             tech_assessment: 'assessed',
+            admin_hidden: true,
             created_at: '2001-01-01T00:00:00Z',
             declaration_accepted_at: '2001-01-01T00:00:00Z',
           }),
@@ -264,6 +376,7 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
         is_fictional: false,
         polygon_illustrative: false,
         tech_assessment: 'not_assessed',
+        admin_hidden: false,
       });
       // The server stamps the declaration and creation time itself.
       expect(new Date(String(row.declaration_accepted_at)).getFullYear()).toBeGreaterThan(2001);
@@ -274,13 +387,14 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
     });
 
     it('an owner cannot create a listing in someone else’s name', async () => {
-      const res = await owner.client.from('listings').insert(listingRow({ owner_id: investor.id })).select('id').single();
+      const title = `גג בשם של אחר ${RUN}`;
+      const res = await owner.client.from('listings').insert(listingRow({ title, owner_id: investor.id })).select('id').single();
       if (!res.error) expect((await stored('listings', (res.data as { id: string }).id)).owner_id).toBe(owner.id);
-      const { count } = await db.from('listings').select('id', { count: 'exact', head: true }).eq('owner_id', investor.id);
+      const { count } = await db.from('listings').select('id', { count: 'exact', head: true }).eq('owner_id', investor.id).eq('title', title);
       expect(count).toBe(0);
     });
 
-    it('an owner cannot mark their own listing verified, fictional or engineering-assessed', async () => {
+    it('an owner cannot mark their own listing verified, fictional, engineering-assessed or un-moderated', async () => {
       await owner.client
         .from('listings')
         .update({
@@ -288,6 +402,7 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
           is_fictional: true,
           polygon_illustrative: true,
           tech_assessment: 'assessed',
+          admin_hidden: true,
           owner_id: investor.id,
         })
         .eq('id', openListing);
@@ -297,6 +412,7 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
         is_fictional: false,
         polygon_illustrative: false,
         tech_assessment: 'not_assessed',
+        admin_hidden: false,
       });
 
       // Ordinary fields and the self-reported tech status stay editable.
@@ -336,8 +452,42 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
       expectRefused(noShape, '22023');
     });
 
+    it('accepts a roof outline of up to 200 points and refuses a larger one in Hebrew', async () => {
+      const ok = await stranger.client
+        .from('listings')
+        .insert(listingRow({ title: `גג מעוגל ${RUN}`, area_source: 'polygon', footprint: polygonEWKT(circle(POINT, 60, 200)) }))
+        .select('id')
+        .single();
+      expectOk(ok);
+
+      const tooMany = await owner.client
+        .from('listings')
+        .insert(listingRow({ area_source: 'polygon', footprint: polygonEWKT(circle(POINT, 60, 201)) }));
+      expectRefused(tooMany, '22023');
+      expect(tooMany.error?.message).toBe(MSG.footprintTooComplex);
+
+      // The limit also applies to edits, and to an outline sent without area_source = 'polygon'.
+      const edit = await owner.client
+        .from('listings')
+        .update({ footprint: polygonEWKT(circle(POINT, 60, 5000)) })
+        .eq('id', openListing);
+      expectRefused(edit, '22023');
+      expect(edit.error?.message).toBe(MSG.footprintTooComplex);
+      expect((await stored('listings', openListing)).footprint).toBeNull();
+    });
+
+    it('refuses a roof outline with holes (more than one ring)', async () => {
+      const outer = rectangle(POINT, 100, 60);
+      const hole = rectangle([POINT[0] + 0.0001, POINT[1] + 0.0002], 20, 10);
+      const res = await owner.client
+        .from('listings')
+        .insert(listingRow({ area_source: 'polygon', footprint: polygonWithRingsEWKT(outer, hole) }));
+      expectRefused(res, '22023');
+      expect(res.error?.message).toBe(MSG.footprintTooComplex);
+    });
+
     it('hidden listings are visible only to their owner', async () => {
-      const hidden = await insertListing(owner, { status: 'hidden' });
+      const hidden = await seedListing(owner, { status: 'hidden' });
       expect((await anon.from('listings').select('id').eq('id', hidden)).data).toEqual([]);
       expect((await investor.client.from('listing_feed').select('id').eq('id', hidden)).data).toEqual([]);
       expect((await owner.client.from('listing_feed').select('id').eq('id', hidden)).data).toHaveLength(1);
@@ -352,6 +502,103 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
     });
   });
 
+  // ─── Listing creation limits ───────────────────────────────────────
+  describe('listing creation limits', () => {
+    it('a user can publish 5 listings per hour; the 6th is refused with 54000 in Hebrew', async () => {
+      const publisher = await createUser('publisher');
+      for (let i = 1; i <= 5; i++) await insertListing(publisher, { title: `גג מספר ${i} ${RUN}` });
+
+      const sixth = await publisher.client.from('listings').insert(listingRow({ title: `גג מספר 6 ${RUN}` }));
+      expectRefused(sixth, '54000');
+      expect(sixth.error?.message).toBe(MSG.hourlyLimit);
+
+      const { count } = await db.from('listings').select('id', { count: 'exact', head: true }).eq('owner_id', publisher.id);
+      expect(count).toBe(5);
+    });
+
+    it('parallel requests cannot race past the hourly limit', async () => {
+      const racer = await createUser('racer');
+      const results = await Promise.all(
+        Array.from({ length: 8 }, (_, i) => racer.client.from('listings').insert(listingRow({ title: `גג במקביל ${i + 1} ${RUN}` }))),
+      );
+      expect(results.filter((r) => !r.error)).toHaveLength(5);
+      for (const r of results.filter((r) => r.error)) expect(r.error?.code).toBe('54000');
+
+      const { count } = await db.from('listings').select('id', { count: 'exact', head: true }).eq('owner_id', racer.id);
+      expect(count).toBe(5);
+    });
+
+    it('a user can publish at most 20 listings per day', async () => {
+      const daily = await createUser('daily');
+      await seedManyListings(daily, 20, 2); // outside the 1-hour window, inside the day
+      const res = await daily.client.from('listings').insert(listingRow());
+      expectRefused(res, '54000');
+      expect(res.error?.message).toBe(MSG.dailyLimit);
+    });
+
+    it('an account can hold at most 100 listings', async () => {
+      const veteran = await createUser('veteran');
+      await seedManyListings(veteran, 100, 72);
+      const res = await veteran.client.from('listings').insert(listingRow());
+      expectRefused(res, '54000');
+      expect(res.error?.message).toBe(MSG.accountLimit);
+    });
+  });
+
+  // ─── Admin moderation ──────────────────────────────────────────────
+  describe('admin moderation (admin_hidden)', () => {
+    let moderated: string;
+    let moderatedImage: string;
+
+    beforeAll(async () => {
+      moderated = await seedListing(owner, { title: `גג למודרציה ${RUN}` });
+      moderatedImage = `${owner.id}/${moderated}/photo-${RUN}.png`;
+      expectOk(await owner.client.from('listing_images').insert({ listing_id: moderated, storage_path: moderatedImage }));
+    });
+
+    it('only an admin can hide a listing', async () => {
+      expectOk(await owner.client.from('listings').update({ admin_hidden: true }).eq('id', moderated));
+      expect((await stored('listings', moderated)).admin_hidden).toBe(false);
+
+      const res = await adminUser.client.from('listings').update({ admin_hidden: true }).eq('id', moderated).select('admin_hidden');
+      expectOk(res);
+      expect(res.data).toEqual([{ admin_hidden: true }]);
+      expect((await stored('listings', moderated)).admin_hidden).toBe(true);
+    });
+
+    it('a moderated listing is invisible to anon and other users, and takes no inquiries', async () => {
+      expect((await anon.from('listings').select('id').eq('id', moderated)).data).toEqual([]);
+      expect((await anon.from('listing_feed').select('id').eq('id', moderated)).data).toEqual([]);
+      expect((await anon.from('listing_images').select('id').eq('listing_id', moderated)).data).toEqual([]);
+      expect((await investor.client.from('listings').select('id').eq('id', moderated)).data).toEqual([]);
+      expect((await investor.client.from('listing_feed').select('id').eq('id', moderated)).data).toEqual([]);
+
+      expectRefused(await investor.client.from('inquiries').insert(inquiryRow(moderated, investor)), '42501');
+
+      // The owner and staff still see it, flagged.
+      expect((await owner.client.from('listing_feed').select('admin_hidden, is_mine').eq('id', moderated).single()).data).toEqual({
+        admin_hidden: true,
+        is_mine: true,
+      });
+      expect((await adminUser.client.from('listing_feed').select('admin_hidden').eq('id', moderated).single()).data).toEqual({ admin_hidden: true });
+    });
+
+    it('the owner cannot undo the moderation, also not by re-publishing', async () => {
+      expectOk(await owner.client.from('listings').update({ admin_hidden: false }).eq('id', moderated));
+      expectOk(await owner.client.from('listings').update({ status: 'hidden' }).eq('id', moderated));
+      expectOk(await owner.client.from('listings').update({ status: 'published', title: `גג למודרציה (פורסם שוב) ${RUN}` }).eq('id', moderated));
+      expect(await stored('listings', moderated)).toMatchObject({ admin_hidden: true, status: 'published' });
+      expect((await anon.from('listing_feed').select('id').eq('id', moderated)).data).toEqual([]);
+      expectRefused(await investor.client.from('inquiries').insert(inquiryRow(moderated, investor)), '42501');
+    });
+
+    it('an admin can lift the moderation', async () => {
+      expectOk(await adminUser.client.from('listings').update({ admin_hidden: false }).eq('id', moderated));
+      expect((await anon.from('listing_feed').select('id, admin_hidden').eq('id', moderated)).data).toEqual([{ id: moderated, admin_hidden: false }]);
+      expect((await anon.from('listing_images').select('storage_path').eq('listing_id', moderated)).data).toEqual([{ storage_path: moderatedImage }]);
+    });
+  });
+
   // ─── Inquiries ──────────────────────────────────────────────────────
   describe('inquiries', () => {
     let inquiryId: string;
@@ -361,9 +608,9 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
     });
 
     it('cannot be sent to an unavailable or hidden listing', async () => {
-      const unavailable = await insertListing(owner, { availability: 'unavailable' });
+      const unavailable = await seedListing(owner, { availability: 'unavailable' });
       expectRefused(await investor.client.from('inquiries').insert(inquiryRow(unavailable, investor)), '42501');
-      const hidden = await insertListing(owner, { status: 'hidden' });
+      const hidden = await seedListing(owner, { status: 'hidden' });
       expectRefused(await investor.client.from('inquiries').insert(inquiryRow(hidden, investor)), '42501');
     });
 
@@ -445,6 +692,18 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
       expectRefused(eleventh, '54000');
       expect(eleventh.error?.message).toMatch(/שלחת פניות רבות/);
     });
+
+    it('parallel requests cannot race past the hourly inquiry limit', async () => {
+      const burst = await createUser('burst');
+      const results = await Promise.all(
+        Array.from({ length: 14 }, (_, i) => burst.client.from('inquiries').insert(inquiryRow(openListing, burst, { message: `פנייה במקביל ${i + 1}` }))),
+      );
+      expect(results.filter((r) => !r.error)).toHaveLength(10);
+      for (const r of results.filter((r) => r.error)) expect(r.error?.code).toBe('54000');
+
+      const { count } = await db.from('inquiries').select('id', { count: 'exact', head: true }).eq('sender_id', burst.id);
+      expect(count).toBe(10);
+    });
   });
 
   // ─── Favorites & profiles ──────────────────────────────────────────
@@ -481,7 +740,7 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
 
     it('submitting documents moves the listing to "pending"', async () => {
       documentPath = `${owner.id}/${openListing}/deed-${RUN}.pdf`;
-      expectOk(await upload(owner, 'ownership-docs', documentPath, PDF, 'application/pdf'));
+      expectOk(await uploadDoc(owner, documentPath));
 
       const res = await owner.client
         .from('verification_requests')
@@ -506,13 +765,19 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
       expectRefused(
         await investor.client
           .from('verification_requests')
-          .insert({ listing_id: openListing, owner_id: investor.id, document_path: `${investor.id}/fake.pdf` }),
+          .insert({ listing_id: openListing, owner_id: investor.id, document_path: `${investor.id}/${openListing}/fake-${RUN}.pdf` }),
         '42501',
       );
       expect((await investor.client.from('verification_requests').select('id').eq('id', requestId)).data).toEqual([]);
       expectRefused(await investor.client.storage.from('ownership-docs').download(documentPath));
       expectOk(await owner.client.storage.from('ownership-docs').download(documentPath));
       expectOk(await adminUser.client.storage.from('ownership-docs').download(documentPath));
+    });
+
+    it('owners have no RPC to cancel their own pending request', async () => {
+      expectRefused(await owner.client.rpc('cancel_pending_verifications', { p_listing: openListing }));
+      expect((await stored('verification_requests', requestId)).status).toBe('pending');
+      expect((await stored('listings', openListing)).owner_verification).toBe('pending');
     });
 
     it('non-admins cannot review a request', async () => {
@@ -537,38 +802,272 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
       expectOk(await owner.client.from('listings').update({ location: pointEWKT([32.1, 34.9]) }).eq('id', openListing));
       expect((await stored('listings', openListing)).owner_verification).toBe('not_verified');
     });
+
+    it('changing the publisher name or the locality resets "verified"; other edits keep it', async () => {
+      const id = await seedListing(owner, { owner_verification: 'verified' });
+
+      expectOk(await owner.client.from('listings').update({ title: `כותרת חדשה ${RUN}`, description: 'תיאור מעודכן', availability: 'in_talks' }).eq('id', id));
+      expect((await stored('listings', id)).owner_verification).toBe('verified');
+
+      expectOk(await owner.client.from('listings').update({ owner_display_name: 'שם מפרסם אחר' }).eq('id', id));
+      expect((await stored('listings', id)).owner_verification).toBe('not_verified');
+
+      await forceListing(id, { owner_verification: 'verified' });
+      expectOk(await owner.client.from('listings').update({ locality: 'ראש העין' }).eq('id', id));
+      expect((await stored('listings', id)).owner_verification).toBe('not_verified');
+
+      await forceListing(id, { owner_verification: 'verified' });
+      expectOk(await owner.client.from('listings').update({ area_source: 'polygon', footprint: polygonEWKT(rectangle(POINT, 40, 30)) }).eq('id', id));
+      expect((await stored('listings', id)).owner_verification).toBe('not_verified');
+    });
+
+    it.each([
+      ['the publisher name', { owner_display_name: 'מפרסם שהתחלף' }],
+      ['the locality', { locality: 'כפר סבא' }],
+      ['the location', { location: pointEWKT([32.105, 34.885]) }],
+    ])('changing %s cancels a pending request, which the admin can then no longer approve', async (_label, change) => {
+      const id = await seedListing(owner);
+      const request = await submitVerification(id, 'cancel');
+
+      // Edits that do not touch who/where keep the request under review.
+      expectOk(await owner.client.from('listings').update({ title: `גג בבדיקת בעלות ${RUN}`, description: 'עודכן בזמן הבדיקה' }).eq('id', id));
+      expect((await stored('listings', id)).owner_verification).toBe('pending');
+      expect((await stored('verification_requests', request)).status).toBe('pending');
+
+      expectOk(await owner.client.from('listings').update(change).eq('id', id));
+      expect((await stored('listings', id)).owner_verification).toBe('not_verified');
+      const cancelled = await stored('verification_requests', request);
+      expect(cancelled).toMatchObject({ status: 'rejected' });
+      expect(String(cancelled.review_note)).toMatch(/^בוטל אוטומטית/);
+
+      const approve = await adminUser.client.rpc('review_verification', { p_request: request, p_approve: true });
+      expectRefused(approve, 'P0002');
+      expect(approve.error?.message).toBe(MSG.requestNotPending);
+      expect((await stored('listings', id)).owner_verification).toBe('not_verified');
+
+      // The owner is not stuck: new documents can be submitted for the new details.
+      await submitVerification(id, 'resubmit');
+    });
+
+    it('an approval is refused when the listing is no longer pending; a rejection still works', async () => {
+      const id = await seedListing(owner);
+      const request = await submitVerification(id, 'stale');
+      await forceListing(id, { owner_verification: 'rejected' });
+
+      const approve = await adminUser.client.rpc('review_verification', { p_request: request, p_approve: true });
+      expectRefused(approve, '22023');
+      expect(approve.error?.message).toBe(MSG.approveChangedListing);
+      expect((await stored('verification_requests', request)).status).toBe('pending');
+      expect((await stored('listings', id)).owner_verification).toBe('rejected');
+
+      expectOk(await adminUser.client.rpc('review_verification', { p_request: request, p_approve: false, p_note: 'המודעה השתנתה' }));
+      expect((await stored('verification_requests', request)).status).toBe('rejected');
+    });
+
+    it('parallel submissions cannot open more than one pending request per listing', async () => {
+      const id = await seedListing(owner);
+      const results = await Promise.all(
+        [1, 2, 3, 4].map((n) =>
+          owner.client
+            .from('verification_requests')
+            .insert({ listing_id: id, owner_id: owner.id, document_path: `${owner.id}/${id}/race-${n}-${RUN}.pdf` }),
+        ),
+      );
+      expect(results.filter((r) => !r.error)).toHaveLength(1);
+      for (const r of results.filter((r) => r.error)) expect(r.error?.code).toBe('23505');
+
+      const { count } = await db.from('verification_requests').select('id', { count: 'exact', head: true }).eq('listing_id', id).eq('status', 'pending');
+      expect(count).toBe(1);
+    });
+  });
+
+  // ─── Technical assessment ──────────────────────────────────────────
+  describe('technical assessment', () => {
+    let assessed: string;
+
+    beforeAll(async () => {
+      assessed = await seedListing(owner, { tech_assessment: 'assessed', roof_type: 'בטון', shading: 'ללא', grid_connection: 'חיבור קיים', roof_age_years: 10 });
+    });
+
+    it('edits that do not touch the roof data keep an "assessed" status', async () => {
+      expectOk(await owner.client.from('listings').update({ title: `גג שנבדק ${RUN}`, description: 'נבדק בשטח', owner_display_name: 'שם חדש' }).eq('id', assessed));
+      expect((await stored('listings', assessed)).tech_assessment).toBe('assessed');
+    });
+
+    it.each([
+      ['roof type', { roof_type: 'פח' }],
+      ['shading', { shading: 'הצללה חלקית' }],
+      ['grid connection', { grid_connection: 'נדרש שדרוג' }],
+      ['roof age', { roof_age_years: 25 }],
+      ['total area', { total_area_sqm: 1500 }],
+      ['usable area', { usable_area_sqm: 700 }],
+      ['location', { location: pointEWKT([32.095, 34.882]) }],
+    ])('changing the %s downgrades "assessed" and "survey planned" to "owner reported"', async (_label, change) => {
+      for (const status of ['assessed', 'survey_planned']) {
+        await forceListing(assessed, { tech_assessment: status, roof_type: 'בטון', shading: 'ללא', grid_connection: 'חיבור קיים', roof_age_years: 10, total_area_sqm: 1200, usable_area_sqm: 800, location: pointEWKT(POINT) });
+        expectOk(await owner.client.from('listings').update(change).eq('id', assessed));
+        expect((await stored('listings', assessed)).tech_assessment, status).toBe('owner_reported');
+      }
+    });
+
+    it('the owner cannot restore an "assessed" status', async () => {
+      expectOk(await owner.client.from('listings').update({ tech_assessment: 'assessed' }).eq('id', assessed));
+      expect((await stored('listings', assessed)).tech_assessment).toBe('owner_reported');
+    });
   });
 
   // ─── Storage & listing images ──────────────────────────────────────
   describe('storage', () => {
-    it('users can upload listing photos only into their own folder', async () => {
-      const ownPhoto = `${owner.id}/${openListing}/photo-${RUN}.png`;
-      expectOk(await upload(owner, 'listing-images', ownPhoto, PNG, 'image/png'));
+    let folderListing: string; // receives the per-folder file caps
 
-      expectRefused(await upload(investor, 'listing-images', `${owner.id}/${openListing}/intruder-${RUN}.png`, PNG, 'image/png'));
-      expectRefused(await upload(null, 'listing-images', `${owner.id}/anon-${RUN}.png`, PNG, 'image/png'));
-      expectOk(await upload(investor, 'listing-images', `${investor.id}/own-${RUN}.png`, PNG, 'image/png'));
+    beforeAll(async () => {
+      folderListing = await seedListing(owner, { title: `גג עם תמונות רבות ${RUN}`, status: 'hidden' });
+    });
+
+    it('photos can only be uploaded into "<own id>/<own listing id>/<file>"', async () => {
+      const ownPhoto = `${owner.id}/${openListing}/photo-${RUN}.png`;
+      expectOk(await uploadPhoto(owner, ownPhoto));
+      expectOk(await uploadPhoto(investor, `${investor.id}/${investorListing}/own-${RUN}.png`));
+
+      // Someone else's folder.
+      expectUploadRefused(await uploadPhoto(investor, `${owner.id}/${openListing}/intruder-${RUN}.png`));
+      // Own folder, but a listing of someone else, or a listing that does not exist.
+      expectUploadRefused(await uploadPhoto(investor, `${investor.id}/${openListing}/intruder-${RUN}.png`));
+      expectUploadRefused(await uploadPhoto(investor, `${investor.id}/${randomUUID()}/ghost-${RUN}.png`));
+      // Not tied to any listing (the old "<uid>/<file>" layout), or anonymous.
+      expectUploadRefused(await uploadPhoto(investor, `${investor.id}/loose-${RUN}.png`));
+      expectUploadRefused(await uploadPhoto(null, `${owner.id}/${openListing}/anon-${RUN}.png`));
 
       // Removing someone else's file silently matches nothing.
       await investor.client.storage.from('listing-images').remove([ownPhoto]);
       expect(await fileExists('listing-images', ownPhoto)).toBe(true);
     });
 
-    it('ownership documents can only be uploaded into the user’s own folder', async () => {
-      expectRefused(await upload(investor, 'ownership-docs', `${owner.id}/${openListing}/fake-${RUN}.pdf`, PDF, 'application/pdf'));
+    it('ownership documents follow the same folder rule', async () => {
+      expectUploadRefused(await uploadDoc(investor, `${owner.id}/${openListing}/fake-${RUN}.pdf`));
+      expectUploadRefused(await uploadDoc(investor, `${investor.id}/${openListing}/fake-${RUN}.pdf`));
+      expectUploadRefused(await uploadDoc(investor, `${investor.id}/loose-${RUN}.pdf`));
+      expectOk(await uploadDoc(investor, `${investor.id}/${investorListing}/deed-${RUN}.pdf`));
     });
 
-    it('listing_images rows must point into the owner’s folder, on the owner’s listing', async () => {
-      expectRefused(
-        await owner.client.from('listing_images').insert({ listing_id: openListing, storage_path: `${investor.id}/own-${RUN}.png` }),
-        '42501',
+    it.each([
+      ['a ".." in the name', `photo..${RUN}.png`],
+      ['a leading dot', `.photo-${RUN}.png`],
+      ['an extra folder level', `nested/photo-${RUN}.png`],
+      // (A doubled "/" is not listed: Storage collapses it, so "<id>/<listing>//x.png" is stored as a valid "<id>/<listing>/x.png".)
+      ['a "../" segment', `../photo-${RUN}.png`],
+      ['a URL-encoded "../"', `%2e%2e%2fphoto-${RUN}.png`],
+      ['a backslash', `sub\\photo-${RUN}.png`],
+      ['a space', `photo ${RUN}.png`],
+      ['non-ASCII characters', `תמונה-${RUN}.png`],
+      ['a name over 121 characters', `${'a'.repeat(130)}.png`],
+    ])('refuses a file name with %s', async (_label, name) => {
+      const path = `${owner.id}/${openListing}/${name}`;
+      expectUploadRefused(await uploadPhoto(owner, path));
+      expectUploadRefused(await uploadDoc(owner, path.replace(/\.png$/, '.pdf')));
+    });
+
+    it('a listing folder holds at most 12 photos', async () => {
+      for (let i = 1; i <= 12; i++) expectOk(await uploadPhoto(owner, `${owner.id}/${folderListing}/f-${String(i).padStart(2, '0')}.png`));
+      expectUploadRefused(await uploadPhoto(owner, `${owner.id}/${folderListing}/f-13.png`));
+      expect(await fileExists('listing-images', `${owner.id}/${folderListing}/f-13.png`)).toBe(false);
+    });
+
+    it('a listing folder holds at most 10 ownership documents', async () => {
+      for (let i = 1; i <= 10; i++) expectOk(await uploadDoc(owner, `${owner.id}/${folderListing}/doc-${String(i).padStart(2, '0')}.pdf`));
+      expectUploadRefused(await uploadDoc(owner, `${owner.id}/${folderListing}/doc-11.pdf`));
+    });
+
+    it('owners can list and remove their own photos; others cannot list them', async () => {
+      const folder = `${owner.id}/${folderListing}`;
+      expect(await listNames(owner.client, 'listing-images', folder)).toHaveLength(12);
+      expect(await listNames(investor.client, 'listing-images', folder)).toEqual([]);
+      expect(await listNames(anon, 'listing-images', folder)).toEqual([]);
+
+      const res = await owner.client.storage.from('listing-images').remove([`${folder}/f-12.png`]);
+      expectOk(res);
+      expect(await fileExists('listing-images', `${folder}/f-12.png`)).toBe(false);
+      // The cap counts the files that are there now.
+      expectOk(await uploadPhoto(owner, `${folder}/f-13.png`));
+    });
+
+    it('admins can list and delete photos and ownership documents', async () => {
+      const folder = `${owner.id}/${folderListing}`;
+      expect((await listNames(adminUser.client, 'listing-images', folder)).length).toBeGreaterThan(0);
+      expect((await listNames(adminUser.client, 'ownership-docs', folder)).length).toBe(10);
+
+      const photo = await adminUser.client.storage.from('listing-images').remove([`${folder}/f-11.png`]);
+      expectOk(photo);
+      expect(photo.data).toHaveLength(1);
+      expect(await fileExists('listing-images', `${folder}/f-11.png`)).toBe(false);
+
+      const doc = await adminUser.client.storage.from('ownership-docs').remove([`${folder}/doc-10.pdf`]);
+      expectOk(doc);
+      expect(doc.data).toHaveLength(1);
+      expect(await fileExists('ownership-docs', `${folder}/doc-10.pdf`)).toBe(false);
+    });
+
+    it('owners can delete ownership documents no request refers to, but not a submitted one', async () => {
+      const spare = `${owner.id}/${folderListing}/doc-09.pdf`;
+      await owner.client.storage.from('ownership-docs').remove([spare]);
+      expect(await fileExists('ownership-docs', spare)).toBe(false);
+
+      const submitted = `${owner.id}/${openListing}/deed-${RUN}.pdf`;
+      await owner.client.storage.from('ownership-docs').remove([submitted]);
+      expect(await fileExists('ownership-docs', submitted)).toBe(true);
+    });
+
+    it('listing_images rows must point at "<owner id>/<that listing id>/<safe file name>"', async () => {
+      const insert = (user: TestUser, storagePath: string, listingId = openListing) =>
+        user.client.from('listing_images').insert({ listing_id: listingId, storage_path: storagePath });
+
+      expectOk(await insert(owner, `${owner.id}/${openListing}/photo-${RUN}.png`));
+
+      for (const bad of [
+        `${investor.id}/${investorListing}/own-${RUN}.png`, // someone else's folder
+        `${owner.id}/${folderListing}/f-01.png`, // another listing's folder
+        `${owner.id}/photo-${RUN}.png`, // no listing folder
+        `${owner.id}/${openListing}/photo..${RUN}.png`,
+        `${owner.id}/${openListing}/../${folderListing}/f-01.png`,
+        `${owner.id}/${openListing}/nested/photo-${RUN}.png`,
+        `${owner.id}/${openListing}/.photo-${RUN}.png`,
+      ]) {
+        expectRefused(await insert(owner, bad), '42501');
+      }
+
+      expectRefused(await insert(investor, `${investor.id}/${openListing}/own-${RUN}.png`), '42501');
+      expectRefused(await anon.from('listing_images').insert({ listing_id: openListing, storage_path: `${owner.id}/${openListing}/x.png` }), '42501');
+    });
+
+    it('a listing has at most 8 photos, also when they are added in parallel', async () => {
+      const id = await seedListing(owner, { title: `גג עם 8 תמונות ${RUN}` });
+      const results = await Promise.all(
+        Array.from({ length: 11 }, (_, i) =>
+          owner.client.from('listing_images').insert({ listing_id: id, storage_path: `${owner.id}/${id}/p-${String(i + 1).padStart(2, '0')}.png` }),
+        ),
       );
-      expectOk(await owner.client.from('listing_images').insert({ listing_id: openListing, storage_path: `${owner.id}/${openListing}/photo-${RUN}.png` }));
-      expectRefused(
-        await investor.client.from('listing_images').insert({ listing_id: openListing, storage_path: `${investor.id}/own-${RUN}.png` }),
-        '42501',
-      );
-      expectRefused(await anon.from('listing_images').insert({ listing_id: openListing, storage_path: `${owner.id}/x.png` }), '42501');
+      expect(results.filter((r) => !r.error)).toHaveLength(8);
+      for (const r of results.filter((r) => r.error)) {
+        expect(r.error?.code).toBe('22023');
+        expect(r.error?.message).toBe('ניתן לצרף עד 8 תמונות למודעה');
+      }
+      const { count } = await db.from('listing_images').select('id', { count: 'exact', head: true }).eq('listing_id', id);
+      expect(count).toBe(8);
+    });
+
+    it('verification requests must point at "<owner id>/<that listing id>/<safe file name>"', async () => {
+      for (const bad of [
+        `${owner.id}/${folderListing}/../${openListing}/deed-${RUN}.pdf`,
+        `${owner.id}/${folderListing}/deed..${RUN}.pdf`,
+        `${owner.id}/${openListing}/deed-${RUN}.pdf`, // a document filed under another listing
+        `${owner.id}/deed-${RUN}.pdf`,
+      ]) {
+        expectRefused(
+          await owner.client.from('verification_requests').insert({ listing_id: folderListing, owner_id: owner.id, document_path: bad }),
+          '42501',
+        );
+      }
+      expect((await stored('listings', folderListing)).owner_verification).toBe('not_verified');
     });
   });
 });

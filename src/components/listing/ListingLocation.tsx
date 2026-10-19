@@ -4,7 +4,10 @@ import type { Listing } from '@/lib/types';
 import { ListingMap } from './ListingMap';
 
 type Props = {
-  listing: Pick<Listing, 'id' | 'title' | 'center' | 'polygon' | 'polygonIllustrative' | 'isFictional' | 'availability' | 'status'>;
+  listing: Pick<
+    Listing,
+    'id' | 'title' | 'center' | 'polygon' | 'polygonIllustrative' | 'isFictional' | 'availability' | 'status' | 'adminHidden'
+  >;
 };
 
 function boundaryNote(l: Props['listing'], illustrative: boolean): string {
@@ -30,12 +33,14 @@ export function ListingLocation({ listing }: Props) {
         polygon={listing.polygon}
         illustrative={illustrative}
         availability={listing.availability}
+        fictional={listing.isFictional}
       />
       <p className="note">
         <AlertTriangle size={15} aria-hidden="true" />
         {boundaryNote(listing, illustrative)}
       </p>
-      {listing.status === 'published' && (
+      {/* Only listings that are actually on the public map. */}
+      {listing.status === 'published' && !listing.adminHidden && (
         <Link className="btn ghost sm listing-map-link" href={`/?focus=${listing.id}`}>
           <MapPin size={15} aria-hidden="true" /> הצג במפה הראשית
         </Link>

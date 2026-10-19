@@ -1,8 +1,19 @@
 import type { ListingStatus } from '@/lib/types';
+import type { ListingVisibility } from './types';
 
+/** The owner's own choice (listings.status). */
 export const LISTING_STATUS_LABEL: Record<ListingStatus, string> = {
   published: 'מפורסמת',
   hidden: 'מוסתרת',
+};
+
+/** Staff moderation (listings.admin_hidden). */
+export const ADMIN_HIDDEN_LABEL = 'הוסתרה ע״י הצוות';
+
+export const VISIBILITY_LABEL: Record<ListingVisibility, string> = {
+  public: 'גלויה לציבור',
+  owner_hidden: 'הוסתרה ע״י המפרסם',
+  admin_hidden: ADMIN_HIDDEN_LABEL,
 };
 
 export const FICTIONAL_LABEL = 'לדוגמה — בדויה';

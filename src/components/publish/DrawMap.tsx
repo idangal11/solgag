@@ -84,7 +84,7 @@ export function DrawMap({ mode, location, polygon, invalid, flyTo, onLocation, o
     >
       <MapContainer bounds={initialBounds} zoomControl={false} className="leaflet-host" maxZoom={19} doubleClickZoom={false}>
         <BaseLayers defaultAerial />
-        <ZoomControl position="topright" />
+        <ZoomControl position="topright" zoomInTitle="התקרב" zoomOutTitle="התרחק" />
         <Events mode={mode} polygon={polygon} onLocation={onLocation} onPolygon={onPolygon} />
         <Fly flyTo={flyTo} />
         <ReadyBridge onReady={onReady} />
@@ -133,6 +133,14 @@ export function DrawMap({ mode, location, polygon, invalid, flyTo, onLocation, o
             />
           ))}
       </MapContainer>
+      {/* Where „סימון במרכז המפה" will put the pin (keyboard users pan the map under it). */}
+      {mode === 'locate' && (
+        <svg className="map-crosshair" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" focusable="false">
+          <path d="M16 3v8M16 21v8M3 16h8M21 16h8" fill="none" stroke="#fff" strokeWidth="5" strokeLinecap="round" />
+          <path d="M16 3v8M16 21v8M3 16h8M21 16h8" fill="none" stroke="#0f3d2e" strokeWidth="2.5" strokeLinecap="round" />
+          <circle cx="16" cy="16" r="2.2" fill="#0f3d2e" stroke="#fff" strokeWidth="1.5" />
+        </svg>
+      )}
     </div>
   );
 }

@@ -9,6 +9,10 @@ const TECH_DESC: Record<TechAssessment, string> = {
   assessed: 'צוות הפלטפורמה סימן שבוצע סקר טכני. בקשו את ממצאי הסקר ובחנו אותם עם איש מקצוע מטעמכם.',
 };
 
+/** What an owner's edit does to a badge staff gave (mirrors the listings_guard DB trigger). */
+const OWNERSHIP_RESET = 'שינוי של מיקום המבנה, גבולות הגג, היישוב או שם המפרסם מבטל את סימון הבדיקה, ובקשה שממתינה לבדיקה נסגרת.';
+const TECH_RESET = `כשהבעלים משנים את המיקום, את השטח או את הנתונים הטכניים, „${TECH_ASSESSMENT.assessed.label}״ ו„${TECH_ASSESSMENT.survey_planned.label}״ חוזרים ל„${TECH_ASSESSMENT.owner_reported.label}״.`;
+
 /** Explains every trust label a listing can carry, using the same texts as the listings themselves. */
 export function TrustLabels() {
   return (
@@ -25,6 +29,7 @@ export function TrustLabels() {
             </div>
           ))}
         </dl>
+        <p className="muted">{OWNERSHIP_RESET}</p>
       </section>
 
       <section className="card-surface" aria-labelledby="tl-tech">
@@ -39,6 +44,7 @@ export function TrustLabels() {
             </div>
           ))}
         </dl>
+        <p className="muted">{TECH_RESET}</p>
       </section>
 
       <section className="card-surface" aria-labelledby="tl-availability">
@@ -52,6 +58,12 @@ export function TrustLabels() {
               <dd>{AVAILABILITY[k].desc}</dd>
             </div>
           ))}
+          <div>
+            <dt>
+              <StatusBadge status="available" fictional />
+            </dt>
+            <dd>מוצג במקום סטטוס הזמינות במודעות לדוגמה (בדויות). אי אפשר לשלוח אליהן פנייה.</dd>
+          </div>
         </dl>
       </section>
 

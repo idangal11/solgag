@@ -27,6 +27,15 @@ export const SEED_TITLES = [
 /** Ribbon shown on every fictional listing (src/components/ui.tsx). */
 export const FICTIONAL_RIBBON = 'מודעה לדוגמה — בדויה';
 
+/** Status badge of a fictional listing (SAMPLE_STATUS in src/components/ui.tsx) — never an availability. */
+export const SAMPLE_STATUS_LABEL = 'מודעה לדוגמה';
+
+/** Status badge of a real listing that is open to inquiries (AVAILABILITY.available in src/lib/labels.ts). */
+export const OPEN_STATUS_LABEL = 'פתוח לפניות';
+
+/** The seeded fictional fixed-rent listing: 18 ₪/m² × 4,110 usable m² = 73,980 ₪ a year. */
+export const FIXED_RENT_SAMPLE = { title: 'מבנה ייצור באזור תעשייה', yearlyRent: 73_980 } as const;
+
 /** A fresh address per run and project, e.g. owner-desktop-m1x2y3abc@example.test. */
 export function uniqueEmail(role: string, project: string): string {
   return `${role}-${project}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}@example.test`;
@@ -240,6 +249,18 @@ export function makePng(width = 640, height = 400): Buffer {
   ]);
 }
 
+// ─── Service role (optional) ────────────────────────────────────────────
+
+/**
+ * A service-role client for the LOCAL stack, or null without SUPABASE_SERVICE_ROLE_KEY
+ * (or for a non-local SUPABASE_URL). Tests that need it skip that part when it is null.
+ */
+export function localAdminClient(): SupabaseClient | null {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key || !LOCAL_URL.test(SUPABASE_URL)) return null;
+  return createClient(SUPABASE_URL, key, { auth: { persistSession: false, autoRefreshToken: false } });
+}
+
 // ─── Cleanup (optional) ─────────────────────────────────────────────────
 
 async function removeFolder(admin: SupabaseClient, bucket: string, prefix: string, depth = 0): Promise<void> {
@@ -255,9 +276,8 @@ async function removeFolder(admin: SupabaseClient, bucket: string, prefix: strin
  * plus their uploaded files. No-op without SUPABASE_SERVICE_ROLE_KEY or for a non-local URL.
  */
 export async function deleteTestUsers(emails: string[]): Promise<void> {
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!key || !emails.length || !LOCAL_URL.test(SUPABASE_URL)) return;
-  const admin = createClient(SUPABASE_URL, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  const admin = localAdminClient();
+  if (!admin || !emails.length) return;
   const wanted = new Set(emails.map((e) => e.toLowerCase()));
   const { data, error } = await admin.auth.admin.listUsers({ perPage: 1000 });
   if (error) {

@@ -1,17 +1,73 @@
 'use client';
 
-import { Calculator as CalcIcon, Heart, LayoutDashboard, MessageSquare, Pencil } from 'lucide-react';
+import { Calculator as CalcIcon, Heart, LayoutDashboard, Loader2, MessageSquare, Pencil } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useCallback, useRef, useState, type MouseEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
 import { useApp } from '@/components/AppProvider';
 import { fmtSqm } from '@/lib/labels';
 import type { Listing } from '@/lib/types';
-import { InquiryDialog } from './InquiryDialog';
+import type { InquiryDialogProps } from './InquiryDialog';
 import { inquiryBlock } from './inquiryGate';
+
+/** Shown instead of the form when its code could not be downloaded (offline, new deployment). */
+function InquiryLoadError({ onClose }: InquiryDialogProps) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return (
+    <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="modal" role="alertdialog" aria-modal="true" aria-labelledby="inq-load-title" aria-describedby="inq-load-desc">
+        <h2 id="inq-load-title">לא ניתן לפתוח את טופס הפנייה</h2>
+        <p id="inq-load-desc">ייתכן שהחיבור לאינטרנט נקטע או שהאתר עודכן. יש לרענן את הדף ולנסות שוב.</p>
+        <div className="row-btns">
+          <button type="button" className="btn primary" onClick={() => window.location.reload()} autoFocus>
+            רענון הדף
+          </button>
+          <button type="button" className="btn ghost" onClick={onClose}>
+            סגירה
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// The dialog (and zod, through its validation) loads only when needed: it is preloaded
+// on hover/focus/press of the inquiry buttons and rendered after the click.
+const loadInquiryDialog = () => import('./InquiryDialog');
+const InquiryDialog = dynamic<InquiryDialogProps>(
+  () =>
+    import('./InquiryDialog')
+      .then((m) => m.InquiryDialog)
+      .catch(() => InquiryLoadError),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="modal-backdrop" role="status">
+        <Loader2 size={28} className="spin inq-loading" aria-hidden="true" />
+        <span className="sr-only">טוען את טופס הפנייה…</span>
+      </div>
+    ),
+  },
+);
 
 type ActionListing = Pick<
   Listing,
-  'id' | 'title' | 'locality' | 'usableAreaSqm' | 'totalAreaSqm' | 'isFictional' | 'isMine' | 'status' | 'availability'
+  | 'id'
+  | 'title'
+  | 'locality'
+  | 'usableAreaSqm'
+  | 'totalAreaSqm'
+  | 'isFictional'
+  | 'isMine'
+  | 'status'
+  | 'adminHidden'
+  | 'availability'
 >;
 
 interface Props {
@@ -22,12 +78,18 @@ interface Props {
 
 /** Sticky action card (desktop), bottom action bar (tablet/mobile) and the inquiry dialog. */
 export function ListingActions({ listing, prefill }: Props) {
-  const { favorites, toggleFavorite, requireAuth } = useApp();
+  const { user, favorites, toggleFavorite, requireAuth } = useApp();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLElement | null>(null);
   const fav = favorites.has(listing.id);
   const block = inquiryBlock(listing);
   const editHref = `/listing/${listing.id}/edit`;
+
+  // Anonymous visitors are sent to sign in instead, so they never need the dialog code.
+  const preloadInquiry = () => {
+    if (!block && user) void loadInquiryDialog().catch(() => {});
+  };
+  const preloadProps = { onPointerEnter: preloadInquiry, onPointerDown: preloadInquiry, onFocus: preloadInquiry };
 
   const openInquiry = (e: MouseEvent<HTMLElement>) => {
     if (block) return;
@@ -58,6 +120,7 @@ export function ListingActions({ listing, prefill }: Props) {
             type="button"
             className="btn primary block lg"
             onClick={openInquiry}
+            {...preloadProps}
             disabled={!!block}
             aria-describedby={block ? 'inq-block-reason' : undefined}
           >
@@ -122,7 +185,7 @@ export function ListingActions({ listing, prefill }: Props) {
             </Link>
           </>
         ) : (
-          <button type="button" className="btn primary block" onClick={openInquiry} disabled={!!block}>
+          <button type="button" className="btn primary block" onClick={openInquiry} {...preloadProps} disabled={!!block}>
             <MessageSquare size={17} aria-hidden="true" /> {block ? block.short : 'אני מתעניין/ת'}
           </button>
         )}

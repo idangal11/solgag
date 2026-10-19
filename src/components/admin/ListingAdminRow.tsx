@@ -1,48 +1,72 @@
 'use client';
 
-import { Eye, EyeOff, LoaderCircle, Trash } from 'lucide-react';
+import { Eye, EyeOff, LoaderCircle, ShieldAlert, Trash } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useOptimistic, useTransition } from 'react';
-import { deleteListing, setListingStatus, setListingTechAssessment } from '@/app/admin/actions';
+import { deleteListing, setListingAdminHidden, setListingTechAssessment } from '@/app/admin/actions';
 import { useApp } from '@/components/AppProvider';
 import { Tag } from '@/components/ui';
 import { fmtDate, TECH_ASSESSMENT, VERIFICATION } from '@/lib/labels';
-import type { ListingStatus, TechAssessment } from '@/lib/types';
-import { FICTIONAL_LABEL, LISTING_STATUS_LABEL } from './labels';
+import type { TechAssessment } from '@/lib/types';
+import { callAction } from './callAction';
+import { ADMIN_HIDDEN_LABEL, FICTIONAL_LABEL, LISTING_STATUS_LABEL } from './labels';
 import type { ActionResult, AdminListingRow } from './types';
 
 const TECH_VALUES = Object.keys(TECH_ASSESSMENT) as TechAssessment[];
-const NETWORK_ERROR: ActionResult = { ok: false, error: 'החיבור לשרת נכשל. נסו שוב.' };
 
-/** One row of the moderation table: visibility, technical-assessment status and deletion. */
+/**
+ * One row of the moderation table: the owner's status and the staff hide
+ * (two separate things), technical-assessment status and deletion.
+ */
 export function ListingAdminRow({ row }: { row: AdminListingRow }) {
   const { toast } = useApp();
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [status, setOptimisticStatus] = useOptimistic(row.status);
+  const [adminHidden, setOptimisticAdminHidden] = useOptimistic(row.adminHidden);
   const [tech, setOptimisticTech] = useOptimistic(row.techAssessment);
   const verification = VERIFICATION[row.ownerVerification];
+  const isPublic = row.status === 'published' && !adminHidden;
 
-  function run(action: () => Promise<ActionResult>, success: string, optimistic?: () => void) {
+  function run<T extends object>(
+    action: () => Promise<ActionResult<T>>,
+    onSuccess: (res: { ok: true } & T) => void,
+    optimistic?: () => void,
+  ) {
     startTransition(async () => {
       optimistic?.();
-      const res = await action().catch(() => NETWORK_ERROR);
-      if (res.ok) toast(success);
-      else toast(res.error, 'error');
+      const res = await callAction(action);
+      if (res.ok) {
+        onSuccess(res);
+        return;
+      }
+      toast(res.error, 'error');
+      // The row changed or disappeared since the page was rendered.
+      if (res.stale) router.refresh();
     });
   }
 
-  function toggleStatus() {
-    const next: ListingStatus = status === 'published' ? 'hidden' : 'published';
-    if (
-      next === 'published' &&
-      !window.confirm(`לפרסם מחדש את "${row.title}"?\n\nאם בעל המודעה הסתיר אותה בעצמו, כדאי לתאם איתו לפני פרסום.`)
-    ) {
-      return;
-    }
+  function toggleAdminHidden() {
+    const hide = !adminHidden;
+    const question = hide
+      ? `להסתיר את "${row.title}" מהציבור?\n\nהמודעה לא תוצג באתר ולא תקבל פניות חדשות, והמפרסם לא יוכל לבטל את ההסתרה. אפשר לבטל אותה כאן בכל עת.`
+      : `לבטל את ההסתרה של הצוות עבור "${row.title}"?\n\n${
+          row.status === 'published'
+            ? 'המודעה תחזור להיות גלויה לציבור ותוכל לקבל פניות.'
+            : 'המפרסם הסתיר את המודעה בעצמו, ולכן היא תישאר מוסתרת עד שיפרסם אותה מחדש.'
+        }`;
+    if (!window.confirm(question)) return;
     run(
-      () => setListingStatus(row.id, next),
-      next === 'hidden' ? 'המודעה הוסתרה מהציבור' : 'המודעה פורסמה',
-      () => setOptimisticStatus(next),
+      () => setListingAdminHidden(row.id, hide),
+      (res) =>
+        toast(
+          hide
+            ? 'המודעה הוסתרה מהציבור. המפרסם לא יוכל לפרסם אותה מחדש.'
+            : res.ownerStatus === 'published'
+              ? 'ההסתרה בוטלה — המודעה גלויה שוב לציבור'
+              : 'ההסתרה בוטלה. המודעה עדיין מוסתרת על ידי המפרסם.',
+        ),
+      () => setOptimisticAdminHidden(hide),
     );
   }
 
@@ -56,30 +80,55 @@ export function ListingAdminRow({ row }: { row: AdminListingRow }) {
     ) {
       return;
     }
-    run(() => setListingTechAssessment(row.id, next), 'סטטוס ההתאמה הטכנית עודכן', () => setOptimisticTech(next));
+    run(
+      () => setListingTechAssessment(row.id, next),
+      () => toast('סטטוס ההתאמה הטכנית עודכן'),
+      () => setOptimisticTech(next),
+    );
   }
 
   function remove() {
     if (
       !window.confirm(
-        `למחוק לצמיתות את "${row.title}"?\n\nיימחקו גם התמונות, הפניות וההודעות ובקשות אימות הבעלות של המודעה. לא ניתן לבטל — אפשר להסתיר במקום.`,
+        `למחוק לצמיתות את "${row.title}"?\n\nיימחקו גם התמונות, מסמכי הבעלות, הפניות וההודעות ובקשות אימות הבעלות של המודעה. לא ניתן לבטל — אפשר להסתיר במקום.`,
       )
     ) {
       return;
     }
-    run(() => deleteListing(row.id), 'המודעה נמחקה');
+    run(
+      () => deleteListing(row.id),
+      (res) => {
+        if (!res.warning) {
+          toast('המודעה נמחקה');
+          return;
+        }
+        // The row disappears and a toast fades in seconds, but the admin has to act
+        // on this (remove the files by hand), so it stays on screen until dismissed.
+        toast('המודעה נמחקה, אך ניקוי הקבצים מהאחסון לא הושלם', 'error');
+        window.alert(res.warning);
+      },
+    );
   }
 
   return (
-    <tr className={status === 'hidden' ? 'is-hidden' : undefined} aria-busy={pending || undefined}>
+    <tr className={isPublic ? undefined : 'is-hidden'} aria-busy={pending || undefined}>
       <td className="al-title">
         <Link href={`/listing/${row.id}`}>{row.title}</Link>
         <span className="muted small">
           {row.locality} · {row.ownerDisplayName}
         </span>
       </td>
-      <td data-label="סטטוס">
-        <Tag tone={status === 'published' ? 'ok' : 'muted'}>{LISTING_STATUS_LABEL[status]}</Tag>
+      <td data-label="סטטוס המפרסם">
+        <Tag tone={row.status === 'published' ? 'ok' : 'muted'}>{LISTING_STATUS_LABEL[row.status]}</Tag>
+      </td>
+      <td data-label="הסתרת צוות">
+        {adminHidden ? (
+          <Tag tone="bad" icon={<ShieldAlert size={13} aria-hidden />}>
+            {ADMIN_HIDDEN_LABEL}
+          </Tag>
+        ) : (
+          <span className="muted small">לא הוסתרה</span>
+        )}
       </td>
       <td data-label="סוג">
         {row.isFictional ? <Tag tone="warn">{FICTIONAL_LABEL}</Tag> : <span className="muted small">אמיתית</span>}
@@ -108,9 +157,9 @@ export function ListingAdminRow({ row }: { row: AdminListingRow }) {
       </td>
       <td data-label="פעולות">
         <div className="al-actions">
-          <button type="button" className="btn ghost xs" onClick={toggleStatus} disabled={pending}>
-            {status === 'published' ? <EyeOff size={14} aria-hidden /> : <Eye size={14} aria-hidden />}
-            {status === 'published' ? 'הסתרה' : 'פרסום'}
+          <button type="button" className="btn ghost xs" onClick={toggleAdminHidden} disabled={pending}>
+            {adminHidden ? <Eye size={14} aria-hidden /> : <EyeOff size={14} aria-hidden />}
+            {adminHidden ? 'ביטול הסתרה' : 'הסתרה'}
             <span className="sr-only"> — {row.title}</span>
           </button>
           <button type="button" className="btn danger-ghost xs" onClick={remove} disabled={pending}>

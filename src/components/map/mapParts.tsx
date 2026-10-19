@@ -4,7 +4,8 @@
 // components loaded with next/dynamic({ ssr: false }).
 
 import L from 'leaflet';
-import { LayersControl, TileLayer } from 'react-leaflet';
+import { useEffect } from 'react';
+import { LayersControl, TileLayer, useMap } from 'react-leaflet';
 import { publicConfig } from '@/lib/config';
 import { AVAILABILITY } from '@/lib/labels';
 import type { Availability, LatLng } from '@/lib/types';
@@ -17,6 +18,14 @@ export const ISRAEL_BOUNDS: L.LatLngBoundsExpression = [
 /** Street map + aerial imagery. Providers come from env (see .env.example). */
 export function BaseLayers({ defaultAerial = false }: { defaultAerial?: boolean }) {
   const m = publicConfig.map;
+  const map = useMap();
+  // Leaflet hard-codes an English "Layers" title on the layer switcher toggle.
+  useEffect(() => {
+    const toggle = map.getContainer().querySelector<HTMLElement>('.leaflet-control-layers-toggle');
+    if (!toggle) return;
+    toggle.title = 'שכבות מפה';
+    toggle.setAttribute('aria-label', 'בחירת שכבת מפה: מפה או תצלום אוויר');
+  }, [map]);
   return (
     <LayersControl position="topleft">
       <LayersControl.BaseLayer checked={!defaultAerial} name="מפה">

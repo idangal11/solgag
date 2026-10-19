@@ -6,6 +6,7 @@ import { forwardRef } from 'react';
 import { AGREEMENT_LABEL, BUILDING_LABEL, fmtSqm } from '@/lib/labels';
 import type { Listing } from '@/lib/types';
 import { useApp } from './AppProvider';
+import { LinkPending } from './LinkPending';
 import { FictionalRibbon, ListingImage, StatusBadge } from './ui';
 
 interface Props {
@@ -86,6 +87,7 @@ export const ListingCard = forwardRef<HTMLElement, Props>(function ListingCard({
           )}
           <Link className="btn primary sm" href={detailHref} onClick={(e) => e.stopPropagation()}>
             לפרטים ולחישוב
+            <LinkPending />
           </Link>
         </div>
       </div>

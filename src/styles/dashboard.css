@@ -75,6 +75,17 @@
 .dash-confirm p {
   margin: 0;
 }
+.hint.dash-admin-hidden {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: #fbe7e5;
+  border: 1px solid #f0c9c4;
+  color: #7a2419;
+}
+.dash-admin-hidden a {
+  color: inherit;
+  text-decoration: underline;
+}
 .btn.dash-btn-danger {
   background: var(--danger);
   color: #fff;
@@ -156,6 +167,9 @@
   gap: 5px;
   overflow-wrap: anywhere;
 }
+.dash-file > span {
+  min-width: 0;
+}
 .dash-verif-history ul {
   list-style: none;
   margin: 0;
@@ -219,8 +233,16 @@
   overflow-wrap: anywhere;
   min-width: 0;
 }
-.dash-contact:hover {
+a.dash-contact:hover {
   text-decoration: underline;
+}
+/* Malformed contact: shown, but deliberately not a mailto:/tel: link. */
+.dash-contact.is-plain {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.dash-listing-gone {
+  font-style: italic;
 }
 .dash-status-field {
   display: inline-flex;
@@ -404,6 +426,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+.dash-reply-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.dash-older-note {
+  margin: 0;
 }
 
 @media (max-width: 860px) {

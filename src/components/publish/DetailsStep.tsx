@@ -1,7 +1,9 @@
 'use client';
 
+import { AlertTriangle } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { NOT_ASSESSED, TECH_ASSESSMENT } from '@/lib/labels';
+import type { TechAssessment } from '@/lib/types';
 import type { Draft } from './draft';
 import { FieldError, errProps } from './FieldError';
 
@@ -11,11 +13,19 @@ interface Props {
   errors: Record<string, string>;
   /** The photo uploader, rendered at the end of the step. */
   images: ReactNode;
+  /** Edit mode: a technical survey status that changing the roof data would downgrade. */
+  surveyAtRisk?: Extract<TechAssessment, 'assessed' | 'survey_planned'> | null;
 }
 
-export function DetailsStep({ d, set, errors, images }: Props) {
+export function DetailsStep({ d, set, errors, images, surveyAtRisk = null }: Props) {
   return (
     <div className="form-grid">
+      {surveyAtRisk && (
+        <p className="note span2">
+          <AlertTriangle size={15} aria-hidden />
+          {`שינוי נתוני הגג, השטח או המיקום יחליף את התווית „${TECH_ASSESSMENT[surveyAtRisk].label}״ בתווית „${TECH_ASSESSMENT.owner_reported.label}״.`}
+        </p>
+      )}
       <p className="hint span2">
         אפשר להשאיר ריק — במודעה יוצג „{NOT_ASSESSED}״. נתונים שתמלאו יוצגו כ„{TECH_ASSESSMENT.owner_reported.label}״, ולא כבדיקה הנדסית.
       </p>

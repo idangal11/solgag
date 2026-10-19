@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useApp } from './AppProvider';
+import { LinkPending } from './LinkPending';
 import { Logo } from './Logo';
 
 function routeName(pathname: string): string {
@@ -45,6 +46,7 @@ export function AppShell({ children, year }: { children: ReactNode; year: number
               <Link key={n.key} href={n.href} className={active ? 'active' : ''} aria-current={active ? 'page' : undefined}>
                 {n.icon}
                 <span>{n.label}</span>
+                <LinkPending />
               </Link>
             );
           })}

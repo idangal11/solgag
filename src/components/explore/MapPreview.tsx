@@ -3,6 +3,7 @@
 import { X } from 'lucide-react';
 import Link from 'next/link';
 import type { Ref } from 'react';
+import { LinkPending } from '@/components/LinkPending';
 import { ListingCard } from '@/components/ListingCard';
 import type { Listing } from '@/lib/types';
 
@@ -39,6 +40,7 @@ export function MapPreview({ listing, onClose, onRefocus, ref }: Props) {
       <p className="preview-note">{boundaryNote(listing)}</p>
       <Link className="btn primary block" href={`/listing/${listing.id}`}>
         פתח מודעה מלאה
+        <LinkPending />
       </Link>
     </section>
   );

@@ -1,6 +1,7 @@
 'use client';
 
-import { BUILDING_LABEL, REGION_LABEL } from '@/lib/labels';
+import { AlertTriangle } from 'lucide-react';
+import { BUILDING_LABEL, REGION_LABEL, VERIFICATION } from '@/lib/labels';
 import type { BuildingType, Region } from '@/lib/types';
 import type { Draft } from './draft';
 import { FieldError, errProps } from './FieldError';
@@ -9,11 +10,19 @@ interface Props {
   d: Draft;
   set: <K extends keyof Draft>(k: K, v: Draft[K]) => void;
   errors: Record<string, string>;
+  /** Edit mode: the listing's ownership is verified or under review. */
+  verificationAtRisk?: boolean;
 }
 
-export function OwnerStep({ d, set, errors }: Props) {
+export function OwnerStep({ d, set, errors, verificationAtRisk = false }: Props) {
   return (
     <div className="form-grid">
+      {verificationAtRisk && (
+        <p className="note span2">
+          <AlertTriangle size={15} aria-hidden />
+          שינוי שם בעלי הגג או היישוב יחזיר את סטטוס הבעלות ל„{VERIFICATION.not_verified.label}״, ויהיה צורך להגיש מסמכים לבדיקה מחדש.
+        </p>
+      )}
       <label className="field">
         <span>שם בעלי הגג / מורשה (יוצג במודעה)</span>
         <input

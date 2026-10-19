@@ -1,6 +1,7 @@
 import { TriangleAlert } from 'lucide-react';
+import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { LEGAL_DRAFT_DATE } from './legalInfo';
+import { contactEmailsPending, LEGAL_STATUS, pendingDetails } from './legalInfo';
 
 export interface LegalSection {
   id: string;
@@ -8,23 +9,51 @@ export interface LegalSection {
   body: ReactNode;
 }
 
-/** Shared frame for the legal drafts: draft warning, table of contents, numbered sections. */
+/** Says exactly what is unfinished: the legal review, missing operator details, and the interim contact route. */
+function DraftNote() {
+  const detailsMissing = pendingDetails().length > 0;
+  if (LEGAL_STATUS.reviewed && !detailsMissing) return null;
+
+  return (
+    <div className="draft-note" role="note" aria-labelledby="draft-note-title">
+      <TriangleAlert size={20} aria-hidden />
+      <div>
+        <strong id="draft-note-title">
+          {LEGAL_STATUS.reviewed ? 'חסרים פרטים במסמך' : 'טיוטה — הנוסח טרם נבדק על ידי עורך/ת דין'}
+        </strong>
+        {!LEGAL_STATUS.reviewed && (
+          <p>
+            המסמך מתאר את אופן הפעולה הנוכחי של השירות, אבל הוא עוד לא עבר בדיקה משפטית, והנוסח עשוי להשתנות לפני ההשקה הציבורית. נקודות שממתינות להחלטה
+            משפטית מסומנות כך: <mark className="ph">[לבדיקה משפטית: …]</mark>.
+          </p>
+        )}
+        {detailsMissing && (
+          <p>
+            פרטים שהמפעיל טרם מסר מסומנים כך: <mark className="ph">[יושלם לפני ההשקה: …]</mark>, והם יושלמו לפני ההשקה הציבורית.
+            {contactEmailsPending && (
+              <>
+                {' '}
+                עד שתוגדר כתובת דוא״ל לפניות, אפשר לעדכן את הפרטים ולמחוק את החשבון בעצמכם בעמוד <Link href="/account">החשבון שלי</Link>, ולהסתיר או
+                למחוק מודעות <Link href="/dashboard">באזור האישי</Link>.
+              </>
+            )}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Shared frame for the legal texts: status note, table of contents, numbered sections. */
 export function LegalPage({ title, intro, sections }: { title: string; intro: ReactNode; sections: LegalSection[] }) {
   return (
     <article className="page narrow legal-page" aria-labelledby="legal-title">
       <header className="legal-head">
         <h1 id="legal-title">{title}</h1>
-        <div className="draft-note" role="note">
-          <TriangleAlert size={20} aria-hidden />
-          <div>
-            <strong>טיוטה — יש לבדוק עם עורך/ת דין לפני השקה ציבורית</strong>
-            <p>
-              זהו נוסח עבודה שטרם נבדק משפטית. פרטים בסוגריים מרובעים, כמו <mark className="ph">[שם החברה/המפעיל]</mark>,
-              ממתינים להשלמה.
-            </p>
-          </div>
-        </div>
-        <p className="legal-meta">נוסח טיוטה מיום {LEGAL_DRAFT_DATE}</p>
+        <DraftNote />
+        <p className="legal-meta">
+          {LEGAL_STATUS.reviewed ? 'בתוקף מיום' : 'נוסח טיוטה מיום'} {LEGAL_STATUS.date}
+        </p>
         <div className="legal-intro">{intro}</div>
       </header>
 

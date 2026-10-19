@@ -13,7 +13,11 @@ const parseArea = (raw: string): number | null => {
   return raw.trim() !== '' && Number.isFinite(n) && n >= MIN_AREA && n <= MAX_AREA ? Math.round(n) : null;
 };
 
-/** Usable-area input that seeds the calculator's starting assumptions. */
+/**
+ * Usable-area input for /calculator. The Calculator stays mounted: a new area
+ * re-derives only the size-based assumptions (capacity, install cost, opex,
+ * reserve) and keeps the tariff, yield, payment model, share and rent the user set.
+ */
 export function AreaCalculator() {
   const [raw, setRaw] = useState(String(DEFAULT_AREA));
   const [area, setArea] = useState(DEFAULT_AREA);
@@ -45,7 +49,7 @@ export function AreaCalculator() {
         <p id="calc-area-hint" className={invalid ? 'err' : 'hint'} aria-live="polite">
           {invalid
             ? `נא להזין שטח בין ${fmtNum(MIN_AREA)} ל-${fmtNum(MAX_AREA)} מ״ר. בינתיים מוצג תרחיש ל-${fmtNum(area)} מ״ר.`
-            : 'החלק מהגג שאפשר להציב עליו פאנלים בפועל — בדרך כלל פחות מהשטח הכולל, בגלל שוליים, מעברים, הצללה ומתקנים על הגג.'}
+            : 'החלק מהגג שאפשר להציב עליו פאנלים בפועל — בדרך כלל פחות מהשטח הכולל, בגלל שוליים, מעברים, הצללה ומתקנים על הגג. שינוי השטח מעדכן את ההספק, עלות ההתקנה, התפעול והרזרבה; שאר הנתונים שערכתם נשמרים.'}
         </p>
       </div>
       {/* No key: changing the area updates size-based assumptions and keeps the user's other edits. */}

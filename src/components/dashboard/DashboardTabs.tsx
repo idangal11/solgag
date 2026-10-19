@@ -3,6 +3,7 @@
 import { Briefcase, House } from 'lucide-react';
 import Link from 'next/link';
 import { useRef, useState, useTransition, type KeyboardEvent, type ReactNode } from 'react';
+import { callAction } from '@/app/dashboard/_lib/callAction';
 import { setDashboardRole } from '@/app/dashboard/actions';
 import { useApp } from '@/components/AppProvider';
 import type { UserRole } from '@/lib/types';
@@ -35,9 +36,11 @@ export function DashboardTabs({ initialTab, name, owner, investor }: Props) {
     const url = new URL(window.location.href);
     url.searchParams.set('tab', next);
     window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+    // Only a preference save: the tab has already switched locally, so a lost
+    // connection or a stale build is logged quietly and never takes over the page.
     startTransition(async () => {
-      const res = await setDashboardRole(next);
-      if (!res.ok) toast(res.error, 'error');
+      const res = await callAction(() => setDashboardRole(next));
+      if (!res.ok && res.reason === 'server') toast(res.error, 'error');
     });
   };
 
@@ -62,7 +65,11 @@ export function DashboardTabs({ initialTab, name, owner, investor }: Props) {
         <div>
           <h1>האזור האישי</h1>
           <p className="muted">
-            {name ? `שלום ${name}. ` : ''}
+            {name ? (
+              <>
+                שלום <bdi>{name}</bdi>.{' '}
+              </>
+            ) : null}
             ניהול המודעות, הפניות והמועדפים שלך. האזור נפתח בתצוגה שבחרת לאחרונה.{' '}
             <Link href="/account">עדכון פרטי החשבון</Link>
           </p>

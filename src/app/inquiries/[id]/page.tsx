@@ -2,6 +2,7 @@ import { ArrowRight, Inbox, Lock, MessagesSquare } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { LISTING_NOT_SHOWN } from '@/components/dashboard/InquiryListItem';
 import { ContactLink } from '@/components/inquiries/ContactLink';
 import { InquiryStatusSelect } from '@/components/inquiries/InquiryStatusSelect';
 import { MessageThread } from '@/components/inquiries/MessageThread';
@@ -19,6 +20,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+/** How many of the most recent follow-up messages the page shows. */
+const MESSAGE_LIMIT = 500;
+
 export default async function InquiryThreadPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const user = await getCurrentUser();
@@ -29,22 +33,39 @@ export default async function InquiryThreadPage({ params }: { params: Promise<{ 
 
   const supabase = await createClient();
   const [{ data, error }, listing] = await Promise.all([
+    // The NEWEST messages (one extra row tells whether older ones were cut off);
+    // id breaks ties between rows inserted in the same transaction.
     supabase
       .from('inquiry_messages')
       .select('id, inquiry_id, sender_id, body, created_at')
       .eq('inquiry_id', inquiry.id)
-      .order('created_at', { ascending: true })
-      .limit(500),
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(MESSAGE_LIMIT + 1),
     // null when the listing is hidden and I am the sender (RLS) — the thread still works.
     getListing(inquiry.listingId),
   ]);
   if (error) throw new Error(`inquiry_messages: ${error.message}`);
-  const messages = ((data ?? []) as InquiryMessageRow[]).map((r) => mapInquiryMessage(r, user.id));
+  const rows = (data ?? []) as InquiryMessageRow[];
+  const olderHidden = rows.length > MESSAGE_LIMIT;
+  // Back to oldest-first for display.
+  const messages = rows
+    .slice(0, MESSAGE_LIMIT)
+    .reverse()
+    .map((r) => mapInquiryMessage(r, user.id));
 
   const isOwner = !inquiry.sentByMe && listing?.isMine === true;
   const isParticipant = inquiry.sentByMe || isOwner;
   const otherParty = !isParticipant ? 'משתתף/ת בשיחה' : inquiry.sentByMe ? listing?.ownerDisplayName || 'בעלי הגג' : inquiry.senderName;
   const status = INQUIRY_STATUS[inquiry.status];
+  // The owner (and staff) still see a hidden listing; say why it is not public.
+  const hiddenNote = !listing
+    ? null
+    : listing.adminHidden
+      ? 'הוסתרה על ידי צוות האתר'
+      : listing.status === 'hidden'
+        ? 'מוסתרת מהחיפוש ומהמפה'
+        : null;
 
   return (
     <div className="page narrow dash-thread">
@@ -54,15 +75,30 @@ export default async function InquiryThreadPage({ params }: { params: Promise<{ 
 
       <header className="dash-thread-head">
         <div>
-          <h1>{inquiry.sentByMe ? 'הפנייה שלך' : `פנייה מאת ${inquiry.senderName}`}</h1>
+          <h1>
+            {inquiry.sentByMe ? (
+              'הפנייה שלך'
+            ) : (
+              <>
+                פנייה מאת <bdi>{inquiry.senderName}</bdi>
+              </>
+            )}
+          </h1>
           <p className="muted">
             על המודעה:{' '}
             {listing ? (
-              <Link href={`/listing/${listing.id}`}>{inquiry.listingTitle}</Link>
-            ) : (
               <>
-                {inquiry.listingTitle} <span className="tiny">(המודעה אינה מוצגת כרגע)</span>
+                <Link href={`/listing/${listing.id}`}>
+                  <bdi>{listing.title}</bdi>
+                </Link>
+                {hiddenNote && <span className="tiny"> ({hiddenNote})</span>}
               </>
+            ) : (
+              // Not visible to me = hidden by its owner or by staff. Never "removed":
+              // deleting a listing deletes its inquiries, so this thread would be gone too.
+              <span className="dash-listing-gone">
+                {LISTING_NOT_SHOWN} <span className="tiny">— השיחה נשארת פתוחה וניתן להמשיך בה.</span>
+              </span>
             )}
           </p>
         </div>
@@ -106,7 +142,9 @@ export default async function InquiryThreadPage({ params }: { params: Promise<{ 
             </dd>
           </div>
         </dl>
-        <p className="dash-msg-body dash-orig-body">{inquiry.message}</p>
+        <p className="dash-msg-body dash-orig-body" dir="auto">
+          {inquiry.message}
+        </p>
         <p className="hint dash-privacy">
           <Lock size={13} aria-hidden /> פרטי הקשר בפנייה גלויים רק לפונה, לבעלי המודעה ולצוות הפלטפורמה.
         </p>
@@ -116,7 +154,7 @@ export default async function InquiryThreadPage({ params }: { params: Promise<{ 
         <h2 id="thread-heading">
           <MessagesSquare size={18} aria-hidden /> המשך השיחה
         </h2>
-        <MessageThread messages={messages} otherParty={otherParty} />
+        <MessageThread messages={messages} otherParty={otherParty} olderHidden={olderHidden} />
       </section>
 
       {isParticipant ? (

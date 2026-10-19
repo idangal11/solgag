@@ -5,8 +5,16 @@ import type { Inquiry, Listing } from '@/lib/types';
 import { FavoritesGrid } from './FavoritesGrid';
 import { InquiryListItem } from './InquiryListItem';
 
+interface Props {
+  favorites: Listing[];
+  sent: Inquiry[];
+  /** Listings of my sent inquiries that I can no longer see (hidden by their owner or by staff). */
+  hiddenListingIds: string[];
+}
+
 /** "משקיע/ה" tab: KPIs, saved rooftops and inquiries I sent. */
-export function InvestorPanel({ favorites, sent }: { favorites: Listing[]; sent: Inquiry[] }) {
+export function InvestorPanel({ favorites, sent, hiddenListingIds }: Props) {
+  const hidden = new Set(hiddenListingIds);
   const usable = favorites.reduce((s, l) => s + l.usableAreaSqm, 0);
   const open = sent.filter((i) => i.status !== 'closed').length;
 
@@ -59,7 +67,7 @@ export function InvestorPanel({ favorites, sent }: { favorites: Listing[]; sent:
         {sent.length ? (
           <ul className="inq-list">
             {sent.map((i) => (
-              <InquiryListItem key={i.id} inquiry={i} />
+              <InquiryListItem key={i.id} inquiry={i} listingVisible={!hidden.has(i.listingId)} />
             ))}
           </ul>
         ) : (

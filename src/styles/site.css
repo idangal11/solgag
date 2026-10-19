@@ -1,6 +1,6 @@
-/* ═════════════ Site pages: /calculator, /about, /terms, /privacy, 404 & errors ═════════════ */
+/* ═════════════ Site pages: /calculator, /about, /terms, /privacy, 404, errors, route loading ═════════════ */
 
-/* ---------- Placeholders (operator details still to be filled in) ---------- */
+/* ---------- Placeholders (operator details still to be filled in, see legalInfo.tsx) ---------- */
 mark.ph {
   background: var(--sun-100);
   color: #6b4e00;
@@ -8,6 +8,73 @@ mark.ph {
   border-radius: 4px;
   padding: 0 4px;
   font-weight: 600;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* ---------- Route loading (src/app/loading.tsx) ---------- */
+.route-loading {
+  /* Keeps the footer below the fold while the page streams in, so it does not jump. */
+  min-height: calc(100dvh - var(--topbar-h) - var(--banner-h));
+}
+.route-progress {
+  /* Fixed on the header's bottom edge: takes no space, so nothing shifts (the explore map included). */
+  position: fixed;
+  z-index: 1150; /* above the sticky header (1100) and map controls, below dialogs and toasts */
+  top: calc(var(--topbar-h) - 3px);
+  inset-inline: 0;
+  height: 3px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  /* Fast navigations finish before the bar fades in, so it does not flash. */
+  animation: route-progress-in 0.2s ease-out 0.15s forwards;
+}
+.route-progress::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 40%;
+  border-radius: 3px;
+  background: var(--sun);
+  animation: route-progress-slide 1.2s ease-in-out infinite;
+}
+[dir='ltr'] .route-progress::before {
+  animation-name: route-progress-slide-ltr;
+}
+@keyframes route-progress-in {
+  to {
+    opacity: 1;
+  }
+}
+/* RTL: from just past the right edge to just past the left edge (the bar is 40% wide). */
+@keyframes route-progress-slide {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(-250%);
+  }
+}
+@keyframes route-progress-slide-ltr {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* globals.css switches every animation off: show a calm, static bar instead. */
+  .route-progress {
+    opacity: 1;
+  }
+  .route-progress::before {
+    width: 100%;
+    opacity: 0.75;
+    transform: none;
+  }
 }
 
 /* ---------- Calculator page ---------- */
@@ -215,6 +282,10 @@ mark.ph {
 .about-contact p {
   margin: 0;
   overflow-wrap: anywhere;
+}
+.about-contact .draft-note p {
+  margin: 0;
+  font-size: 0.88rem;
 }
 .about-cta {
   margin-top: 34px;

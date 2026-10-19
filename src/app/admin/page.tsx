@@ -40,12 +40,18 @@ export default async function AdminOverviewPage() {
 
       <div className="admin-kpis">
         <Kpi
-          label="מודעות מפורסמות"
-          value={counts.published}
-          sub={counts.publishedFictional ? `מתוכן ${fmtNum(counts.publishedFictional)} לדוגמה (בדויות)` : undefined}
-          href="/admin/listings?status=published"
+          label="מודעות גלויות לציבור"
+          value={counts.visible}
+          sub={counts.visibleFictional ? `מתוכן ${fmtNum(counts.visibleFictional)} לדוגמה (בדויות)` : undefined}
+          href="/admin/listings?visibility=public"
         />
-        <Kpi label="מודעות מוסתרות" value={counts.hidden} href="/admin/listings?status=hidden" />
+        <Kpi label="הוסתרו ע״י המפרסמים" value={counts.ownerHidden} href="/admin/listings?visibility=owner_hidden" />
+        <Kpi
+          label="הוסתרו ע״י הצוות"
+          value={counts.adminHidden}
+          sub={counts.adminHidden ? 'המפרסמים לא יכולים לבטל' : undefined}
+          href="/admin/listings?visibility=admin_hidden"
+        />
         <Kpi
           label="בקשות אימות ממתינות"
           value={counts.pendingVerifications}

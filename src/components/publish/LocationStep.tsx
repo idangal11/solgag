@@ -1,14 +1,50 @@
 'use client';
 
-import { AlertTriangle, Crosshair, Loader2, MapPin, PenLine, Search, Trash2, Undo2 } from 'lucide-react';
+import { AlertTriangle, Crosshair, LocateFixed, Loader2, MapPin, PenLine, Search, Trash2, Undo2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useMemo, useState } from 'react';
 import { isSelfIntersecting, polygonAreaSqm } from '@/lib/geo';
 import { AREA_SOURCE_LABEL, fmtSqm } from '@/lib/labels';
 import type { LatLng } from '@/lib/types';
-import { roundLatLng, totalArea, usableArea, USABLE_PCT, type Draft, type DrawMode, type ManualSource } from './draft';
+import {
+  isFarFromRing,
+  MAX_VERTICES,
+  roundLatLng,
+  totalArea,
+  usableArea,
+  USABLE_PCT,
+  type AreaMode,
+  type Draft,
+  type DrawMode,
+  type ManualSource,
+} from './draft';
 import type { MapApi } from './DrawMap';
 import { FieldError, errProps } from './FieldError';
+import { SegmentedRadio, type SegmentOption } from './SegmentedRadio';
+
+const MAP_MODES: readonly SegmentOption<DrawMode>[] = [
+  {
+    value: 'locate',
+    label: (
+      <>
+        <Crosshair size={15} aria-hidden /> סימון מיקום
+      </>
+    ),
+  },
+  {
+    value: 'draw',
+    label: (
+      <>
+        <PenLine size={15} aria-hidden /> שרטוט גבולות הגג
+      </>
+    ),
+  },
+];
+
+const AREA_MODES: readonly SegmentOption<AreaMode>[] = [
+  { value: 'polygon', label: 'שטח מהשרטוט' },
+  { value: 'manual', label: 'הזנה ידנית' },
+];
 
 const DrawMap = dynamic(() => import('./DrawMap').then((m) => m.DrawMap), {
   ssr: false,
@@ -46,6 +82,8 @@ export function LocationStep({ d, set, errors, verificationAtRisk }: Props) {
   const crossing = useMemo(() => isSelfIntersecting(d.polygon), [d.polygon]);
   const total = totalArea(d);
   const usable = usableArea(d);
+  const atVertexCap = d.polygon.length >= MAX_VERTICES;
+  const pinFarFromOutline = !!d.location && isFarFromRing(d.location, d.polygon);
 
   const onLocation = (p: LatLng) => set('location', roundLatLng(p));
   const onPolygon = (ring: LatLng[]) => set('polygon', ring.map(roundLatLng));
@@ -61,6 +99,10 @@ export function LocationStep({ d, set, errors, verificationAtRisk }: Props) {
     setResults([]);
     try {
       const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`, { signal: AbortSignal.timeout(10_000) });
+      if (res.status === 401) {
+        setSearchMsg('תוקף ההתחברות פג, ולכן החיפוש אינו זמין. אפשר לבחור מיקום ידנית בלחיצה על המפה (הטיוטה נשמרת בלשונית זו).');
+        return;
+      }
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as GeoResult[];
       setResults(data);
@@ -85,7 +127,7 @@ export function LocationStep({ d, set, errors, verificationAtRisk }: Props) {
     <div className="locate-step">
       {verificationAtRisk && (
         <p className="note">
-          <AlertTriangle size={15} />
+          <AlertTriangle size={15} aria-hidden />
           שינוי המיקום או גבולות הגג יחזיר את סטטוס הבעלות ל„בעלות לא אומתה״, ויהיה צורך להגיש מסמכים לבדיקה מחדש.
         </p>
       )}
@@ -127,18 +169,11 @@ export function LocationStep({ d, set, errors, verificationAtRisk }: Props) {
           {searchMsg}
         </p>
 
-        <div className="seg" role="radiogroup" aria-label="מצב עבודה במפה">
-          <button type="button" role="radio" aria-checked={mode === 'locate'} className={mode === 'locate' ? 'on' : ''} onClick={() => setMode('locate')}>
-            <Crosshair size={15} /> סימון מיקום
-          </button>
-          <button type="button" role="radio" aria-checked={mode === 'draw'} className={mode === 'draw' ? 'on' : ''} onClick={() => setMode('draw')}>
-            <PenLine size={15} /> שרטוט גבולות הגג
-          </button>
-        </div>
+        <SegmentedRadio label="מצב עבודה במפה" value={mode} options={MAP_MODES} onChange={setMode} />
         <p className="hint">
           {mode === 'locate'
-            ? 'לחצו על המפה כדי לסמן את המבנה. הסמן ניתן לגרירה. אפשר גם להזיז את המפה (גם בחיצי המקלדת) וללחוץ „סימון במרכז המפה״.'
-            : 'לחצו על פינות הגג לפי הסדר. גררו נקודה כדי לערוך; לחיצה ימנית (או לחיצה ארוכה בנייד) מוחקת נקודה. מומלץ לעבוד על „תצלום אוויר״.'}
+            ? 'לחצו על המפה כדי לסמן את המבנה. הסמן ניתן לגרירה. אפשר גם להזיז את המפה (גם בחיצי המקלדת) עד שהצלב שבמרכזה עומד על המבנה, וללחוץ „סימון במרכז המפה״.'
+            : `לחצו על פינות הגג לפי הסדר (עד ${MAX_VERTICES} נקודות). גררו נקודה כדי לערוך; לחיצה ימנית (או לחיצה ארוכה בנייד) מוחקת נקודה. מומלץ לעבוד על „תצלום אוויר״.`}
         </p>
         <FieldError id="err-location" msg={errors.location} />
       </div>
@@ -159,7 +194,16 @@ export function LocationStep({ d, set, errors, verificationAtRisk }: Props) {
           {d.polygon.length} נקודות
         </span>
         {mode === 'locate' && (
-          <button type="button" className="btn ghost sm" disabled={!mapApi} onClick={() => mapApi && onLocation(mapApi.center())}>
+          <button
+            type="button"
+            className="btn ghost sm"
+            disabled={!mapApi}
+            onClick={() => {
+              if (!mapApi) return;
+              onLocation(mapApi.center());
+              setSearchMsg('המיקום סומן במרכז המפה. אפשר להזיז את המפה ולסמן שוב.');
+            }}
+          >
             <MapPin size={14} /> סימון במרכז המפה
           </button>
         )}
@@ -170,17 +214,26 @@ export function LocationStep({ d, set, errors, verificationAtRisk }: Props) {
           <Trash2 size={14} /> נקה שרטוט
         </button>
       </div>
+      {atVertexCap && mode === 'draw' && (
+        <p className="hint" role="status">
+          הגעתם למספר הנקודות המרבי ({MAX_VERTICES}). אפשר לגרור נקודות קיימות או למחוק נקודות כדי לשנות את השרטוט.
+        </p>
+      )}
+      {pinFarFromOutline && (
+        <p className="note">
+          <AlertTriangle size={15} aria-hidden />
+          <span>
+            סמן המיקום רחוק משרטוט הגג. ודאו שהסמן והשרטוט מתייחסים לאותו מבנה — הסמן הוא הנקודה שתוצג במפת החיפוש ותשמש למחשבון.{' '}
+            <button type="button" className="link-btn" onClick={() => set('location', null)}>
+              <LocateFixed size={14} aria-hidden /> העברת הסמן למרכז השרטוט
+            </button>
+          </span>
+        </p>
+      )}
       <FieldError id="err-polygon" msg={errors.polygon} />
 
       <div className="area-box">
-        <div className="seg" role="radiogroup" aria-label="מקור שטח הגג">
-          <button type="button" role="radio" aria-checked={d.areaMode === 'polygon'} className={d.areaMode === 'polygon' ? 'on' : ''} onClick={() => set('areaMode', 'polygon')}>
-            שטח מהשרטוט
-          </button>
-          <button type="button" role="radio" aria-checked={d.areaMode === 'manual'} className={d.areaMode === 'manual' ? 'on' : ''} onClick={() => set('areaMode', 'manual')}>
-            הזנה ידנית
-          </button>
-        </div>
+        <SegmentedRadio label="מקור שטח הגג" value={d.areaMode} options={AREA_MODES} onChange={(m) => set('areaMode', m)} />
         {d.areaMode === 'polygon' ? (
           <div className="area-readout" aria-live="polite">
             <span className="k">שטח מחושב (גיאודזי, Turf.js)</span>

@@ -4,6 +4,7 @@ import { CheckCircle2, Loader2, Send, X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useId, useRef, useState, useTransition, type FormEvent, type KeyboardEvent } from 'react';
 import { submitInquiry } from '@/app/listing/[id]/actions';
+import { useApp } from '@/components/AppProvider';
 import { INQUIRY_ROLE_LABEL } from '@/lib/labels';
 import type { InquiryRole, Listing } from '@/lib/types';
 import { fieldErrors, inquirySchema } from '@/lib/validation';
@@ -11,19 +12,53 @@ import { fieldErrors, inquirySchema } from '@/lib/validation';
 const ROLES = Object.keys(INQUIRY_ROLE_LABEL) as InquiryRole[];
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-interface Props {
+export interface InquiryDialogProps {
   listing: Pick<Listing, 'id' | 'title' | 'locality'>;
   prefill: { name: string; contact: string };
   onClose: () => void;
 }
 
-export function InquiryDialog({ listing, prefill, onClose }: Props) {
+// The typed message survives closing the dialog, a failed send and the sign-in round
+// trip (same tab only). Contact details are not stored: they come from the profile.
+type Draft = { role: InquiryRole; message: string };
+// Keyed by user too, so a draft (which may contain a phone number) never surfaces for
+// another account signed in later on the same browser tab.
+const draftKey = (userId: string, listingId: string) => `solgag:inquiry-draft:${userId}:${listingId}`;
+
+function readDraft(key: string): Draft | null {
+  try {
+    const raw = window.sessionStorage.getItem(key);
+    if (!raw) return null;
+    const d = JSON.parse(raw) as Partial<Draft>;
+    if (typeof d.message !== 'string' || !d.message.trim()) return null;
+    return { role: d.role && ROLES.includes(d.role) ? d.role : 'investor', message: d.message.slice(0, 2000) };
+  } catch {
+    return null;
+  }
+}
+
+/** Returns false when storage is unavailable (private mode, blocked): the draft is then not kept. */
+function writeDraft(key: string, draft: Draft | null): boolean {
+  try {
+    if (draft) window.sessionStorage.setItem(key, JSON.stringify(draft));
+    else window.sessionStorage.removeItem(key);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function InquiryDialog({ listing, prefill, onClose }: InquiryDialogProps) {
   const uid = useId();
+  const { user } = useApp();
+  const storageKey = draftKey(user?.id ?? 'anon', listing.id);
+  // Rendered only on the client (after a click), so reading storage here cannot mismatch hydration.
+  const [draft] = useState(() => readDraft(storageKey));
   const [name, setName] = useState(prefill.name);
   const [contact, setContact] = useState(prefill.contact);
-  const [role, setRole] = useState<InquiryRole>('investor');
+  const [role, setRole] = useState<InquiryRole>(draft?.role ?? 'investor');
   const [message, setMessage] = useState(
-    `שלום, אני מתעניין/ת בגג "${listing.title}" ב${listing.locality}. אשמח לקבל פרטים נוספים על התנאים והמבנה.`,
+    draft?.message ?? `שלום, אני מתעניין/ת בגג "${listing.title}" ב${listing.locality}. אשמח לקבל פרטים נוספים על התנאים והמבנה.`,
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -80,9 +115,12 @@ export function InquiryDialog({ listing, prefill, onClose }: Props) {
     setErrors({});
     setNeedsLogin(false);
     startTransition(async () => {
+      // A rejected call (network error, new deployment) must not reach error.tsx: the
+      // dialog stays open with everything the user typed, and shows a Hebrew error.
       try {
         const res = await submitInquiry(parsed.data);
         if (res.ok) {
+          writeDraft(storageKey, null);
           setDone(true);
           return;
         }
@@ -92,9 +130,25 @@ export function InquiryDialog({ listing, prefill, onClose }: Props) {
         const generic = !res.fieldErrors || !!res.fieldErrors.listingId;
         setFormError(res.error ?? (generic ? 'שליחת הפנייה נכשלה. נסו שוב.' : null));
       } catch {
-        setFormError('שליחת הפנייה נכשלה. בדקו את החיבור לאינטרנט ונסו שוב.');
+        // Keep the message in sessionStorage too, so even a page refresh (needed after a
+        // new deployment) brings it back.
+        const kept = writeDraft(storageKey, { role: parsed.data.senderRole, message: parsed.data.message });
+        setFormError(
+          kept
+            ? 'שליחת הפנייה נכשלה — ייתכן שהחיבור לאינטרנט נקטע. ההודעה שכתבת נשמרה; נסו שוב, ואם זה חוזר — רעננו את הדף.'
+            : 'שליחת הפנייה נכשלה — ייתכן שהחיבור לאינטרנט נקטע. הפרטים שמילאת נשארו בטופס; נסו לשלוח שוב בעוד רגע.',
+        );
       }
     });
+  };
+
+  const updateMessage = (value: string) => {
+    setMessage(value);
+    writeDraft(storageKey, { role, message: value });
+  };
+  const updateRole = (value: InquiryRole) => {
+    setRole(value);
+    writeDraft(storageKey, { role: value, message });
   };
 
   const showFieldErrors = (errs: Record<string, string>) => {
@@ -184,7 +238,7 @@ export function InquiryDialog({ listing, prefill, onClose }: Props) {
             </label>
             <label className="field">
               <span>אני פונה בתור</span>
-              <select value={role} onChange={(e) => setRole(e.target.value as InquiryRole)} {...fieldProps('senderRole')}>
+              <select value={role} onChange={(e) => updateRole(e.target.value as InquiryRole)} {...fieldProps('senderRole')}>
                 {ROLES.map((r) => (
                   <option key={r} value={r}>
                     {INQUIRY_ROLE_LABEL[r]}
@@ -198,7 +252,7 @@ export function InquiryDialog({ listing, prefill, onClose }: Props) {
               <textarea
                 rows={4}
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) => updateMessage(e.target.value)}
                 autoFocus={firstEmpty === 'message'}
                 maxLength={2000}
                 required

@@ -78,6 +78,11 @@ usage policies do not allow production traffic without an agreement/account.
    | `NOTIFY_FROM_EMAIL` | `סולגג <no-reply@<your-domain>>` | no |
    | `NEXT_PUBLIC_MAP_TILE_URL` … | see step 3 | no (restrict key by domain) |
    | `GOOGLE_MAPS_API_KEY` | optional | **yes** |
+   | `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` | 32-byte base64 key, e.g. `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` | **yes** |
+
+   The fixed Server Actions key keeps forms working for visitors who still have the
+   previous version open during a deploy. Also enable **Skew Protection** (Project →
+   Settings → Advanced) so old browser tabs keep talking to the deployment they loaded.
 
 3. Deploy:
    ```
@@ -102,7 +107,10 @@ usage policies do not allow production traffic without an agreement/account.
   Amendment 13, database registration/notification duties if applicable, Data Security Regulations.
 - Securities/investment-advice check: if the platform will match investors to projects for a fee
   or show projected returns, get advice regarding Israel Securities Authority rules.
-- Fill the placeholders in the legal pages (company name, contact email, jurisdiction).
+- Fill the operator details in **`src/components/site/legalInfo.tsx`** (company name and number,
+  address, contact and privacy emails, court district, hosting regions, email/SMTP provider,
+  log and backup retention). They feed `/terms`, `/privacy` and `/about`; until they are filled,
+  the pages show highlighted placeholders and a draft banner, and the production build logs a warning.
 - Enable Supabase **Point-in-Time Recovery / daily backups** (paid plans) and set up uptime alerts.
 
 ## Updating production later

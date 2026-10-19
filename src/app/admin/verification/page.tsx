@@ -59,7 +59,11 @@ function PendingRequest({ item }: { item: AdminVerificationItem }) {
           <p className="muted small">המגיש לא צירף הערה.</p>
         )}
       </div>
-      <VerificationReview requestId={item.id} listingTitle={item.listingTitle} />
+      <VerificationReview
+        requestId={item.id}
+        listingTitle={item.listingTitle}
+        canApprove={item.listingVerification === 'pending'}
+      />
     </li>
   );
 }
