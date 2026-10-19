@@ -418,3 +418,28 @@ enabled = true
 # formatted with uppercase keywords, indent 2, max width 180, trailing commas,
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
+
+# ─── Production overrides (applied by `supabase config push` to the linked project) ───
+[remotes.production]
+project_id = "ifldvamrpmdcnbozmfro"
+
+[remotes.production.auth]
+site_url = "https://solgag-mu.vercel.app"
+additional_redirect_urls = ["https://solgag-mu.vercel.app/**"]
+
+[remotes.production.auth.email]
+# At most one sign-in email per address per minute in production (the UI's resend timer is 60s).
+max_frequency = "1m0s"
+
+[remotes.production.auth.mfa.totp]
+# Keep the hosted defaults (not used by the app, harmless to leave available).
+enroll_enabled = true
+verify_enabled = true
+
+[remotes.production.db.pooler]
+# Keep the values Supabase sizes for the project's compute.
+default_pool_size = 15
+max_client_conn = 200
+
+[remotes.production.storage.vector]
+enabled = false
