@@ -1,0 +1,95 @@
+{
+  "version": 2,
+  "pilot": {
+    "name": "אזור עמק חפר (מלבן פיילוט, כולל חלק מנתניה וקדימה)",
+    "bbox": {
+      "s": 32.3,
+      "w": 34.85,
+      "n": 32.42,
+      "e": 35
+    },
+    "areaKm2": 188.4
+  },
+  "assumptions": {
+    "MIN_AREA": 1000,
+    "USABLE_RATIO": 0.65,
+    "SQM_PER_KWP": 6.5,
+    "yieldKwhPerKwp": 1677,
+    "pvgis": {
+      "used": true,
+      "url": "https://re.jrc.ec.europa.eu/api/v5_3/PVcalc?lat=32.36&lon=34.92&peakpower=1&loss=14&optimalangles=1&outputformat=json",
+      "E_y": 1677.15,
+      "note": "optimal angles, free-standing, 14% losses — optimistic for roof-following arrays"
+    },
+    "capacityUnit": "kWp DC"
+  },
+  "osm": {
+    "buildings": 18123,
+    "relationsUsed": 9,
+    "genericTagShare": 92.7,
+    "mappedSolarFeatures": 12
+  },
+  "ms": {
+    "buildings": 43124,
+    "msDroppedAsDuplicate": 542,
+    "msMergedSmallOsm": 459
+  },
+  "raw": {
+    "largeRoofs": 2482
+  },
+  "excluded": {
+    "residential area": 819,
+    "residential building tag": 17,
+    "building=greenhouse": 32,
+    "greenhouse area (likely greenhouse)": 606,
+    "military area": 16
+  },
+  "candidates": {
+    "total": 992,
+    "byTier": {
+      "A": 238,
+      "B": 231,
+      "C": 523
+    },
+    "bySource": {
+      "both": 378,
+      "osm_only": 60,
+      "ms_only": 512,
+      "ms_merged": 42
+    },
+    "byLanduse": {
+      "commercial": 10,
+      "residential": 21,
+      "industrial": 279,
+      "retail": 11,
+      "unmapped": 70,
+      "farmland": 594,
+      "farmyard": 7
+    }
+  },
+  "totals": {
+    "roofAreaSqm": 3190672,
+    "usableSqm": 2073936,
+    "kWp": 319067,
+    "mwhYear": 535076
+  },
+  "totalsTierA": {
+    "roofAreaSqm": 640986,
+    "kWp": 64099
+  },
+  "photoReview": {
+    "sampleSize": 36,
+    "reviewers": 3,
+    "interRaterAgreementBlind": "33/36",
+    "consensus": {
+      "good_bare_roof": 4,
+      "solar_partial": 4,
+      "greenhouse": 11,
+      "outline_wrong": 7,
+      "solar_full": 3,
+      "residential": 3,
+      "unclear_or_no_majority": 4
+    },
+    "note": "v1 set; Microsoft-only roofs in farm areas were 11/12 greenhouses. Real opportunities concentrated where both sources agree."
+  }
+}

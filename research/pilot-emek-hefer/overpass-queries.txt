@@ -1,0 +1,9 @@
+﻿## osm-landuse.json
+[out:json][timeout:180];(way["landuse"~"^(industrial|farmyard|commercial|retail|residential|farmland|greenhouse_horticulture|military)$"](32.30,34.85,32.42,35.00);relation["landuse"~"^(industrial|farmyard|commercial|retail|residential|farmland|greenhouse_horticulture|military)$"](32.30,34.85,32.42,35.00););out geom;
+
+## osm-solar.json
+[out:json][timeout:120];(nwr["generator:source"="solar"](32.30,34.85,32.42,35.00);nwr["plant:source"="solar"](32.30,34.85,32.42,35.00););out geom;
+
+## osm-buildings.json
+[out:json][timeout:180];(way["building"](32.30,34.85,32.42,35.00);relation["building"](32.30,34.85,32.42,35.00););out geom;
+

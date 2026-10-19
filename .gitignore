@@ -32,3 +32,6 @@ next-env.d.ts
 .vercel
 .env*
 !.env.example
+
+# research raw downloads (large, re-fetchable)
+/research/**/raw/

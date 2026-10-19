@@ -1,0 +1,62 @@
+{
+  "osmWaysTotal": 18179,
+  "osmRelationsTotal": 9,
+  "osmRelationsWithMembers": 0,
+  "osmBuildingsCentroidInBbox": 18134,
+  "osmBuildingsVertexMeanInBbox": 18134,
+  "osmBuildingsBboxIntersects": 18179,
+  "osmRelationsBoundsCentreInBbox": 9,
+  "msFootprintsInFile": 408837,
+  "msFootprintsCentroidInBbox": 43124,
+  "msVertexMeanInBbox": 43121,
+  "osmGe1000_sphereMean": 724,
+  "osmGe1000_ellipsoid": 724,
+  "msGe1000_sphereMean": 2294,
+  "msGe1000_ellipsoid": 2293,
+  "meanRatio_sphereOverEllipsoid": 1.0006454570822316,
+  "msGe1000_noOsmContainingCentroid_bboxOsm": 1467,
+  "msGe1000_noOsmContainingCentroid_allOsm": 1466,
+  "osmGe1000_noMsContainingCentroid_bboxMs": 157,
+  "osmGe1000_noMsContainingCentroid_allMs": 156,
+  "candidates": 2125,
+  "excluded": {
+    "residential building": 17,
+    "building=greenhouse": 32,
+    "building=construction": 1,
+    "military area": 16
+  },
+  "bySource": {
+    "osm_only": 139,
+    "both": 535,
+    "ms_only": 1451
+  },
+  "byLanduseRaw": {
+    "unmapped": 647,
+    "commercial": 6,
+    "industrial": 306,
+    "retail": 11,
+    "farmland": 466,
+    "residential": 98,
+    "farmyard": 13,
+    "greenhouse_horticulture": 578
+  },
+  "candidateAreaSum_sphereMean": 6917067,
+  "candidateAreaSum_ellipsoid": 6912641,
+  "candidates_ellipsoidThreshold": 2124,
+  "published": {
+    "statsTotal": 2125,
+    "statsRoofArea": 6908946,
+    "geojsonFeatures": 2125,
+    "geojsonAreaSum": 6908971,
+    "geojsonKwSum": 690870,
+    "geojsonMwhSum": 1158628,
+    "geojsonDupIds": 0
+  },
+  "featureMatch": {
+    "matched": 1249,
+    "onlyMine": 876,
+    "onlyPublished": 876,
+    "maxAbsAreaDiff_vsMySphere": 0.61,
+    "meanPublishedOverEllipsoid": 1.000644
+  }
+}

@@ -1,0 +1,1372 @@
+{
+  "D1_setDiff": {
+    "onlyPublished": [
+      {
+        "id": "ms/19804",
+        "source": "ms_only",
+        "area": 3054,
+        "lat": 32.315161,
+        "lng": 34.850044
+      },
+      {
+        "id": "ms/22561",
+        "source": "ms_only",
+        "area": 2593,
+        "lat": 32.320824,
+        "lng": 34.854345
+      },
+      {
+        "id": "ms/18706",
+        "source": "ms_only",
+        "area": 2359,
+        "lat": 32.332522,
+        "lng": 34.85194
+      },
+      {
+        "id": "ms/21403",
+        "source": "ms_only",
+        "area": 2218,
+        "lat": 32.314505,
+        "lng": 34.947504
+      },
+      {
+        "id": "ms/24536",
+        "source": "ms_only",
+        "area": 2096,
+        "lat": 32.307281,
+        "lng": 34.87003
+      },
+      {
+        "id": "ms/33957",
+        "source": "ms_only",
+        "area": 2049,
+        "lat": 32.319798,
+        "lng": 34.874797
+      },
+      {
+        "id": "ms/13598",
+        "source": "ms_only",
+        "area": 1663,
+        "lat": 32.300669,
+        "lng": 34.871874
+      },
+      {
+        "id": "ms/4405",
+        "source": "ms_only",
+        "area": 1639,
+        "lat": 32.317561,
+        "lng": 34.863379
+      },
+      {
+        "id": "ms/17014",
+        "source": "ms_only",
+        "area": 1492,
+        "lat": 32.316301,
+        "lng": 34.950896
+      },
+      {
+        "id": "ms/40822",
+        "source": "ms_only",
+        "area": 1455,
+        "lat": 32.316804,
+        "lng": 34.853166
+      },
+      {
+        "id": "ms/14642",
+        "source": "ms_only",
+        "area": 1441,
+        "lat": 32.33201,
+        "lng": 34.860926
+      },
+      {
+        "id": "ms/20455",
+        "source": "ms_only",
+        "area": 1412,
+        "lat": 32.322666,
+        "lng": 34.860357
+      },
+      {
+        "id": "ms/32996",
+        "source": "ms_only",
+        "area": 1411,
+        "lat": 32.322455,
+        "lng": 34.850641
+      },
+      {
+        "id": "ms/35672",
+        "source": "ms_only",
+        "area": 1382,
+        "lat": 32.336121,
+        "lng": 34.854511
+      },
+      {
+        "id": "ms/42905",
+        "source": "ms_only",
+        "area": 1362,
+        "lat": 32.333524,
+        "lng": 34.856934
+      },
+      {
+        "id": "ms/24076",
+        "source": "ms_only",
+        "area": 1348,
+        "lat": 32.321153,
+        "lng": 34.858907
+      },
+      {
+        "id": "ms/12743",
+        "source": "ms_only",
+        "area": 1315,
+        "lat": 32.321123,
+        "lng": 34.85719
+      },
+      {
+        "id": "ms/10388",
+        "source": "ms_only",
+        "area": 1239,
+        "lat": 32.323809,
+        "lng": 34.857319
+      },
+      {
+        "id": "ms/20457",
+        "source": "ms_only",
+        "area": 1226,
+        "lat": 32.323037,
+        "lng": 34.860503
+      },
+      {
+        "id": "ms/19082",
+        "source": "ms_only",
+        "area": 1222,
+        "lat": 32.311938,
+        "lng": 34.937399
+      },
+      {
+        "id": "ms/20642",
+        "source": "ms_only",
+        "area": 1216,
+        "lat": 32.335985,
+        "lng": 34.853895
+      },
+      {
+        "id": "ms/17785",
+        "source": "ms_only",
+        "area": 1195,
+        "lat": 32.326786,
+        "lng": 34.856904
+      },
+      {
+        "id": "ms/33913",
+        "source": "ms_only",
+        "area": 1173,
+        "lat": 32.323817,
+        "lng": 34.85832
+      },
+      {
+        "id": "ms/28381",
+        "source": "ms_only",
+        "area": 1163,
+        "lat": 32.300803,
+        "lng": 34.913801
+      },
+      {
+        "id": "ms/36579",
+        "source": "ms_only",
+        "area": 1160,
+        "lat": 32.317503,
+        "lng": 34.87228
+      },
+      {
+        "id": "ms/20597",
+        "source": "ms_only",
+        "area": 1070,
+        "lat": 32.32277,
+        "lng": 34.936181
+      },
+      {
+        "id": "ms/35472",
+        "source": "ms_only",
+        "area": 1060,
+        "lat": 32.344964,
+        "lng": 34.858431
+      },
+      {
+        "id": "ms/6598",
+        "source": "ms_only",
+        "area": 1052,
+        "lat": 32.324841,
+        "lng": 34.854173
+      },
+      {
+        "id": "ms/35275",
+        "source": "ms_only",
+        "area": 1043,
+        "lat": 32.334984,
+        "lng": 34.865715
+      },
+      {
+        "id": "ms/38020",
+        "source": "ms_only",
+        "area": 1034,
+        "lat": 32.319955,
+        "lng": 34.854086
+      },
+      {
+        "id": "ms/3677",
+        "source": "ms_only",
+        "area": 1033,
+        "lat": 32.327509,
+        "lng": 34.85239
+      },
+      {
+        "id": "ms/32788",
+        "source": "ms_only",
+        "area": 1010,
+        "lat": 32.322459,
+        "lng": 34.857372
+      }
+    ],
+    "onlyRecomputed": [
+      {
+        "id": "msline/28763",
+        "src": "ms_only",
+        "area": 4651,
+        "c": [
+          34.860454,
+          32.330703
+        ]
+      },
+      {
+        "id": "msline/28945",
+        "src": "ms_only",
+        "area": 1522,
+        "c": [
+          34.877901,
+          32.301905
+        ]
+      },
+      {
+        "id": "msline/30816",
+        "src": "ms_only",
+        "area": 1508,
+        "c": [
+          34.863659,
+          32.319913
+        ]
+      },
+      {
+        "id": "msline/42885",
+        "src": "ms_only",
+        "area": 1308,
+        "c": [
+          34.864917,
+          32.328073
+        ]
+      },
+      {
+        "id": "msline/98139",
+        "src": "ms_only",
+        "area": 4527,
+        "c": [
+          34.855118,
+          32.328533
+        ]
+      },
+      {
+        "id": "msline/112694",
+        "src": "ms_only",
+        "area": 2058,
+        "c": [
+          34.856382,
+          32.319852
+        ]
+      },
+      {
+        "id": "msline/118720",
+        "src": "ms_only",
+        "area": 1447,
+        "c": [
+          34.854694,
+          32.318402
+        ]
+      },
+      {
+        "id": "msline/160000",
+        "src": "ms_only",
+        "area": 1266,
+        "c": [
+          34.859397,
+          32.331371
+        ]
+      },
+      {
+        "id": "msline/170389",
+        "src": "ms_only",
+        "area": 2103,
+        "c": [
+          34.852909,
+          32.310699
+        ]
+      },
+      {
+        "id": "msline/172447",
+        "src": "ms_only",
+        "area": 1055,
+        "c": [
+          34.850767,
+          32.325115
+        ]
+      },
+      {
+        "id": "msline/197161",
+        "src": "ms_only",
+        "area": 1484,
+        "c": [
+          34.850366,
+          32.322609
+        ]
+      },
+      {
+        "id": "msline/215826",
+        "src": "ms_only",
+        "area": 1011,
+        "c": [
+          34.857722,
+          32.318704
+        ]
+      },
+      {
+        "id": "msline/219854",
+        "src": "ms_only",
+        "area": 1688,
+        "c": [
+          34.856295,
+          32.332481
+        ]
+      },
+      {
+        "id": "msline/240370",
+        "src": "ms_only",
+        "area": 1761,
+        "c": [
+          34.85688,
+          32.322656
+        ]
+      },
+      {
+        "id": "msline/254555",
+        "src": "ms_only",
+        "area": 3919,
+        "c": [
+          34.853367,
+          32.333315
+        ]
+      },
+      {
+        "id": "msline/264916",
+        "src": "ms_only",
+        "area": 1533,
+        "c": [
+          34.857476,
+          32.331172
+        ]
+      },
+      {
+        "id": "msline/270937",
+        "src": "ms_only",
+        "area": 1105,
+        "c": [
+          34.851697,
+          32.328173
+        ]
+      },
+      {
+        "id": "msline/283233",
+        "src": "ms_only",
+        "area": 1457,
+        "c": [
+          34.851403,
+          32.301586
+        ]
+      },
+      {
+        "id": "msline/293374",
+        "src": "ms_only",
+        "area": 1128,
+        "c": [
+          34.854421,
+          32.323762
+        ]
+      },
+      {
+        "id": "msline/297421",
+        "src": "ms_only",
+        "area": 1248,
+        "c": [
+          34.859553,
+          32.340234
+        ]
+      },
+      {
+        "id": "msline/313734",
+        "src": "ms_only",
+        "area": 1490,
+        "c": [
+          34.875144,
+          32.315063
+        ]
+      },
+      {
+        "id": "msline/314060",
+        "src": "ms_only",
+        "area": 1205,
+        "c": [
+          34.912485,
+          32.387951
+        ]
+      },
+      {
+        "id": "msline/333853",
+        "src": "ms_only",
+        "area": 1197,
+        "c": [
+          34.871067,
+          32.303166
+        ]
+      },
+      {
+        "id": "msline/346580",
+        "src": "ms_only",
+        "area": 1396,
+        "c": [
+          34.936601,
+          32.310178
+        ]
+      },
+      {
+        "id": "msline/356313",
+        "src": "ms_only",
+        "area": 1276,
+        "c": [
+          34.877222,
+          32.317874
+        ]
+      },
+      {
+        "id": "msline/362448",
+        "src": "ms_only",
+        "area": 3282,
+        "c": [
+          34.881701,
+          32.319189
+        ]
+      },
+      {
+        "id": "msline/364345",
+        "src": "ms_only",
+        "area": 1437,
+        "c": [
+          34.864011,
+          32.341039
+        ]
+      },
+      {
+        "id": "msline/368659",
+        "src": "ms_only",
+        "area": 1401,
+        "c": [
+          34.881313,
+          32.322601
+        ]
+      },
+      {
+        "id": "msline/371271",
+        "src": "ms_only",
+        "area": 1273,
+        "c": [
+          34.939028,
+          32.313217
+        ]
+      },
+      {
+        "id": "msline/384952",
+        "src": "ms_only",
+        "area": 1066,
+        "c": [
+          34.874551,
+          32.315812
+        ]
+      },
+      {
+        "id": "msline/394997",
+        "src": "ms_only",
+        "area": 1102,
+        "c": [
+          34.857366,
+          32.320599
+        ]
+      },
+      {
+        "id": "msline/395044",
+        "src": "ms_only",
+        "area": 1402,
+        "c": [
+          34.863007,
+          32.316837
+        ]
+      }
+    ],
+    "areaOnlyPublished": 47185,
+    "areaOnlyRecomputed": 55305,
+    "sourceLabelChanged": [
+      {
+        "id": "way/104334043",
+        "published": "osm_only",
+        "recomputed": "both",
+        "area": 1099
+      },
+      {
+        "id": "way/104334157",
+        "published": "osm_only",
+        "recomputed": "both",
+        "area": 1372
+      },
+      {
+        "id": "way/143541249",
+        "published": "osm_only",
+        "recomputed": "both",
+        "area": 2253
+      },
+      {
+        "id": "way/147113776",
+        "published": "both",
+        "recomputed": "osm_only",
+        "area": 1061
+      },
+      {
+        "id": "way/383407927",
+        "published": "osm_only",
+        "recomputed": "both",
+        "area": 1133
+      },
+      {
+        "id": "way/383407979",
+        "published": "osm_only",
+        "recomputed": "both",
+        "area": 1470
+      },
+      {
+        "id": "way/555989964",
+        "published": "osm_only",
+        "recomputed": "both",
+        "area": 1665
+      },
+      {
+        "id": "way/668113816",
+        "published": "osm_only",
+        "recomputed": "both",
+        "area": 1101
+      },
+      {
+        "id": "way/768479598",
+        "published": "osm_only",
+        "recomputed": "both",
+        "area": 1543
+      },
+      {
+        "id": "way/996254328",
+        "published": "both",
+        "recomputed": "osm_only",
+        "area": 4222
+      },
+      {
+        "id": "way/1113042554",
+        "published": "osm_only",
+        "recomputed": "both",
+        "area": 1803
+      },
+      {
+        "id": "way/1207084459",
+        "published": "both",
+        "recomputed": "osm_only",
+        "area": 1080
+      }
+    ],
+    "contextChanged": 0
+  },
+  "D2_publishedOverlap": {
+    "sumOfAreas": 6908971,
+    "unionArea": 6837344,
+    "doubleCountedSqm": 71627,
+    "doubleCountedPct": 1.04,
+    "featuresWithAnyOverlapGt10pct": 85,
+    "featuresOverlapGt50pct": 72,
+    "overlappingPairs_ge10sqm": 65,
+    "bySourcePair": {
+      "both+ms_only": {
+        "pairs": 41,
+        "overlapSqm": 60155
+      },
+      "ms_only+ms_only": {
+        "pairs": 16,
+        "overlapSqm": 264
+      },
+      "ms_only+osm_only": {
+        "pairs": 7,
+        "overlapSqm": 10012
+      },
+      "both+both": {
+        "pairs": 1,
+        "overlapSqm": 1101
+      }
+    },
+    "worst": [
+      {
+        "a": "ms/23208 (ms_only, 15365 m2, yes)",
+        "b": "way/1327479712 (both, 8632 m2)",
+        "overlapSqm": 7857,
+        "at": "32.36849,34.994092"
+      },
+      {
+        "a": "way/555989933 (both, 5042 m2, yes)",
+        "b": "ms/42737 (ms_only, 4896 m2)",
+        "overlapSqm": 4030,
+        "at": "32.321845,34.874984"
+      },
+      {
+        "a": "ms/23208 (ms_only, 15365 m2, yes)",
+        "b": "way/1327479710 (both, 3467 m2)",
+        "overlapSqm": 3451,
+        "at": "32.36849,34.994092"
+      },
+      {
+        "a": "way/30809475 (osm_only, 5004 m2, yes)",
+        "b": "ms/41252 (ms_only, 3545 m2)",
+        "overlapSqm": 3380,
+        "at": "32.327048,34.858457"
+      },
+      {
+        "a": "ms/23208 (ms_only, 15365 m2, yes)",
+        "b": "way/1327479711 (both, 2114 m2)",
+        "overlapSqm": 2085,
+        "at": "32.36849,34.994092"
+      },
+      {
+        "a": "ms/1543 (ms_only, 4452 m2, yes)",
+        "b": "way/555989998 (both, 3862 m2)",
+        "overlapSqm": 2032,
+        "at": "32.322165,34.877917"
+      },
+      {
+        "a": "ms/17558 (ms_only, 2642 m2, yes)",
+        "b": "way/972507661 (osm_only, 2166 m2)",
+        "overlapSqm": 2006,
+        "at": "32.361517,34.868376"
+      },
+      {
+        "a": "ms/14428 (ms_only, 5250 m2, yes)",
+        "b": "way/143541249 (osm_only, 2253 m2)",
+        "overlapSqm": 1883,
+        "at": "32.309705,34.855867"
+      },
+      {
+        "a": "ms/23493 (ms_only, 3753 m2, yes)",
+        "b": "way/1020203119 (both, 3212 m2)",
+        "overlapSqm": 1713,
+        "at": "32.398059,34.896987"
+      },
+      {
+        "a": "ms/29750 (ms_only, 3075 m2, yes)",
+        "b": "way/1191559901 (both, 1961 m2)",
+        "overlapSqm": 1698,
+        "at": "32.395586,34.972054"
+      },
+      {
+        "a": "ms/7137 (ms_only, 2108 m2, yes)",
+        "b": "way/1304223360 (both, 1864 m2)",
+        "overlapSqm": 1666,
+        "at": "32.387376,34.909882"
+      },
+      {
+        "a": "ms/23003 (ms_only, 3757 m2, yes)",
+        "b": "way/87935795 (both, 2007 m2)",
+        "overlapSqm": 1569,
+        "at": "32.327624,34.854157"
+      }
+    ]
+  },
+  "D3_msOnlyVsOsm": {
+    "msOnly": 1451,
+    "coverageBuckets": {
+      "covered<10%": 1258,
+      "10-50%": 64,
+      "50-90%": 127,
+      ">=90%": 2
+    },
+    "msOnlyAreaTotal": 5342535,
+    "areaAlsoCoveredByAnyOsmBuilding": 234713,
+    "areaAlsoCoveredByOsmCandidates_doubleCounted": 69735,
+    "mostlyOsmMapped_butOsmPartsBelowThreshold": {
+      "n": 96,
+      "area": 176900
+    },
+    "ownCentroidOutsideOwnPolygon": 49,
+    "ownCentroidOutside_andOsmCover50": 28,
+    "examples": [
+      {
+        "ms": "msline/588",
+        "area": 1701,
+        "osmCover": 0.53,
+        "osmBuildings": 2,
+        "centroidInOwnPolygon": true,
+        "c": [
+          34.861203,
+          32.316709
+        ]
+      },
+      {
+        "ms": "msline/6621",
+        "area": 4801,
+        "osmCover": 0.6,
+        "osmBuildings": 6,
+        "centroidInOwnPolygon": true,
+        "c": [
+          34.8733,
+          32.320853
+        ]
+      },
+      {
+        "ms": "msline/6845",
+        "area": 2745,
+        "osmCover": 0.79,
+        "osmBuildings": 2,
+        "centroidInOwnPolygon": true,
+        "c": [
+          34.898413,
+          32.374614
+        ]
+      },
+      {
+        "ms": "msline/12485",
+        "area": 1721,
+        "osmCover": 0.64,
+        "osmBuildings": 5,
+        "centroidInOwnPolygon": true,
+        "c": [
+          34.853437,
+          32.323665
+        ]
+      },
+      {
+        "ms": "msline/12533",
+        "area": 2196,
+        "osmCover": 0.6,
+        "osmBuildings": 3,
+        "centroidInOwnPolygon": true,
+        "c": [
+          34.858712,
+          32.33427
+        ]
+      },
+      {
+        "ms": "msline/14751",
+        "area": 4452,
+        "osmCover": 0.61,
+        "osmBuildings": 2,
+        "centroidInOwnPolygon": true,
+        "c": [
+          34.877917,
+          32.322164
+        ]
+      },
+      {
+        "ms": "msline/16518",
+        "area": 1640,
+        "osmCover": 0.65,
+        "osmBuildings": 1,
+        "centroidInOwnPolygon": true,
+        "c": [
+          34.851619,
+          32.302456
+        ]
+      },
+      {
+        "ms": "msline/22644",
+        "area": 1744,
+        "osmCover": 0.54,
+        "osmBuildings": 2,
+        "centroidInOwnPolygon": true,
+        "c": [
+          34.854577,
+          32.340067
+        ]
+      }
+    ]
+  },
+  "D4_msLargeSwallowedBySmallOsm": {
+    "msGe1000_centroidInOsm": 827,
+    "msGe1000_centroidInOsmGe1000": 498,
+    "msGe1000_centroidInOsmLt1000": 329,
+    "ofWhichNoOverlappingOsmGe1000_lostRoofs": 318,
+    "lostRoofArea": 487002,
+    "lostBySize": {
+      "1000-2500": 296,
+      "2500-5000": 19,
+      "5000+": 3
+    },
+    "examples": [
+      {
+        "area": 9422,
+        "maxOsmContainingCentroid": 725,
+        "osmCover": 0.71,
+        "osmPieces": 14,
+        "anyOverlappingOsmGe1000": false,
+        "c": [
+          34.856936,
+          32.330313
+        ]
+      },
+      {
+        "area": 5638,
+        "maxOsmContainingCentroid": 701,
+        "osmCover": 0.74,
+        "osmPieces": 8,
+        "anyOverlappingOsmGe1000": false,
+        "c": [
+          34.854073,
+          32.328476
+        ]
+      },
+      {
+        "area": 5070,
+        "maxOsmContainingCentroid": 475,
+        "osmCover": 0.55,
+        "osmPieces": 6,
+        "anyOverlappingOsmGe1000": false,
+        "c": [
+          34.937432,
+          32.310343
+        ]
+      },
+      {
+        "area": 4957,
+        "maxOsmContainingCentroid": 861,
+        "osmCover": 0.33,
+        "osmPieces": 5,
+        "anyOverlappingOsmGe1000": false,
+        "c": [
+          34.85542,
+          32.336324
+        ]
+      },
+      {
+        "area": 4633,
+        "maxOsmContainingCentroid": 296,
+        "osmCover": 0.29,
+        "osmPieces": 6,
+        "anyOverlappingOsmGe1000": false,
+        "c": [
+          34.943104,
+          32.312682
+        ]
+      },
+      {
+        "area": 3879,
+        "maxOsmContainingCentroid": 513,
+        "osmCover": 0.46,
+        "osmPieces": 6,
+        "anyOverlappingOsmGe1000": false,
+        "c": [
+          34.860853,
+          32.323735
+        ]
+      },
+      {
+        "area": 3849,
+        "maxOsmContainingCentroid": 513,
+        "osmCover": 0.66,
+        "osmPieces": 7,
+        "anyOverlappingOsmGe1000": false,
+        "c": [
+          34.850996,
+          32.326963
+        ]
+      },
+      {
+        "area": 3810,
+        "maxOsmContainingCentroid": 768,
+        "osmCover": 0.63,
+        "osmPieces": 6,
+        "anyOverlappingOsmGe1000": false,
+        "c": [
+          34.851113,
+          32.32792
+        ]
+      },
+      {
+        "area": 3577,
+        "maxOsmContainingCentroid": 848,
+        "osmCover": 0.42,
+        "osmPieces": 3,
+        "anyOverlappingOsmGe1000": false,
+        "c": [
+          34.939002,
+          32.322537
+        ]
+      },
+      {
+        "area": 3550,
+        "maxOsmContainingCentroid": 964,
+        "osmCover": 0.86,
+        "osmPieces": 4,
+        "anyOverlappingOsmGe1000": false,
+        "c": [
+          34.872874,
+          32.319099
+        ]
+      }
+    ]
+  },
+  "D5_osmMatching": {
+    "osmOnly": 139,
+    "osmOnly_butMsCoversHalfOrMore": 49,
+    "examples": [
+      {
+        "id": "way/28309479",
+        "area": 9316,
+        "msCover": 0.54,
+        "centroidInOwnPolygon": true
+      },
+      {
+        "id": "way/30809475",
+        "area": 5004,
+        "msCover": 0.73,
+        "centroidInOwnPolygon": false
+      },
+      {
+        "id": "way/84099684",
+        "area": 5337,
+        "msCover": 0.53,
+        "centroidInOwnPolygon": true
+      },
+      {
+        "id": "way/104519823",
+        "area": 2390,
+        "msCover": 0.57,
+        "centroidInOwnPolygon": true
+      },
+      {
+        "id": "way/106178920",
+        "area": 1992,
+        "msCover": 0.72,
+        "centroidInOwnPolygon": false
+      },
+      {
+        "id": "way/133868992",
+        "area": 6956,
+        "msCover": 0.59,
+        "centroidInOwnPolygon": true
+      }
+    ],
+    "both_msAreaOverOsmArea_lt0_5": 47,
+    "both_msAreaOverOsmArea_gt2": 29,
+    "osmCandidatesCentroidOutsideOwnPolygon": 20
+  },
+  "D6_landuse": {
+    "byLanduseAndSource": {
+      "unmapped|osm_only": {
+        "n": 57,
+        "area": 152662
+      },
+      "commercial|both": {
+        "n": 2,
+        "area": 4659
+      },
+      "unmapped|both": {
+        "n": 224,
+        "area": 421496
+      },
+      "industrial|both": {
+        "n": 207,
+        "area": 539831
+      },
+      "retail|osm_only": {
+        "n": 3,
+        "area": 12864
+      },
+      "industrial|osm_only": {
+        "n": 47,
+        "area": 157073
+      },
+      "farmland|both": {
+        "n": 60,
+        "area": 116519
+      },
+      "residential|both": {
+        "n": 32,
+        "area": 78330
+      },
+      "farmland|osm_only": {
+        "n": 19,
+        "area": 37932
+      },
+      "retail|both": {
+        "n": 2,
+        "area": 4115
+      },
+      "residential|osm_only": {
+        "n": 8,
+        "area": 13503
+      },
+      "farmyard|both": {
+        "n": 8,
+        "area": 22353
+      },
+      "farmyard|osm_only": {
+        "n": 4,
+        "area": 11027
+      },
+      "commercial|osm_only": {
+        "n": 1,
+        "area": 2166
+      },
+      "unmapped|ms_only": {
+        "n": 366,
+        "area": 902273
+      },
+      "farmland|ms_only": {
+        "n": 387,
+        "area": 1580690
+      },
+      "greenhouse_horticulture|ms_only": {
+        "n": 578,
+        "area": 2548992
+      },
+      "industrial|ms_only": {
+        "n": 52,
+        "area": 184227
+      },
+      "residential|ms_only": {
+        "n": 58,
+        "area": 109217
+      },
+      "commercial|ms_only": {
+        "n": 3,
+        "area": 5601
+      },
+      "retail|ms_only": {
+        "n": 6,
+        "area": 10088
+      },
+      "farmyard|ms_only": {
+        "n": 1,
+        "area": 1447
+      }
+    },
+    "greenhouseHorticulture": {
+      "n": 578,
+      "area": 2548992,
+      "msOnly": 578
+    },
+    "agriculturalTotal": {
+      "n": 1057,
+      "area": 4318961
+    },
+    "candidatesInsideMoreThanOneLanduseType": 460,
+    "osmCandidateTags": {
+      "yes": 608,
+      "retail": 10,
+      "train_station": 1,
+      "hotel": 1,
+      "sports_centre": 1,
+      "office": 3,
+      "school": 20,
+      "sports_hall": 5,
+      "industrial": 13,
+      "commercial": 2,
+      "kindergarten": 1,
+      "hospital": 1,
+      "public": 1,
+      "college": 1,
+      "cowshed": 4,
+      "allotment_house": 1,
+      "data_center": 1
+    },
+    "residentialContextCandidates_msOnly": 58
+  },
+  "D7_solar": [
+    {
+      "id": "way/1284396049",
+      "area": 6931,
+      "floating": "yes",
+      "coveredByCandidates": 0,
+      "candidates": [],
+      "msFootprintsTouching": 0
+    },
+    {
+      "id": "way/1284396050",
+      "area": 6800,
+      "floating": "yes",
+      "coveredByCandidates": 0,
+      "candidates": [],
+      "msFootprintsTouching": 0
+    },
+    {
+      "id": "way/1284396051",
+      "area": 6732,
+      "floating": "yes",
+      "coveredByCandidates": 0,
+      "candidates": [],
+      "msFootprintsTouching": 0
+    },
+    {
+      "id": "way/1305688019",
+      "area": 88451,
+      "floating": "yes",
+      "coveredByCandidates": 0,
+      "candidates": [],
+      "msFootprintsTouching": 0
+    },
+    {
+      "id": "way/1305699515",
+      "area": 6880,
+      "floating": null,
+      "coveredByCandidates": 0,
+      "candidates": [],
+      "msFootprintsTouching": 1
+    },
+    {
+      "id": "way/1306001386",
+      "area": 14962,
+      "floating": "yes",
+      "coveredByCandidates": 0,
+      "candidates": [],
+      "msFootprintsTouching": 0
+    },
+    {
+      "id": "way/1313078348",
+      "area": 6235,
+      "floating": null,
+      "coveredByCandidates": 0,
+      "candidates": [],
+      "msFootprintsTouching": 0
+    },
+    {
+      "id": "way/1327050197",
+      "area": 29573,
+      "floating": null,
+      "coveredByCandidates": 0,
+      "candidates": [],
+      "msFootprintsTouching": 1
+    },
+    {
+      "id": "way/1446464191",
+      "area": 2366,
+      "floating": null,
+      "coveredByCandidates": 0,
+      "candidates": [],
+      "msFootprintsTouching": 0
+    },
+    {
+      "id": "way/1446464192",
+      "area": 427,
+      "floating": null,
+      "coveredByCandidates": 0,
+      "candidates": [],
+      "msFootprintsTouching": 0
+    },
+    {
+      "id": "way/1446464193",
+      "area": 1119,
+      "floating": null,
+      "coveredByCandidates": 0,
+      "candidates": [],
+      "msFootprintsTouching": 0
+    },
+    {
+      "id": "way/1504989872",
+      "area": 52485,
+      "floating": "yes",
+      "coveredByCandidates": 0,
+      "candidates": [],
+      "msFootprintsTouching": 0
+    }
+  ],
+  "D8_relations": {
+    "buildingRelations": [
+      {
+        "id": 7936416,
+        "building": "yes",
+        "name": null,
+        "bboxSqm": 640,
+        "msFootprintsInside": 2,
+        "msCandidatesInside": []
+      },
+      {
+        "id": 7945895,
+        "building": "commercial",
+        "name": null,
+        "bboxSqm": 3606,
+        "msFootprintsInside": 2,
+        "msCandidatesInside": [
+          3406
+        ]
+      },
+      {
+        "id": 8924012,
+        "building": "yes",
+        "name": "Tegart fort",
+        "bboxSqm": 3004,
+        "msFootprintsInside": 6,
+        "msCandidatesInside": []
+      },
+      {
+        "id": 9293076,
+        "building": "school",
+        "name": null,
+        "bboxSqm": 2264,
+        "msFootprintsInside": 3,
+        "msCandidatesInside": []
+      },
+      {
+        "id": 17147784,
+        "building": "yes",
+        "name": null,
+        "bboxSqm": 2317,
+        "msFootprintsInside": 1,
+        "msCandidatesInside": [
+          1543
+        ]
+      },
+      {
+        "id": 17147785,
+        "building": "yes",
+        "name": null,
+        "bboxSqm": 2642,
+        "msFootprintsInside": 1,
+        "msCandidatesInside": [
+          1361
+        ]
+      },
+      {
+        "id": 17925635,
+        "building": "yes",
+        "name": null,
+        "bboxSqm": 2454,
+        "msFootprintsInside": 0,
+        "msCandidatesInside": []
+      },
+      {
+        "id": 17925636,
+        "building": "yes",
+        "name": null,
+        "bboxSqm": 3332,
+        "msFootprintsInside": 3,
+        "msCandidatesInside": [
+          1622
+        ]
+      },
+      {
+        "id": 17958342,
+        "building": "yes",
+        "name": null,
+        "bboxSqm": 2604,
+        "msFootprintsInside": 2,
+        "msCandidatesInside": []
+      }
+    ],
+    "landuseRelations": [
+      {
+        "id": 7155961,
+        "landuse": "residential",
+        "bounds": {
+          "minlat": 32.2673033,
+          "minlon": 34.8327584,
+          "maxlat": 32.3536187,
+          "maxlon": 34.8914834
+        },
+        "candidatesWithCentroidInBounds": 478,
+        "ofWhichUnmapped": 323
+      },
+      {
+        "id": 21193201,
+        "landuse": "residential",
+        "bounds": {
+          "minlat": 32.4182904,
+          "minlon": 34.9447086,
+          "maxlat": 32.4215041,
+          "maxlon": 34.9474915
+        },
+        "candidatesWithCentroidInBounds": 0,
+        "ofWhichUnmapped": 0
+      },
+      {
+        "id": 21193202,
+        "landuse": "residential",
+        "bounds": {
+          "minlat": 32.4159707,
+          "minlon": 34.9444757,
+          "maxlat": 32.4192788,
+          "maxlon": 34.9466624
+        },
+        "candidatesWithCentroidInBounds": 0,
+        "ofWhichUnmapped": 0
+      },
+      {
+        "id": 21193203,
+        "landuse": "residential",
+        "bounds": {
+          "minlat": 32.4182954,
+          "minlon": 34.9469115,
+          "maxlat": 32.4213613,
+          "maxlon": 34.9498241
+        },
+        "candidatesWithCentroidInBounds": 0,
+        "ofWhichUnmapped": 0
+      },
+      {
+        "id": 21193499,
+        "landuse": "residential",
+        "bounds": {
+          "minlat": 32.38311,
+          "minlon": 34.8628417,
+          "maxlat": 32.3853208,
+          "maxlon": 34.8656963
+        },
+        "candidatesWithCentroidInBounds": 0,
+        "ofWhichUnmapped": 0
+      }
+    ]
+  },
+  "D9_threshold": {
+    "candidates_1000_1010": 19,
+    "pool_990_1000": 22
+  },
+  "D10_scenarios": {
+    "published": {
+      "areaSqm": 6908946,
+      "MWp": 690.9,
+      "GWhYear": 1158.6
+    },
+    "recomputedStableCentroid": {
+      "areaSqm": 6917067,
+      "MWp": 691.7,
+      "GWhYear": 1160
+    },
+    "minusMsOnlyOverlapWithOsmCandidates": {
+      "areaSqm": 6847332,
+      "MWp": 684.7,
+      "GWhYear": 1148.3
+    },
+    "minusGreenhouseLanduse": {
+      "areaSqm": 4368075,
+      "MWp": 436.8,
+      "GWhYear": 732.5
+    },
+    "minusBoth": {
+      "areaSqm": 4298340,
+      "MWp": 429.8,
+      "GWhYear": 720.8
+    }
+  }
+}
