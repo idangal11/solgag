@@ -41,23 +41,26 @@ Both Vercel functions (`fra1`, see `vercel.json`) and the Supabase project shoul
 1. 👤 Create an account at https://resend.com, add and verify your domain (DNS records).
 2. 👤 Create an API key. Use it for both Supabase SMTP (above) and `RESEND_API_KEY` (below).
 
-## 3. Map tiles (required before real traffic)
+## 3. Map tiles (required — production builds refuse to ship without them)
 
-The defaults (OpenStreetMap public tiles, Esri World Imagery) are fine for development but their
-usage policies do not allow production traffic without an agreement/account.
+The free OpenStreetMap tile server and Esri's keyless World Imagery are not licensed for
+commercial traffic. `next.config.ts` fails a production build unless both providers below
+are configured (temporary escape hatch: `ALLOW_KEYLESS_TILES=true`).
 
-1. 👤 Create a MapTiler account (https://www.maptiler.com) — free tier to start.
-2. 👤 Create a key restricted to your domain, then set:
-   ```
-   NEXT_PUBLIC_MAP_TILE_URL=https://api.maptiler.com/maps/streets-v2/256/{z}/{x}/{y}.png?key=KEY
-   NEXT_PUBLIC_MAP_TILE_ATTRIBUTION=<a href="https://www.maptiler.com/copyright/">© MapTiler</a> <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>
-   NEXT_PUBLIC_IMAGERY_TILE_URL=https://api.maptiler.com/maps/satellite/256/{z}/{x}/{y}.jpg?key=KEY
-   NEXT_PUBLIC_IMAGERY_TILE_ATTRIBUTION=<a href="https://www.maptiler.com/copyright/">© MapTiler</a> © Maxar
-   ```
-   For sharper rooftop imagery consider licensed orthophotos (Survey of Israel / GovMap) later.
-3. Optional: `GOOGLE_MAPS_API_KEY` (Geocoding API, server-side only, restricted by API) for better
-   Hebrew address search. Without it the app uses OpenStreetMap Nominatim, which is OK for low volume.
-
+1. 👤 **MapTiler** (street map + address search) — https://cloud.maptiler.com
+   - Plan: **Flex** (/month, 500k requests, then .15/1k; set a spending limit). Free is non-commercial.
+   - Key 1 → `NEXT_PUBLIC_MAPTILER_KEY`: restrict **Allowed HTTP origins** to your site URLs
+     (`https://<your-domain>`, `https://www.<your-domain>`, `https://solgag-mu.vercel.app`, `http://localhost:3000`).
+   - Key 2 → `MAPTILER_GEOCODING_KEY` (server only, no origin restriction, mark Sensitive). Without it,
+     address search falls back to OpenStreetMap Nominatim (low volume only).
+2. 👤 **Esri ArcGIS Location Platform** (aerial imagery) — https://location.arcgis.com
+   - Free account: 2M basemap tiles/month included, then .15/1k (pay-as-you-go needs billing details).
+   - Create an **API key** with the **Basemaps** privilege, **referrer restrictions** set to the same site
+     URLs, and an expiration date (put a renewal reminder in your calendar) → `NEXT_PUBLIC_ESRI_API_KEY`.
+   - Display only: Esri's terms forbid downloading/extracting imagery or deriving data from it outside
+     ArcGIS apps. The site's terms page passes this restriction on to users.
+3. Attribution ("© MapTiler © OpenStreetMap contributors" / "Powered by Esri | Source: Esri, Vantor,
+   Earthstar Geographics…") is added automatically by `src/lib/config.ts`.
 ## 4. Vercel
 
 1. 👤 Create an account at https://vercel.com, then in this folder:
@@ -76,8 +79,9 @@ usage policies do not allow production traffic without an agreement/account.
    | `SUPABASE_SERVICE_ROLE_KEY` | service_role key | **yes** |
    | `RESEND_API_KEY` | Resend API key | **yes** |
    | `NOTIFY_FROM_EMAIL` | `סולגג <no-reply@<your-domain>>` | no |
-   | `NEXT_PUBLIC_MAP_TILE_URL` … | see step 3 | no (restrict key by domain) |
-   | `GOOGLE_MAPS_API_KEY` | optional | **yes** |
+   | `NEXT_PUBLIC_MAPTILER_KEY` | MapTiler key (origin-restricted) | no |
+   | `MAPTILER_GEOCODING_KEY` | MapTiler key for server geocoding | **yes** |
+   | `NEXT_PUBLIC_ESRI_API_KEY` | Esri API key (referrer-restricted) | no |
    | `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` | 32-byte base64 key, e.g. `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` | **yes** |
 
    The fixed Server Actions key keeps forms working for visitors who still have the
