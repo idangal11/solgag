@@ -44,7 +44,7 @@ function NameList({ names }: { names: string[] }) {
 function buildSections(): LegalSection[] {
   const mapProviders = [...new Set([tileProvider(publicConfig.map.tileUrl), tileProvider(publicConfig.map.imageryUrl)])];
   // Same switch as /api/geocode: Google when a server key is configured, otherwise Nominatim.
-  const geocoder = process.env.GOOGLE_MAPS_API_KEY ? 'Google Geocoding' : 'Nominatim (OpenStreetMap)';
+  const geocoder = process.env.MAPTILER_GEOCODING_KEY ? 'MapTiler Geocoding' : 'Nominatim (OpenStreetMap)';
 
   return [
     {

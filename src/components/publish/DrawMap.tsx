@@ -49,7 +49,8 @@ function Events({ mode, polygon, onLocation, onPolygon }: Pick<DrawMapProps, 'mo
 function Fly({ flyTo }: { flyTo: DrawMapProps['flyTo'] }) {
   const map = useMap();
   useEffect(() => {
-    if (flyTo) map.flyTo(flyTo.at, 18, { duration: 1 });
+    // setView (not flyTo): no tiles fetched for the intermediate zoom levels.
+    if (flyTo) map.setView(flyTo.at, 18);
   }, [flyTo, map]);
   return null;
 }

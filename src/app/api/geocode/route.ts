@@ -5,10 +5,12 @@ import { publicConfig } from '@/lib/config';
 import { isInSupportedArea } from '@/lib/geo';
 import { getCurrentUser } from '@/lib/supabase/server';
 
-// Address search for the publish wizard. Google Geocoding when a server key is
-// configured, otherwise OpenStreetMap Nominatim (low volume only — see
-// https://operations.osmfoundation.org/policies/nominatim/). The key never
-// leaves the server.
+// Address search for the publish wizard. MapTiler Geocoding when a server key is
+// configured (MAPTILER_GEOCODING_KEY — a separate key without an origin
+// restriction, never sent to the browser), otherwise OpenStreetMap Nominatim
+// (low volume only — https://operations.osmfoundation.org/policies/nominatim/).
+// Google Geocoding is deliberately not used: its terms require showing results
+// on a Google map, and this app uses Leaflet.
 
 interface GeocodeResult {
   label: string;
@@ -24,20 +26,15 @@ function clean(results: GeocodeResult[]): GeocodeResult[] {
   return results.filter((r) => r.label && Number.isFinite(r.lat) && Number.isFinite(r.lng) && isInSupportedArea([r.lat, r.lng])).slice(0, 5);
 }
 
-async function google(q: string, key: string): Promise<GeocodeResult[]> {
-  const url = new URL('https://maps.googleapis.com/maps/api/geocode/json');
-  url.search = new URLSearchParams({ address: q, language: 'iw', region: 'il', components: 'country:IL', key }).toString();
+async function maptiler(q: string, key: string): Promise<GeocodeResult[]> {
+  const url = new URL(`https://api.maptiler.com/geocoding/${encodeURIComponent(q)}.json`);
+  url.search = new URLSearchParams({ key, language: 'he', country: 'il', limit: '5' }).toString();
   const res = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(TIMEOUT_MS) });
-  if (!res.ok) throw new Error(`google ${res.status}`);
-  const data = (await res.json()) as {
-    status: string;
-    results?: { formatted_address: string; geometry: { location: { lat: number; lng: number } } }[];
-  };
-  if (data.status === 'ZERO_RESULTS') return [];
-  // REQUEST_DENIED / OVER_QUERY_LIMIT etc. arrive with HTTP 200 — throw so they are not cached.
-  if (data.status !== 'OK') throw new Error(`google ${data.status}`);
+  if (!res.ok) throw new Error(`maptiler ${res.status}`);
+  const data = (await res.json()) as { features?: { place_name?: string; center?: [number, number] }[] };
+  if (!Array.isArray(data.features)) throw new Error('maptiler: unexpected body');
   return clean(
-    (data.results ?? []).map((r) => ({ label: r.formatted_address, lat: r.geometry.location.lat, lng: r.geometry.location.lng })),
+    data.features.filter((f) => Array.isArray(f.center)).map((f) => ({ label: f.place_name ?? '', lat: f.center![1], lng: f.center![0] })),
   );
 }
 
@@ -74,11 +71,11 @@ async function nominatim(q: string): Promise<GeocodeResult[]> {
 
 // Only successful lookups are cached — a thrown error is never stored.
 const cachedGeocode = unstable_cache(
-  async (provider: 'google' | 'osm', q: string) => {
-    const key = process.env.GOOGLE_MAPS_API_KEY;
-    return provider === 'google' && key ? google(q, key) : nominatim(q);
+  async (provider: 'maptiler' | 'osm', q: string) => {
+    const key = process.env.MAPTILER_GEOCODING_KEY;
+    return provider === 'maptiler' && key ? maptiler(q, key) : nominatim(q);
   },
-  ['geocode-v1'],
+  ['geocode-v2'],
   { revalidate: ONE_DAY },
 );
 
@@ -93,7 +90,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'q must be 2-200 characters' }, { status: 400 });
   }
   const q = parsed.data.replace(/\s+/g, ' ');
-  const provider = process.env.GOOGLE_MAPS_API_KEY ? 'google' : 'osm';
+  const provider = process.env.MAPTILER_GEOCODING_KEY ? 'maptiler' : 'osm';
 
   try {
     const results = await cachedGeocode(provider, q.toLocaleLowerCase('he'));

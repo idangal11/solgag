@@ -28,11 +28,13 @@ export function BaseLayers({ defaultAerial = false }: { defaultAerial?: boolean 
   }, [map]);
   return (
     <LayersControl position="topleft">
+      {/* updateWhenZooming=false: load tiles once a zoom ends, not for every intermediate
+          level — every tile is a billable request with the licensed providers. */}
       <LayersControl.BaseLayer checked={!defaultAerial} name="מפה">
-        <TileLayer url={m.tileUrl} attribution={m.tileAttribution} className="osm-tiles" maxNativeZoom={19} maxZoom={20} />
+        <TileLayer url={m.tileUrl} attribution={m.tileAttribution} className="osm-tiles" maxNativeZoom={19} maxZoom={20} updateWhenZooming={false} />
       </LayersControl.BaseLayer>
       <LayersControl.BaseLayer checked={defaultAerial} name="תצלום אוויר">
-        <TileLayer url={m.imageryUrl} attribution={m.imageryAttribution} maxNativeZoom={19} maxZoom={20} />
+        <TileLayer url={m.imageryUrl} attribution={m.imageryAttribution} maxNativeZoom={m.imageryMaxNativeZoom} maxZoom={20} updateWhenZooming={false} />
       </LayersControl.BaseLayer>
     </LayersControl>
   );

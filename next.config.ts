@@ -1,6 +1,19 @@
 import type { NextConfig } from 'next';
 
 const isDev = process.env.NODE_ENV !== 'production';
+
+// Refuse to ship production with the free keyless tile servers: neither
+// tile.openstreetmap.org nor Esri's keyless World Imagery is licensed for
+// commercial traffic (docs/DEPLOY.md §3). Mirrors src/lib/config.ts.
+if (process.env.VERCEL_ENV === 'production' && process.env.ALLOW_KEYLESS_TILES !== 'true') {
+  const street = process.env.NEXT_PUBLIC_MAP_TILE_URL || (process.env.NEXT_PUBLIC_MAPTILER_KEY ? 'maptiler' : '');
+  const imagery = process.env.NEXT_PUBLIC_IMAGERY_TILE_URL || (process.env.NEXT_PUBLIC_ESRI_API_KEY ? 'esri' : '');
+  const keyless = (u: string) => !u || /tile\.openstreetmap\.org|arcgisonline\.com/.test(u);
+  const missing = [keyless(street) && 'NEXT_PUBLIC_MAPTILER_KEY', keyless(imagery) && 'NEXT_PUBLIC_ESRI_API_KEY'].filter(Boolean);
+  if (missing.length) {
+    throw new Error(`Production build refused: licensed map tiles are not configured (${missing.join(', ')}). See docs/DEPLOY.md §3.`);
+  }
+}
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 const supabaseWs = supabaseUrl.replace(/^http/, 'ws');
 

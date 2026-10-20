@@ -71,8 +71,9 @@ function Controller({ flyTo, visible, overlayRef }: Pick<Props, 'flyTo' | 'visib
       map.invalidateSize();
       const bounds = listingBounds(flyTo.target);
       const opts = { maxZoom: 17, ...overlayPadding(map, overlayRef.current) };
-      if (prefersReducedMotion()) map.fitBounds(bounds, opts);
-      else map.flyToBounds(bounds, { ...opts, duration: 1.1 });
+      // fitBounds animates one zoom step and loads tiles only for the final view;
+      // flyToBounds fetched every intermediate zoom level (100–300 billable tiles per click).
+      map.fitBounds(bounds, { ...opts, animate: !prefersReducedMotion() });
     }, 80);
     return () => clearTimeout(t);
   }, [flyTo, map, overlayRef]);
