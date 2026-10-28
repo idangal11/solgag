@@ -35,3 +35,8 @@ next-env.d.ts
 
 # research raw downloads (large, re-fetchable)
 /research/**/raw/
+
+# business-prospect pilot: collected business contacts and unverified roof↔business
+# matches are admin-only and never go into this (public) repository
+/research/prospects-*/data/
+/research/prospects-*/discovery/
