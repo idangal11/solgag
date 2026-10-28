@@ -11,7 +11,7 @@
 
 | Topic | Recommendation for Phase 1 | Why |
 |---|---|---|
-| Where ingestion runs | A **local Node script** against the **local Supabase Postgres/PostGIS** (already used for dev, port 54322). The prod database gets small staged batches plus a transactional `ingest.apply_batch()`. Package it later as a `workflow_dispatch` GitHub Action. | Parsing Microsoft (MS) footprint tiles means hundreds of MB per z9 tile (the pilot tile `ms-122112223.geojsonl` is 167 MB and holds 408,837 footprints). Supabase Edge Functions are capped at 256 MB RAM and 2 s CPU, so they are unsuitable. |
+| Where ingestion runs | A **local Node script** against the **local Supabase Postgres/PostGIS** (already used for dev, port 55322). The prod database gets small staged batches plus a transactional `ingest.apply_batch()`. Package it later as a `workflow_dispatch` GitHub Action. | Parsing Microsoft (MS) footprint tiles means hundreds of MB per z9 tile (the pilot tile `ms-122112223.geojsonl` is 167 MB and holds 408,837 footprints). Supabase Edge Functions are capped at 256 MB RAM and 2 s CPU, so they are unsuitable. |
 | Published geometry | **Microsoft Global ML Building Footprints only** (CDLA-Permissive-2.0). The production database never stores OSM or Overture data. | This avoids ODbL share-alike on the public layer. Area, kWp and MWh are "Results", which CDLA leaves unrestricted. |
 | Tiering | An ODbL-free score: MS confidence, shape metrics, neighbourhood density from MS itself, own listings, and **HOOKs** for permissive context (e.g. GHS-BUILT-C, CC BY 4.0). Tier only orders the review queue and sets the QA rate; the public never sees it. | Without OSM land use, the pilot pool grows from 992 to about 2,294 roofs (MS ≥1000 m², `audit/recompute-core.json`). The score has to recover that filtering. |
 | Publication gate | **Human review is mandatory.** Only `good_bare_roof` and `solar_partial` (with a free share) get published. A deterministic QA sample gets a second blind review. | Pilot: Tier A was only about 42% good (5/12), and about 1 in 4 outlines was wrong. |
@@ -100,7 +100,7 @@ scripts/potential/
 ```
 
 Environment (operator machine or GitHub secret only; `.env*` is already gitignored):
-- `PIPELINE_LOCAL_DB_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres` (local stack default)
+- `PIPELINE_LOCAL_DB_URL=postgresql://postgres:postgres@127.0.0.1:55322/postgres` (local stack default)
 - `PIPELINE_PROD_DB_URL`: the Supavisor **session** pooler URI, port 5432, IPv4. Secret, never a `NEXT_PUBLIC_*`.
 
 **Stage details**

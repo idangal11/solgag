@@ -105,7 +105,25 @@ are configured (temporary escape hatch: `ALLOW_KEYLESS_TILES=true`).
 3. Smoke test: publish a rooftop, sign in as a second user, send an inquiry, reply, submit an
    ownership document and approve it in `/admin`.
 
-## 6. Before a public launch (non-technical)
+## 6. Business-prospect pilot (admin-only)
+
+`/admin/prospects` shows candidate commercial roofs and the businesses publicly listed at them
+(research in `research/prospects-emek-hefer-park/`, licences in its `LICENSES-AND-CHECKS.md`).
+The tables are admin-only (RLS) and nothing appears on the public site.
+
+1. Schema: migrations `20261020000000_prospects.sql` and `20261020010000_prospects_import_prune.sql`
+   (already pushed to production with `npx supabase db push`).
+2. Data: sign in as an admin, open `/admin/prospects` → „ייבוא אצווה ממחקר” → upload
+   `research/prospects-emek-hefer-park/data/prospects-import.json`. Re-importing is safe: reviewed
+   rows are never overwritten. No service-role key is needed.
+3. Vercel previews get the public Supabase URL/key at deploy time
+   (`vercel deploy --build-env NEXT_PUBLIC_SUPABASE_URL=… --build-env NEXT_PUBLIC_SUPABASE_ANON_KEY=…`),
+   or set them once for the Preview environment in Vercel. Supabase Auth allows
+   `https://solgag-*-solgag.vercel.app/**` as a redirect, so sign-in works on previews.
+4. Do not contact businesses from this data before a legal check (Communications Law §30A,
+   Privacy Protection Law incl. Amendment 13).
+
+## 7. Before a public launch (non-technical)
 
 - Legal review of `/terms` and `/privacy` (drafts) — Israeli Privacy Protection Law incl.
   Amendment 13, database registration/notification duties if applicable, Data Security Regulations.

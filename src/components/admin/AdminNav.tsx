@@ -1,6 +1,6 @@
 'use client';
 
-import { FileSearch, LayoutDashboard, ListChecks } from 'lucide-react';
+import { FileSearch, FlaskConical, LayoutDashboard, ListChecks } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -10,6 +10,7 @@ export function AdminNav({ pendingCount }: { pendingCount: number | null }) {
     { href: '/admin', label: 'סקירה', icon: <LayoutDashboard size={16} />, badge: 0 },
     { href: '/admin/verification', label: 'אימות בעלות', icon: <FileSearch size={16} />, badge: pendingCount ?? 0 },
     { href: '/admin/listings', label: 'ניהול מודעות', icon: <ListChecks size={16} />, badge: 0 },
+    { href: '/admin/prospects', label: 'גגות פוטנציאליים (פיילוט)', icon: <FlaskConical size={16} />, badge: 0 },
   ];
 
   return (

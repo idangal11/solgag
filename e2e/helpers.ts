@@ -4,8 +4,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 // Shared helpers for the e2e specs. They assume the LOCAL Supabase stack (see playwright.config.ts).
 
-export const MAILPIT_URL = (process.env.MAILPIT_URL ?? 'http://127.0.0.1:54324').replace(/\/$/, '');
-const SUPABASE_URL = (process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321').replace(/\/$/, '');
+export const MAILPIT_URL = (process.env.MAILPIT_URL ?? 'http://127.0.0.1:55324').replace(/\/$/, '');
+const SUPABASE_URL = (process.env.SUPABASE_URL ?? 'http://127.0.0.1:55321').replace(/\/$/, '');
 const LOCAL_URL = /^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/;
 
 /** The 12 FICTIONAL demo listings from supabase/seed.sql. */

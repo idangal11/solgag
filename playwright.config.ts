@@ -5,7 +5,7 @@ import { defineConfig } from '@playwright/test';
  *
  * Needs the LOCAL Supabase stack: sign-in codes are read from its Mailpit inbox.
  *   npx supabase start && npx supabase db reset     # schema + the 12 fictional demo listings
- *   .env.local points at http://127.0.0.1:54321     # see README
+ *   .env.local points at http://127.0.0.1:55321     # see README
  *   npx playwright test                             # or: npm run test:e2e  (--project=desktop / --project=mobile)
  *
  * Optional: SUPABASE_SERVICE_ROLE_KEY in the environment lets the journey spec delete the

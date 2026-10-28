@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "solgag-dev",
+      "runtimeExecutable": "C:\\Users\\idang\\solgag\\.tools\\node\\node.exe",
+      "runtimeArgs": ["node_modules/next/dist/bin/next", "dev", "--port", "3000"],
+      "port": 3000
+    }
+  ]
+}

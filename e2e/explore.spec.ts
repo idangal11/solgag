@@ -59,7 +59,11 @@ test.describe('explore map (anonymous)', () => {
     await expect(page).toHaveURL(/[?&]region=arava/);
 
     // A fictional listing is never "open to inquiries".
-    await page.getByLabel('רק גגות שפתוחים לפניות').check();
+    // The checkbox reflects the URL, which Next.js syncs a tick after the click — so click,
+    // then wait for it to show as checked (check() would assert the state immediately).
+    const openOnly = page.getByLabel('רק גגות שפתוחים לפניות');
+    await openOnly.click();
+    await expect(openOnly).toBeChecked();
     await expect(cards).toHaveCount(0);
     await expect(list.getByText('אין גגות שתואמים לסינון.')).toBeVisible();
 

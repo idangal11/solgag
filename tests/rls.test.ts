@@ -8,7 +8,7 @@
  *   $env:SUPABASE_SERVICE_ROLE_KEY = '<SERVICE_ROLE_KEY>'
  *   npx vitest run --config tests/vitest.rls.config.ts
  *
- * SUPABASE_URL defaults to http://127.0.0.1:54321. Without both keys every test is skipped.
+ * SUPABASE_URL defaults to http://127.0.0.1:55321. Without both keys every test is skipped.
  * The suite creates and deletes users, so it refuses a non-local URL unless RLS_ALLOW_REMOTE=1.
  * Everything it creates (users → listings/inquiries/favorites by cascade, uploaded files,
  * a fallback fictional listing) is removed in afterAll.
@@ -22,7 +22,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { pointEWKT, polygonAreaSqm, polygonEWKT } from '@/lib/geo';
 import type { LatLng } from '@/lib/types';
 
-const SUPABASE_URL = (process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321').replace(/\/$/, '');
+const SUPABASE_URL = (process.env.SUPABASE_URL ?? 'http://127.0.0.1:55321').replace(/\/$/, '');
 const ANON_KEY = process.env.SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
 const IS_LOCAL = /^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/.test(SUPABASE_URL);
@@ -1068,6 +1068,127 @@ describe.skipIf(SKIP_REASON !== null)(SKIP_REASON ? `row-level security — SKIP
         );
       }
       expect((await stored('listings', folderListing)).owner_verification).toBe('not_verified');
+    });
+  });
+
+  // ─── Business-prospect pilot (admin-only) ──────────────────────────
+  describe('business-prospect pilot', () => {
+    const batch = `rls-${RUN}`;
+    const ring = rectangle([32.4, 34.895], 60, 40); // 2,400 m²
+    const geometry = { type: 'Polygon', coordinates: [[...ring, ring[0]].map(([lat, lng]) => [lng, lat])] };
+    const business = {
+      dedupeKey: 'biz-1',
+      name: 'עסק לבדיקה בע"מ',
+      matchConfidence: 'medium',
+      matchBasis: 'test fixture',
+      phone: '04-0000000',
+      phoneSourceUrl: 'https://example.com/contact',
+    };
+    const payload = (over: Record<string, unknown> = {}, biz: Record<string, unknown> = {}) => ({
+      batch,
+      roofs: [
+        {
+          ref: 'T-01',
+          sourceKey: `test:${RUN}`,
+          geometry,
+          buildingSource: 'test',
+          buildingLicense: 'CDLA-Permissive-2.0',
+          buildingConfidence: 'high',
+          address: { street: 'המסיק', houseNumber: null, locality: 'פארק תעשיות עמק חפר', source: 'test', sourceUrl: null, method: 'test', confidence: 'low' },
+          businesses: [{ ...business, ...biz }],
+          ...over,
+        },
+      ],
+    });
+    let roofId: string;
+
+    afterAll(async () => {
+      if (db) await db.from('prospect_roofs').delete().eq('batch', batch);
+    });
+
+    it('only an admin can import a batch', async () => {
+      expectRefused(await anon.rpc('import_prospect_batch', { p: payload() }));
+      expectRefused(await stranger.client.rpc('import_prospect_batch', { p: payload() }), '42501');
+      const res = await adminUser.client.rpc('import_prospect_batch', { p: payload() });
+      expectOk(res);
+      expect(res.data).toMatchObject({ batch, roofs: 1, businesses: 1 });
+    });
+
+    it('computes the roof area with PostGIS from the footprint', async () => {
+      const { data } = await db.from('prospect_roofs').select('id, area_m2, review_status, is_demo').eq('batch', batch).single();
+      roofId = (data as { id: string }).id;
+      expect(Number((data as { area_m2: number }).area_m2)).toBeCloseTo(polygonAreaSqm(ring), -1);
+      expect(data).toMatchObject({ review_status: 'pending', is_demo: false });
+    });
+
+    it('roofs, businesses and the feed are invisible to anon and non-admin users', async () => {
+      for (const client of [anon, stranger.client, owner.client]) {
+        for (const table of ['prospect_roofs', 'prospect_roof_feed', 'prospect_businesses']) {
+          const { data } = await client.from(table).select('id').limit(5);
+          expect(data ?? [], `${table} must be empty for a non-admin`).toHaveLength(0);
+        }
+      }
+      const { data } = await adminUser.client.from('prospect_roof_feed').select('ref, footprint, lat, lng').eq('batch', batch);
+      expect(data).toHaveLength(1);
+    });
+
+    it('non-admins cannot write prospect rows', async () => {
+      await stranger.client.from('prospect_roofs').update({ review_status: 'approved' }).eq('id', roofId);
+      expect((await stored('prospect_roofs', roofId)).review_status).toBe('pending');
+      expectRefused(await stranger.client.from('prospect_businesses').insert({ roof_id: roofId, dedupe_key: 'x', name: 'x', match_confidence: 'low', match_basis: 'x' }));
+    });
+
+    it('refuses contact details without a source and "owner" without evidence', async () => {
+      const insert = (row: Record<string, unknown>) =>
+        adminUser.client.from('prospect_businesses').insert({ roof_id: roofId, dedupe_key: randomUUID(), name: 'x', match_confidence: 'low', match_basis: 'x', ...row });
+      expectRefused(await insert({ phone: '03-1234567' }), '23514');
+      expectRefused(await insert({ email: 'info@example.com' }), '23514');
+      expectRefused(await insert({ website: 'https://example.com' }), '23514');
+      expectRefused(await insert({ relation: 'owner_evidence' }), '23514');
+      expectOk(await insert({ relation: 'owner_evidence', relation_evidence: 'נסח טאבו מתאריך 01.10.2026' }));
+    });
+
+    it('a review is stamped with the reviewing admin, and a re-import keeps it', async () => {
+      const { data: biz } = await db.from('prospect_businesses').select('id').eq('roof_id', roofId).eq('dedupe_key', 'biz-1').single();
+      const bizId = (biz as { id: string }).id;
+      expectOk(await adminUser.client.from('prospect_roofs').update({ review_status: 'corrected', address_street: 'החריש', address_source: 'reviewer' }).eq('id', roofId));
+      expectOk(await adminUser.client.from('prospect_businesses').update({ review_status: 'rejected' }).eq('id', bizId));
+      const roof = await stored('prospect_roofs', roofId);
+      expect(roof.reviewed_by).toBe(adminUser.id);
+      expect(roof.reviewed_at).not.toBeNull();
+
+      // Re-import with different evidence: reviewed address and business stay as reviewed.
+      expectOk(await adminUser.client.rpc('import_prospect_batch', { p: payload({ buildingConfidence: 'medium' }, { name: 'שם אחר' }) }));
+      const after = await stored('prospect_roofs', roofId);
+      expect(after).toMatchObject({ review_status: 'corrected', address_street: 'החריש', building_confidence: 'medium' });
+      expect(await stored('prospect_businesses', bizId)).toMatchObject({ review_status: 'rejected', name: business.name });
+    });
+
+    it('a re-import removes pending matches it no longer contains, never reviewed or hand-added ones', async () => {
+      const withTwo = payload();
+      withTwo.roofs[0].businesses = [{ ...business }, { ...business, dedupeKey: 'biz-2', name: 'עסק שני' }];
+      expectOk(await adminUser.client.rpc('import_prospect_batch', { p: withTwo }));
+      expectOk(
+        await adminUser.client
+          .from('prospect_businesses')
+          .insert({ roof_id: roofId, dedupe_key: `manual:${RUN}`, name: 'ידני', match_confidence: 'low', match_basis: 'נוסף ידנית', review_status: 'corrected' }),
+      );
+      const keys = async () =>
+        ((await db.from('prospect_businesses').select('dedupe_key').eq('roof_id', roofId)).data as { dedupe_key: string }[]).map((r) => r.dedupe_key).sort();
+      expect(await keys()).toContain('biz-2');
+
+      // biz-1 (rejected earlier) and the manual row stay; pending biz-2 is gone.
+      const res = await adminUser.client.rpc('import_prospect_batch', { p: payload({}, {}) });
+      expectOk(res);
+      expect(res.data).toMatchObject({ pruned: 1 });
+      expect(await keys()).toEqual(['biz-1', `manual:${RUN}`].sort());
+    });
+
+    it('refuses an invalid footprint in Hebrew', async () => {
+      const bad = { type: 'Polygon', coordinates: [[[34.895, 32.4], [34.896, 32.401], [34.896, 32.4], [34.895, 32.401], [34.895, 32.4]]] };
+      const res = await adminUser.client.rpc('import_prospect_batch', { p: payload({ sourceKey: `bad:${RUN}`, ref: 'T-02', geometry: bad }) });
+      expectRefused(res, '22023');
+      expect(res.error?.message).toMatch(/[֐-׿]/);
     });
   });
 });

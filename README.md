@@ -18,15 +18,16 @@ $env:Path = "$PWD\.tools\node;$PWD\.tools\git\cmd;$env:Path"
 
 ```
 npm install
-npx supabase start          # local Postgres/Auth/Storage + Mailpit (http://127.0.0.1:54324)
+npx supabase start          # local Postgres/Auth/Storage + Mailpit (http://127.0.0.1:55324)
+                            # (ports 553xx: Windows/Hyper-V may reserve the default 543xx range)
 npx supabase db reset       # applies migrations + 12 FICTIONAL demo listings (supabase/seed.sql)
 copy .env.example .env.local   # then paste the anon + service_role keys printed by `supabase status`
 npm run dev                 # http://localhost:3000
 ```
 
-Sign-in uses a 6-digit email code. Locally, read it in Mailpit at http://127.0.0.1:54324.
+Sign-in uses a 6-digit email code. Locally, read it in Mailpit at http://127.0.0.1:55324.
 Make yourself admin: `update public.profiles set is_admin = true where contact_email = 'you@example.com';`
-(Supabase Studio at http://127.0.0.1:54323 → SQL editor).
+(Supabase Studio at http://127.0.0.1:55323 → SQL editor).
 
 ## Scripts
 
